@@ -1,2 +1,4 @@
 *.exe
+*.pdf
 .vscode/
+code/.vscode/
