@@ -234,8 +234,7 @@ $$
 
 
 
-###### 求和公式：
-
+求和公式：
 $$
 \begin{align}
 \sum_{i=1}^ni&=\dfrac{n(n+1)}2\\
@@ -332,11 +331,21 @@ ll gcd(ll a, ll b, ll &x, ll &y)
 
 
 
+
+
 ### 计算几何
 
 
 
 ## 数据结构
+
+
+
+## 字符串
+
+
+
+
 
 
 
@@ -509,9 +518,418 @@ signed main()
 
 
 
-
-
 ### 高精度
+
+#### C++
+
+以下给出高精度之间的、带负数的加减乘除模运算 (洛谷P1932)：
+
+其中高精度间乘法复杂度是 $O(n^2)$ ，高精度间除法使用二分答案，复杂度大概是 $O(n\log n)$
+
+```c++
+// luogu-judger-enable-o2 
+#include <cstring>
+#include <cstdio>
+#include <algorithm>
+#include <cassert>
+
+typedef int i32;
+typedef unsigned u32;
+typedef unsigned long long u64;
+
+struct BigInt
+{
+    const static u32 exp = 9;
+    const static u32 mod = 1000000000;
+
+    static i32 abs_comp(const BigInt &lhs, const BigInt &rhs)
+    {
+        if (lhs.len != rhs.len)
+            return lhs.len < rhs.len ? -1 : 1;
+        for (u32 i = lhs.len - 1; ~i; --i)
+            if (lhs.val[i] != rhs.val[i])
+                return lhs.val[i] < rhs.val[i] ? -1 : 1;
+        return 0;
+    }
+
+    u32 *val, len, sgn;
+
+    BigInt(u32 *val = nullptr, u32 len = 0, u32 sgn = 0) : val(val), len(len), sgn(sgn) {}
+
+    // copy_to cannot guarantee val[x] == 0 for x >= len
+    // other function should set (the position they assume to be zero) as zero
+    void copy_to(BigInt &dst) const
+    {
+        dst.len = len, dst.sgn = sgn;
+        memcpy(dst.val, val, sizeof(u32) * len);
+    }
+
+    void trim()
+    {
+        while (len && !val[len - 1])
+            --len;
+        if (len == 0)
+            sgn = 0;
+    }
+
+    void add(BigInt &x)
+    {
+        if (sgn ^ x.sgn)
+            return x.sgn ^= 1, sub(x);
+        val[len = std::max(len, x.len)] = 0;
+        for (u32 i = 0; i < x.len; ++i)
+            if ((val[i] += x.val[i]) >= mod)
+                val[i] -= mod, ++val[i + 1];
+        for (u32 i = x.len; i < len && val[i] >= mod; ++i)
+            val[i] -= mod, ++val[i + 1];
+        if (val[len])
+            ++len;
+    }
+
+    void sub(BigInt &x)
+    {
+        if (sgn ^ x.sgn)
+            return x.sgn ^= 1, add(x);
+        if (abs_comp(*this, x) < 0)
+            std::swap(*this, x), sgn ^= 1;
+        val[len] = 0;
+        for (u32 i = 0; i < x.len; ++i)
+            if ((val[i] -= x.val[i]) & 0x80000000)
+                val[i] += mod, --val[i + 1];
+        for (u32 i = x.len; i < len && val[i] & 0x80000000; ++i)
+            val[i] += mod, --val[i + 1];
+        trim();
+    }
+
+    void mul(BigInt &x, u32 *ext_mem)
+    {
+        assert(this != &x);
+        memcpy(ext_mem, val, sizeof(u32) * len);
+        memset(val, 0, sizeof(u32) * (len + x.len));
+        for (u32 i = 0; i < len; ++i)
+            for (u32 j = 0; j < x.len; ++j)
+            {
+                u64 tmp = (u64)ext_mem[i] * x.val[j] + val[i + j];
+                val[i + j] = tmp % mod;
+                val[i + j + 1] += tmp / mod;
+            }
+        len += x.len, sgn ^= x.sgn;
+        trim();
+    }
+
+    void mul(u32 x)
+    {
+        if (x & 0x80000000)
+            x = -x, sgn ^= 1;
+        u64 carry = 0;
+        for (u32 i = 0; i < len; ++i)
+        {
+            carry += (u64)val[i] * x;
+            val[i] = carry % mod;
+            carry /= mod;
+        }
+        if (carry)
+            val[len++] = carry;
+        trim();
+    }
+
+    void div(BigInt &x, BigInt &remainder, u32 *ext_mem)
+    {
+        assert(this != &x && this != &remainder);
+        copy_to(remainder), memset(val, 0, sizeof(u32) * len);
+        u32 shift = len - x.len;
+        if (shift & 0x80000000)
+            return void(len = sgn = 0);
+        while (~shift)
+        {
+            u32 l = 0, r = mod;
+            BigInt mul_test{ext_mem}, remainder_high{remainder.val + shift, remainder.len - shift};
+            while (l <= r)
+            {
+                u32 mid = (l + r) / 2;
+                x.copy_to(mul_test), mul_test.mul(mid);
+                abs_comp(mul_test, remainder_high) < 0 ? l = mid + 1 : r = mid - 1;
+            }
+            val[shift] = r;
+            x.copy_to(mul_test), mul_test.mul(r);
+            remainder_high.sub(mul_test), remainder.trim();
+            --shift;
+        }
+        sgn ^= x.sgn;
+        trim();
+    }
+
+    void div(u32 x)
+    {
+        if (x & 0x80000000)
+            x = -x, sgn ^= 1;
+        u64 carry = 0;
+        for (u32 i = len - 1; ~i; --i)
+        {
+            carry = carry * mod + val[i];
+            val[i] = carry / x;
+            carry %= x;
+        }
+        trim();
+    }
+
+    void read(const char *s)
+    {
+        sgn = len = 0;
+        i32 bound = 0, pos;
+        if (s[0] == '-')
+            sgn = bound = 1;
+        u64 cur = 0, pow = 1;
+        for (pos = strlen(s) - 1; pos + 1 >= exp + bound; pos -= exp, val[len++] = cur, cur = 0, pow = 1)
+            for (i32 i = pos; i + exp > pos; --i)
+                cur += (s[i] - '0') * pow, pow *= 10;
+        for (cur = 0, pow = 1; pos >= bound; --pos)
+            cur += (s[pos] - '0') * pow, pow *= 10;
+        if (cur)
+            val[len++] = cur;
+    }
+
+    void print()
+    {
+        if (len)
+        {
+            if (sgn)
+                putchar('-');
+            printf("%u", val[len - 1]);
+            for (u32 i = len - 2; ~i; --i)
+                printf("%0*u", exp, val[i]);
+        }
+        else
+            putchar('0');
+        puts("");
+    }
+};
+
+const int N = 1e4 + 20;
+u32 a_[N], b_[N], r_[N], tmp[N * 2];
+char sa[N], sb[N];
+
+int main()
+{
+    scanf("%s%s", sa, sb);
+    {
+        BigInt a{a_}, b{b_};
+        a.read(sa), b.read(sb), a.add(b), a.print();
+    }
+    {
+        BigInt a{a_}, b{b_};
+        a.read(sa), b.read(sb), a.sub(b), a.print();
+    }
+    {
+        BigInt a{a_}, b{b_};
+        a.read(sa), b.read(sb), a.mul(b, tmp), a.print();
+    }
+    {
+        BigInt a{a_}, b{b_}, r{r_};
+        a.read(sa), b.read(sb), a.div(b, r, tmp), a.print();
+        r.print();
+    }
+}
+```
+
+
+
+#### FFT 乘法
+
+复杂度 $O(n\log n)$ ，可以通过 $10^6$ 数据量
+
+```c++
+#include <bits/stdc++.h>
+using namespace std;
+typedef long long ll;
+typedef double db;
+#define sc(x) x = read()
+#define mn ((1 << 21) + 1)
+ll n1, n2, rev[mn], ans[mn], k, s = 1, len, n;
+db pi = acos(-1), v;
+typedef complex<db> cp;
+cp a[mn], b[mn];
+char s1[mn], s2[mn];
+void fft(cp *a, ll n, ll flag)
+{
+    for (ll i = 0; i < n; ++i)
+    {
+        if (i < rev[i])
+        {
+            swap(a[i], a[rev[i]]);
+        }
+    }
+    for (ll h = 1; h < n; h <<= 1)
+    {
+        cp wn = exp(cp(0, flag * pi / h));
+        for (ll j = 0; j < n; j += h << 1)
+        {
+            cp w(1, 0);
+            for (ll k = j; k < j + h; ++k)
+            {
+                cp x = a[k], y = w * a[k + h];
+                a[k] = x + y;
+                a[k + h] = x - y;
+                w *= wn;
+            }
+        }
+    }
+    if (flag == -1)
+    {
+        for (ll i = 0; i < n; ++i)
+        {
+            a[i] /= n;
+        }
+    }
+}
+
+signed main()
+{
+    scanf("%s%s", s1, s2);
+    n1 = strlen(s1), n2 = strlen(s2), n = max(n1, n2);
+    for (ll i = 0; i < n1; ++i)
+    {
+        a[i] = (db)(s1[n1 - i - 1] - '0');
+    }
+    for (ll i = 0; i < n2; ++i)
+    {
+        b[i] = (db)(s2[n2 - i - 1] - '0');
+    }
+    k = 1, s = 2;
+    while ((1 << k) < (n << 1) - 1)
+    {
+        ++k, s <<= 1;
+    }
+    // while (s <= n)
+    // {
+    //     s <<= 1, ++k;
+    // }
+    for (ll i = 0; i < s; ++i)
+    {
+        rev[i] = (rev[i >> 1] >> 1) | ((i & 1) << (k - 1));
+    }
+    fft(a, s, 1), fft(b, s, 1);
+    for (ll i = 0; i <= s; ++i)
+    {
+        a[i] *= b[i];
+    }
+    fft(a, s, -1);
+    for (ll i = 0; i < s; ++i)
+    {
+        ans[i] += (ll)(a[i].real() + 0.5);
+        ans[i + 1] += ans[i] / 10, ans[i] %= 10;
+    }
+    while (!ans[s] && s > -1)
+    {
+        --s;
+    }
+    if (s == -1)
+    {
+        puts("0");
+    }
+    else
+    {
+        for (ll i = s; i >= 0; --i)
+        {
+            printf("%lld", ans[i]);
+        }
+    }
+    return 0;
+}
+```
+
+
+
+#### java 高精度
+
+`java.math.BigInteger`,`java.math.BigDecimal` 高精度运算 JAVA8为例
+
+构造函数只能传字符串。可以直接输出。
+
+`BigInteger` 方法：(注意不会改变lhs本身,需要用新变量存结果)
+
+- add, subtract, multiply, divide
+- remainder 取模
+- divideAndRemainder 返回数组，第一个是商，第二个是余
+- pow(指数是int不是BigInteger) (应该不是快速幂)
+- negate 相反数
+- shiftLeft 左移<<(负数右移) 参数是int
+- shiftRight 右移>>(负数左移) 参数是int
+- and or 位运算
+- compareTo
+- equals 参数rhs是Ojbect
+- min,max
+- isProbablePrime(值) 值越大，得到的结果越准确
+- toString(进制) 可以返回16进制字符串
+
+`BigDecimal` 方法：
+
+- add subtract multiply divide
+
+divide的设置方法处理小数位：
+
+- ROUND_UP 商的最后一位大于0时向前进位，正负号均如此
+- ROUND_DOWN 商的最后一位忽略
+- ROUND_CEILING 正up负down 故近似值$\ge$实际值
+- ROUND_FLOOR 负up正down 故近似值$\le$实际值
+- ROUND_HALF_DOWN 商四舍五入$\le5$舍弃否则进位
+- ROUND_HALF_UP $<$5舍弃否则进位
+- ROUND_HALF_EVEN 商倒数第二位奇数halfup否则halfdown
+
+要调用，三个参数，第一个是rhs,第二个是商小数点保留位数，第三个是处理方式，如 `BigDecimal.ROUND_UP`
+
+```java
+import java.util.Scanner; // 洛谷P1932
+import java.math.BigInteger;
+
+public class Main {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        BigInteger a = new BigInteger(sc.next());
+        BigInteger b = new BigInteger(sc.next());
+        System.out.println(a.add(b));
+        System.out.println(a.subtract(b));
+        System.out.println(a.multiply(b));
+        System.out.println(a.divide(b));
+        System.out.println(a.mod(b));
+        sc.close();
+    }
+}
+```
+
+除法必须规定位数(java9后当前函数会报 warning)，如：
+
+```java
+BigDecimal a = new BigDecimal(sc.next());
+BigDecimal b = new BigDecimal(sc.next());
+System.out.println(a.divide(b, 2, BigDecimal.ROUND_HALF_DOWN));
+```
+
+
+
+#### python 高精度
+
+以例子说明：(正常使用四则运算，输入输出和格式化，设置精度即可)
+
+```python
+from decimal import *
+getcontext().prec = 20
+x = Decimal('1')
+y = Decimal('7.0')
+print((x / y * y * y).quantize(Decimal('0.00'), ROUND_HALF_DOWN))
+#第二个参数可以不填
+```
+
+> 精度：(官方文档)
+>
+> ROUND_CEILING (towards Infinity),
+> ROUND_DOWN (towards zero),
+> ROUND_FLOOR (towards -Infinity),
+> ROUND_HALF_DOWN (to nearest with ties going towards zero),
+> ROUND_HALF_EVEN (to nearest with ties going to nearest even integer),
+> ROUND_HALF_UP (to nearest with ties going away from zero), or
+> ROUND_UP (away from zero).
+> ROUND_05UP (away from zero if last digit after rounding towards zero would have been 0 or 5; otherwise towards zero)
 
 
 
@@ -1106,7 +1524,108 @@ signed main()
 
 #### 快读/写
 
-##### 普通
+关闭同步流略。好看版快读：
+
+```c++
+ll read()
+{
+    ll num = 0;
+    char c = getchar(), up = c;
+    while (c < '0' || c > '9')
+        up = c, c = getchar();
+    while (c >= '0' && c <= '9')
+        num = (num << 1) + (num << 3) + (c ^ '0'), c = getchar();
+    return up == '-' ? -num : num;
+}
+```
+
+位运算快读：
+
+```c++
+ll read()
+{
+    char p = 0;
+    ll r = 0, o = 0;
+    for (; p < '0' || p > '9'; o |= p == '-', p = getchar())
+        ;
+    for (; p >= '0' && p <= '9'; r = (r << 1) + (r << 3) + (p ^ 48), p = getchar())
+        ;
+    return o ? (~r) + 1 : r;
+}
+```
+
+快写：
+
+```c++
+void write(ll x)
+{
+    if (x < 0)
+    {
+        putchar('-');
+        x = -x;
+    }
+    if (x > 9)
+    {
+        write(x / 10);
+    }
+    putchar(x % 10 + '0');
+}
+```
+
+更快的读写：
+
+```c++
+#include <bits/stdc++.h>
+using namespace std;
+typedef long long ll;
+#define sc(x) scanf("%lld", &x)
+const ll MAXSIZE = 1 << 20;
+char buf[MAXSIZE], *p1, *p2;
+#define gc() (p1 == p2 && (p2 = (p1 = buf) + fread(buf, 1, MAXSIZE, stdin), p1 == p2) ? EOF : *p1++)
+inline ll rd()
+{
+    ll x = 0, f = 1;
+    char c = gc();
+    while (!isdigit(c))
+    {
+        if (c == '-')
+            f = -1;
+        c = gc();
+    }
+    while (isdigit(c))
+        x = x * 10 + (c ^ 48), c = gc();
+    return x * f;
+}
+char pbuf[1 << 20], *pp = pbuf;
+inline void push(const char &c)
+{
+    if (pp - pbuf == 1 << 20)
+        fwrite(pbuf, 1, 1 << 20, stdout), pp = pbuf;
+    *pp++ = c;
+}
+inline void write(ll x)
+{
+    if (x < 0)
+        x = -x, push('-');
+    static ll sta[35];
+    ll top = 0;
+    do
+    {
+        sta[top++] = x % 10, x /= 10;
+    } while (x);
+    while (top)
+        push(sta[--top] + '0');
+}
+signed main()
+{
+    ll a = rd(), b = rd();
+    write(a + b);
+    fwrite(pbuf, 1, pp - pbuf, stdout);
+    return 0;
+}
+```
+
+
 
 
 
@@ -1118,18 +1637,7 @@ input = sys.stdin.readline
 print = sys.stdout.write # 仅字符串输出
 ```
 
-
-
-
-
-##### 更快
-
-```c++
-const int _IB = 1e6;
-char _ibuf[_IB], *_s, *_t;
-#define getchar() \
-    (_s == _t && (_t = (_s = _ibuf) + fread(_ibuf, 1, _IB, stdin), _s == _t) ? EOF : *_s++)
-```
+Java:
 
 
 
