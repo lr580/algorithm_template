@@ -1,3 +1,15 @@
+
+
+<hr/>
+<div style="font-size:36px;font-weight:900;margin:-14px 10px" align="center">lr580's 算法模板</div>
+<hr/>
+
+![image-20220325120131181](img/image-20220325120131181.png)
+
+<div align="center" style="font-size:18px">Last built at Mar. 25, 2022</div>
+
+<div STYLE="page-break-after: always;"></div>
+
 [toc]
 
 <div STYLE="page-break-after: always;"></div>
@@ -18,12 +30,253 @@
 4. $lcm(x,y)=[x,y]$ 最小公倍数
 5. $\lfloor x\rfloor$ 向下取整
 6. $\lceil x\rceil$ 向上取整
-7. $C^m_n=(\matrix{n\\m})=\frac{n!}{m!(n-m)!}$
-8. $A_n^m=P_n^m=\frac{n!}{(n-m)!}$
+7. $C^m_n=C(n,m)=(\matrix{n\\m})=\dfrac{n!}{m!(n-m)!}$ ，若 $n < m$ 得 $0$ 
+8. $A_n^m=P_n^m=P(n,m)=\dfrac{n!}{(n-m)!}=\prod_{i=n-m+1}^ni$ ，若 $n < m$ 得 $0$ 
 
 
 
 #### 组合数学
+
+##### 排列组合
+
+元素依次排成一个圆圈的排列称作环排列，$S$的$r$环排列数等于$\dfrac{P(n,r)}r$
+
+组合数性质：设正整数 $n,r$，有
+
+- $C(n,r)=\dfrac nrC(n-1,r-1)$
+- $C(n,r)=\dfrac{n-r+1}{r}C(n,r-1)$
+- $C(n,r)=C(n,n-r)$
+- $C(n,r)=C(n-1,r-1)+C(n-1,r)$  (Pascal公式/杨辉三角)
+
+二项式定理 $n$ 是正整数，对一切 $x,y$ ，有：
+$$
+(x+y)^n=\sum_{k=0}^n\begin{pmatrix}n\\k\end{pmatrix}x^ky^{n-k}
+$$
+
+推论：
+
+- $\sum_{k=0}^n\begin{pmatrix}n\\k\end{pmatrix}=2^n,n\in N$
+- $\sum_{k=0}^n(-1)^k\begin{pmatrix}n\\k\end{pmatrix}=0,n\in N$
+- $\sum_{l=0}^n\begin{pmatrix}l\\k\end{pmatrix}=\begin{pmatrix}n+1\\k+1\end{pmatrix},n,k\in N$
+- $\begin{pmatrix}n\\r\end{pmatrix}\begin{pmatrix}r\\k\end{pmatrix}=\begin{pmatrix}n\\k\end{pmatrix}\begin{pmatrix}n-k\\r-k\end{pmatrix},n\ge r\ge k,n,r,k\in N$
+- $\sum_{k=0}^r\begin{pmatrix}m\\k\end{pmatrix}\begin{pmatrix}n\\r-k\end{pmatrix}=\begin{pmatrix}n+m\\r\end{pmatrix},n,m,r\in N,r\le\min(m,n)$
+- $\sum_{k=0}^n\begin{pmatrix}m\\k\end{pmatrix}\begin{pmatrix}n\\k\end{pmatrix}=\begin{pmatrix}m+n\\m\end{pmatrix},m,n\in N$
+
+> 某些时候可以两边求导再求
+
+**容斥原理：**
+$$
+|\bigcup_{i=1}^nS_i|=\sum_{m=1}^n(-1)^{m-1}\sum_{a_i<a_{i+1}}|\bigcap_{i=1}^mS_{a_i}|
+$$
+**抽屉原理：**
+
+把 $mn+1$ 个物体放到 $n$ 个抽屉里，至少有一个抽屉至少有 $m+1$ 个物体
+
+把 $mn-1$ 个物体放到 $n$ 个抽屉里，至少有一个抽屉至少有 $m-1$ 个物体
+
+
+
+##### 卡特兰数
+
+$$
+c[0]=1\\
+c[n+1]=\sum_{i=0}^nc[i]\cdot c[n-i-1]
+$$
+
+从 $0$ 到 $5$ 分别是 $1,1,2,5,14,42$ ，`c[35]`  为 19 位长度，`c[36]` 爆long long 
+$$
+c[n]=c[n-1]\times\dfrac{4n-2}{n+1}\\
+c[n]=\dfrac{C(2n,n)}{n+1}\\
+c[n]=C(2n,n)-C(2n,n-1)
+$$
+意义：
+
+- 矩阵连乘： P=a1×a2×a3×……×an，依据乘法结合律，不改变其顺序，只用括号表示成对的乘积，试问有几种括号化的方案。h(n) 种
+- 一个栈(无穷大)的进栈序列为1，2，3，…，n，有多少个不同的出栈序列
+- 在一个凸多边形中，通过若干条互不相交的对角线，把这个多边形划分成了若干个三角形。任务是键盘上输入凸多边形的边数n，求不同划分的方案数 f（n）。比如当n=6时，f（6）=14。
+- 给定N个节点，能构成多少种不同的二叉搜索树
+- 给定n对括号，求括号正确配对的字符串数
+- $2n$ 个黑白，使得前缀黑色小于白色的方案数
+- 圆上 $2n$ 点用 $n$ 条不相交线段连接的方案数
+- $n$ 人有 $50$ 元，$n$ 人有 $100$ 元买 $50$ 元物品，排队方案数使得 $2n$ 人都可找零
+
+
+
+##### 斯特林数
+
+第一类：(无符号:)将n个不同元素构成m个圆排列的数目。无符号为 $s_u(n,m)$ 或$\left[\matrix{n\\m}\right]$ ，有符号为 $s_s(n,m)$ ，分别表现升阶函数和降阶函数的各项系数。
+$$
+\begin{align}
+x^{n\downarrow}&=x(x-1)(x-2)\dots(x-n+1)=\sum_{k=0}^ns_s(n,k)x^k\\
+x^{n\uparrow}&=x(x+1)(x+2)\dots(x+n-1)=\sum_{k=0}^ns_u(n,k)x^k\\
+s_s(n,u)&=(-1)^{n+m}s_u(n,m)\\
+s_u(n+1,m)&=s_u(n,m-1)+n\cdot s_u(n,m)\\
+s_s(n+1,m)&=s_s(n,m-1)-n\cdot s_s(n,m)\\
+\end{align}
+$$
+
+> 例题：有n个仓库，每个仓库有两把钥匙，共2n把钥匙。同时又有n位官员。问如何放置钥匙使得所有官员都能够打开所有仓库？（只考虑钥匙怎么放到仓库中，而不考虑官员拿哪把钥匙。）那如果官员分成m个不同的部，部中的官员数量和管理的仓库数量一致。那么有多少方案使得，同部的所有官员可以打开所有本部管理的仓库，而无法打开其他部管理的仓库？（同样只考虑钥匙的放置。）
+>
+> 第一问就是打开将钥匙放入仓库构成一个环：1号仓库放2号钥匙，2号仓库放3号钥匙……n号仓库放1号钥匙。这种情况相当于钥匙和仓库编号构成一个圆排列方案数是$(n-1)!$种。
+>
+> 而第二问就对应的将n个元素分成m个圆排列，方案数就是第一类无符号Stirling数$s_u(n,m)$。如要要考虑官员的情况，只需再乘上$n!$即可。
+
+第二类：把n+1个元素分成m个集合，记为$S(n,m)$或$\left\{\matrix{n\\m}\right\}$。
+$$
+\begin{align}
+S(n,m)&=\frac{1}{m!}\sum_{k=0}^m(-1)^k\left(\matrix{m\\k}\right)(m-k)^n\\
+S(n+1,m)&=S(n,m-1)+m\cdot S(n,m)
+\end{align}
+$$
+
+递推上与第一类的区别在于$m$还是$n$作系数和正负问题。
+
+求斯特林数，可以套用公式二，使用 $dp$ 。注意到初始状态是$S(n,1)=S(n,n)=1$ 。
+
+
+
+##### 球盒问题
+
+| 球区别 | 盒区别 | 空盒 | 模型       | 方案计数                                        |
+| ------ | ------ | ---- | ---------- | ----------------------------------------------- |
+| 有     | 有     | 有   | 选取       | $m^n$                                           |
+| 有     | 有     | 无   | 放球       | $m!\left\{\matrix{n\\m}\right\}$                |
+| 有     | 无     | 有   | 放球       | $\sum_{k=1}^m\left\{\matrix{n\\k}\right\}$      |
+| 有     | 无     | 无   | 放球       | $\left\{\matrix{n\\m}\right\}$                  |
+| 无     | 有     | 有   | 不定方程   | $C_{n+m-1}^n$                                   |
+| 无     | 有     | 无   | 不定方程   | $C_{n-1}^{m-1}$                                 |
+| 无     | 无     | 有   | 正整数拆分 | $G(x)=\frac1{\prod_{i=1}^m(1-x^i)},x^n$系数     |
+| 无     | 无     | 无   | 正整数拆分 | $G(x)=\frac{x^m}{\prod_{i=1}^m(1-x^i)},x^n$系数 |
+
+
+
+#### 复杂度
+
+若递归算法存在分治递推式：
+$$
+T(n)=\begin{cases}c&n=1\\aT(\dfrac nb)+cn^k&n>1\end{cases}
+$$
+其中 $a,b,c,k$ 是常数，$T(n)$ 是非递减函数，则：
+$$
+T(n)=\begin{cases}\Omicron(n^{\log_ba})&a>b^k\\
+\Omicron(n^k\log_bn)&a=b^k\\
+\Omicron(n^k)&a<b^k\end{cases}
+$$
+
+注： $b=1$ 不适用，这是因为 $T(n)=aT(n)+cn^k$ 显然是死循环
+
+
+
+常用复杂度对 $10^8$ ：$n!(n=11),2^n(n=26),n^3(n=464),n^2\log n(n=3000,n\log n(n=4.5\times10^6)$
+
+
+
+#### 数列
+
+> A.P.   Arithmetic progression
+
+$$
+a_n=a_1+(n-1)d=a_m+(n-m)d
+$$
+
+$$
+d=\dfrac{a_m-a_n}{m-n}
+$$
+
+$$
+\begin{align}
+S_n&=\dfrac{n(a_1+a_n)}2\\
+&=\dfrac{n(a_m+a_{n-m+1})}2\\
+&=na_1+\dfrac{n(n-1)}2d\\&=\dfrac d2n^2+(a_1-\dfrac d2)n\\&=na_{\frac{n+1}2}
+\end{align}
+$$
+
+部分性质：
+
+1. $$
+   m+n=p+q\Rightarrow a_m+a_n=a_p+a_q
+   $$
+
+2. $$
+   \dfrac{a_n}{b_n}=\dfrac{S_{2n-1}}{T_{2n-1}}
+   $$
+
+3. $$
+   a_n=\dfrac{S_{2n-1}}{2n-1}
+   $$
+
+
+
+
+> G.P.    Geometric progression
+
+$$
+a_n=a_1q^{n-1}=a_mq^{n-m}
+$$
+
+$$
+q=\large{\sqrt[n-m]{\dfrac{a_n}{a_m}}}
+$$
+
+$$
+S_n=\dfrac{a_1(1-q^n)}{1-q},\quad(q\neq1)
+$$
+
+部分性质：
+
+1. $$
+   m+n=p+q\Rightarrow a_m\times a_n=a_p\times a_q
+   $$
+
+2. $$
+   S_{n+m}=S_m+q^mS_n
+   $$
+
+
+
+###### 求和公式：
+
+$$
+\begin{align}
+\sum_{i=1}^ni&=\dfrac{n(n+1)}2\\
+\sum_{i=1}^ni^2&=\dfrac{n(n+1)(2n+1)}2\\
+\sum_{i=1}^ni^3&=\left(\dfrac{n(n+1)}2\right)^2
+\end{align}
+$$
+
+
+$$
+\sum_{i=1}^n\dfrac1i\approx0.57722+\ln n\\
+\sum_{i=1}^\infty\left(\dfrac1k\right)^i=\dfrac1{k-1}
+$$
+
+求 $a_n$ ：
+
+- $a_{n+1}=pa_n+q$ 构造新数列，使得 $b_{n+1}=pb_n$
+
+- $a_{n+1}=a_n+f(n)$ 累加法
+
+- $a_{n+1}=a_n\cdot f(n)$ 累乘法
+
+- $a_{n+1}=\dfrac{pa_n}{ka_n+m}$ 倒数法，令 $b_n=a_n^{-1}$
+
+- $\overline{k},\overline{kk},\overline{kkk}\cdots$ $a_n=\dfrac k9(10^n-1)$
+
+- $a,b,a,b,\cdots$ $a_n=\dfrac{a+b+(-1)^n(b-a)}2$
+
+求 $S_n$ ：
+
+- 裂项相消 $b_n=\dfrac1{a_n\cdot a_{n+k}},a_n\in A.P.$
+
+- 错位相减 $c_n=a_n\cdot b_n,a_n\in A.P.,b_n\in G.P.$
+  $$
+  (1-q)S_n=a_1b_1-a_nb_{n+1}+\dfrac{db_2}{1-q}(1-q^{n-1})
+  $$
+  $c_n=(an+b)q^{n-1}$ ，则 $S_n=(An+B)q^n-B$ ，其中 $A=\dfrac a{q-1},B=\dfrac{b-A}{q-1}$
+
+- 分组求和
+
+- 倒序相加
 
 
 
@@ -54,7 +307,7 @@ ll exgcd(ll a, ll b, ll &x, ll &y)
     x = y;
     y = t - (a / b) * y;
     return d;
-}
+} // 或 exgcd(b, a % b, y, x); y -= a / b * x;
 ```
 
 循环：
@@ -89,16 +342,193 @@ ll gcd(ll a, ll b, ll &x, ll &y)
 
 ## 杂项
 
+### 排序
+
+归并、计数、基数是稳定排序。
+
+#### 计数排序
+
+参考代码：(设值域是 $[1,k]$ 的整数)
+
+```c++
+for (int i = 1; i <= n; ++i)
+{
+    ++c[a[i]]; // c 初始值均 0; a 数组使用下标范围 [1,n] 存值
+}
+for (int i = 1; i <= k; ++i) // k 是 a 的最大值
+{
+    for (int j = 1; j <= c[i]; ++j)
+    {
+        a[++p] = i; // p 初始值为 0
+    }
+}
+```
+
+前缀和写法：
+
+```c++
+for (int i = 1; i <= n; ++i)
+{
+    ++cnt[a[i]];
+}
+for (int i = 1; i <= k; ++i)
+{
+    cnt[i] += cnt[i - 1];
+}
+for (int i = n; i >= 1; --i) //顺着i到n遍历也行
+{
+    b[cnt[a[i]]--] = a[i];
+}
+```
+
+
+
+#### 基数排序
+
+以下代码以 $1\le n\le8\times 10^6$ ，值域在 $2^{31}$ ， $q$ 次询问排序后位置为例(下标从 $1$ 开始) (SCNUOJ 1577)
+
+```c++
+#include <bits/stdc++.h>
+using namespace std;
+typedef int ll;
+#define il inline
+il ll read()
+{
+    char p = 0;
+    ll r = 0, o = 0;
+    for (; p < '0' || p > '9'; o |= p == '-', p = getchar())
+        ;
+    for (; p >= '0' && p <= '9'; r = (r << 1) + (r << 3) + (p ^ 48), p = getchar())
+        ;
+    return o ? (~r) + 1 : r;
+}
+#define sc(x) x = read()
+#define mn 8000010
+ll n, a[mn], q, x, b[mn], cnt[1 << 8];
+void radixsort(ll n)
+{
+    ll mask = (1 << 8) - 1;
+    ll *x = a, *y = b;
+    for (ll i = 0; i < 32; i += 8) //每八位每八位拆分，int拆为四个关键字
+    {
+        for (ll j = 0; j != (1 << 8); ++j) //[0,255)
+        {
+            cnt[j] = 0; //计数排序归零
+        }
+        for (ll j = 0; j != n; ++j)
+        {
+            ++cnt[x[j] >> i & mask]; //当前的八个位，注意位运算优先级
+        }
+        for (ll sum = 0, j = 0; j != (1 << 8); ++j)
+        { //计数排序变式，cnt代表同值元素段的开头下标;即减去前缀和前自己
+            sum += cnt[j], cnt[j] = sum - cnt[j];
+        }
+        for (ll j = 0; j != n; ++j)
+        { //计数排序变式
+            y[cnt[x[j] >> i & mask]++] = x[j];
+        }
+        swap(x, y); // y是排序好的,x是未排序的;换过来，继续操作
+    }
+}
+signed main()
+{
+    sc(n);
+    for (ll i = 0; i < n; ++i)
+    {
+        sc(a[i]);
+    }
+    radixsort(n);
+    sc(q);
+    while (q--)
+    {
+        sc(x);
+        printf("%d\n", a[x - 1]);
+    }
+    return 0;
+}
+```
+
+
+
+#### 归并求逆序对
+
+参考代码：(洛谷P1908)
+
+```c++
+#include <bits/stdc++.h> //洛谷p1908
+using namespace std;
+#define mn 500010
+typedef long long ll;
+ll n, a[mn], b[mn], ans;
+void mergesort(ll lf, ll rf)
+{
+    if (lf < rf)
+    {
+        ll cf = (lf + rf) >> 1; // left-face; center-face; right-face
+        mergesort(lf, cf);
+        mergesort(cf + 1, rf);
+        ll i = lf, j = cf + 1, je = rf, ie = cf, k = 0; //左[i,ie],右[j,je]
+        while (i <= ie && j <= je)
+        {
+            if (a[i] <= a[j])
+            {
+                b[k++] = a[i++];
+            }
+            else
+            {
+                ans += ie - i + 1;
+                b[k++] = a[j++];
+            }
+        }
+        while (i <= ie)
+        {
+            b[k++] = a[i++];
+        }
+        while (j <= je)
+        {
+            b[k++] = a[j++];
+        }
+        for (ll h = 0; h < k; ++h)
+        {
+            a[lf + h] = b[h];
+        }
+    }
+}
+signed main()
+{
+    scanf("%lld", &n);
+    for (ll i = 1; i <= n; ++i)
+    {
+        scanf("%lld", &a[i]);
+    }
+    mergesort(1, n);
+    printf("%lld", ans);
+    return 0;
+}
+```
+
+
+
+
+
+### 高精度
+
 
 
 ### 程序语法
 
 #### 常规运算
 
+- `__int128` $[-2^{127},2^{127}-1]$ ， $16$ 字节，其中 $2^{127}\approx8.5\times10^{37}$
+- `double` 有效位数约 $15$ 位， $8$ 字节，范围约为 $[-1.79\times10^{308},1.79\times10^{308}]$
+- `long double` 通常有效位数约 $20$ 位，$16$ 字节，范围约为 $[-1.2\times10^{4932},1.2\times10^{4932}]$
+
 注意：
 
 - 浮点数除，被除数为 $0$ ，被除数和除数存在一个负数，结果为负零
-- 取模只可以是整型之间的；负数运算结果等于取绝对值计算，最后正负号与被除数一致，如 $(-5)\bmod 3=-2,5\bmod (-3)=2$
+- 取模只可以是整型之间的；负数运算结果等于取绝对值计算，最后正负号与被除数一致，如 $(-5)\bmod 3=-2,5\bmod (-3)=2$  (JAVA同)
+
+> Python : `-17%10=-7,17%-10=7,-17%-10=-7` (除时取取比实际结果稍小的最大整数)
 
 整数上取整公式：
 $$
@@ -137,7 +567,7 @@ $$
 
 - > `~` 运算仅对 $-1$ 得 $0$ ，可以用于递减到 0 的循环枚举常数优化
 
-- > `^` 用于汉明码
+- 交换两个数 `a^=b^=a^=b`
 
 
 
@@ -232,6 +662,37 @@ signed main()
 int g(int a, int b);
 使用时：g(3, f);
 ```
+
+
+
+#### I/O
+
+cout 输出小数： `cout<<setprecision(n)`
+
+cout 输出不同进制： 
+
+```c++
+cout<<hex<<17<<endl;
+cout<<dec<<18<<endl;
+cout<<oct<<9<<endl;
+cout<<bitset<sizeof(unsigned long) * 8>(1UL << 27)<<endl;
+```
+
+
+
+#### 其他
+
+decltype
+
+```c++
+int x;
+decltype((x)) z;//z为int & ,da ck
+decltype(x) y;//y为int
+typedef decltype(f(x)+g(x)) dt;
+dt var1;
+```
+
+使用了万能头时，不允许使用这些变量名：`y1` , `y0` , `yn` , `prev` , `tm` 等 
 
 
 
@@ -338,6 +799,53 @@ signed main()
 ```
 
 
+
+##### 随机数
+
+```c++
+#include <iostream>
+#include <chrono>
+#include <random>
+using namespace std;
+int main()
+{
+	unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
+	mt19937 rand_num(seed);
+	uniform_int_distribution<long long> dist(0, 1000000000);
+	cout << dist(rand_num) << endl;
+	return 0;
+}
+```
+
+
+
+##### 杂项
+
+**unique** : 排序后使用，返回去重后下界。
+
+```c++
+ll m = unique(a + 1, a + 6) - (a + 1);
+```
+
+**nth\_element** : (a,a+k,a+n); 使容器a+k所在元素左边都小于它，右边都大于它(a+k通常移位)
+
+**partial\_sort** : 保证\[lf,cf)有序，\[cf,rf\]按本来的相对顺序。
+
+```c++
+partial_sort(lf,cf,rf);
+```
+
+**stable_sort** : 用法同 `std::sort` ，区别在于是稳定排序
+
+**advance**：使迭代器前进n个元素，适用于所有迭代器，第一个参数是迭代器引用，第二个参数是整数距离，表示前进或后退的单位(正负控制)。
+
+**max\_element** : 返回首个最大元素所在位置迭代器
+
+**inplace\_merge** : (lf,cf,rf,cmp) 对 $(lf,cf]$ 和 $(cf,rf)$ 就地归并排序 
+
+**merge** : (lf1, rf1, lf2, rf2, res, cmp) 归并排序并放到结果迭代器
+
+**random\_shuffle** : 打乱元素(传入首尾迭代器)
 
 
 
@@ -471,6 +979,26 @@ pair<key类型,value类型> target = \*T.find(key)  //注意区分[]
 
 ##### bitset
 
+```c++
+bitset<位数> var;
+bitset<d> s1(12);
+string str="100110";
+bitset<d> s2(str);
+//如果是整型，那么填充时会自动转换为二进制，如果是字符串，但是其中出现了 0/1 以外的字符，就会爆炸
+```
+
+方法：
+
+1. 基本的位操作，如：$s|=s<<w[i];$
+2. .count()计算1的个数
+3. .any()是否存在1
+4. .none()是否不存在1
+5. .set()全设为1
+6. .reset()全设为0
+7. .flip()按位取反
+
+上述函数可以传一个参数，则只对该位操作
+
 
 
 ##### tuple
@@ -490,6 +1018,87 @@ list
 deque
 
 array, valarray
+
+
+
+#### pb_ds
+
+```c++
+#include <ext/pb_ds/assoc_container.hpp>
+#include <ext/pb_ds/tree_policy.hpp>
+__gnu_pbds::tree<类型, __gnu_pbds::null_type, less<类型>, __gnu_pbds::rb_tree_tag, __gnu_pbds::tree_order_statistics_node_update> 变量名;
+```
+
+- `order_of_key(x)` 返回值 $x$ 在 `set` 的下标
+- `find_by_order(x)` 返回下标为 $x$ 的迭代器
+
+使用示例：(洛谷P6136)
+
+> 题意：输入 $n,m(1\le n\le10^5,1\le m\le10^6)$ ，输入 $a_i(0\le a_i < 2^{30})$ ，接下来有 $6$ 种在线操作 ( $x=x\oplus last$ )：
+>
+> 1. 插入整数 $x(0\le x < 2^{30})$
+> 2. 删除整数 $x$ (若有多个相同，只删一个)
+> 3. 查询整数 $x$ 的排名(比它小的数个数 $+1$ )
+> 4. 查询排名为 $x$ 的数(不存在时查小于 $x$ 的最大数，保证 $x$ 不越当前界)
+> 5. 求 $x$ 前驱(小于 $x$ 的最大的数)
+> 6. 求 $x$ 后继(大于 $x$ 的最小的数)
+
+```c++
+#include <bits/stdc++.h>
+using namespace std;
+typedef long long ll;
+#include <ext/pb_ds/assoc_container.hpp>
+#include <ext/pb_ds/tree_policy.hpp>
+__gnu_pbds::tree<ll, __gnu_pbds::null_type, less<ll>, __gnu_pbds::rb_tree_tag, __gnu_pbds::tree_order_statistics_node_update> tr;
+ll n, m, lastans, dig, ans;
+signed main()
+{
+    scanf("%lld%lld", &n, &m);
+    dig = n + m;
+    for (ll i = 1, a; i <= n; ++i)
+    {
+        scanf("%lld", &a);
+        tr.insert(a * dig + i);
+    }
+    for (ll i = n + 1, opt, x; i <= m + n; ++i)
+    {
+        scanf("%lld%lld", &opt, &x);
+        x ^= lastans;
+        if (opt == 1)
+        {
+            tr.insert((x * dig) + i);
+        }
+        else if (opt == 2)
+        {
+            tr.erase(tr.lower_bound(x * dig));
+        }
+        else
+        {
+            if (opt == 3)
+            {
+                lastans = tr.order_of_key(x * dig) + 1;
+            }
+            else if (opt == 4)
+            {
+                lastans = (*tr.find_by_order(x - 1)) / dig;
+            }
+            else if (opt == 5)
+            {
+                lastans = (*--tr.lower_bound(x * dig)) / dig;
+            }
+            else if (opt == 6)
+            {
+                lastans = (*tr.upper_bound(x * dig + dig)) / dig;
+            }
+            ans ^= lastans;
+        }
+    }
+    printf("%lld\n", ans);
+    return 0;
+}
+```
+
+
 
 
 
