@@ -339,6 +339,1268 @@ ll gcd(ll a, ll b, ll &x, ll &y)
 
 ## 数据结构
 
+### ST表
+
+以区间 gcd 为例(时间复杂没有两个 $\log$ 乘积)
+
+```c++
+#include <bits/stdc++.h>
+using namespace std;
+typedef int ll;
+typedef double db;
+#define sc(x) scanf("%d", &x)
+#define mn 2000010
+#define lg 23
+ll n, m, st[mn][lg], l, r, lg2[mn];
+signed main()
+{
+    sc(n), sc(m);
+    for (ll i = 1; i <= n; ++i)
+    {
+        sc(st[i][0]);
+    }
+    for (ll i = 2; i <= n; ++i)
+    {
+        lg2[i] = lg2[i / 2] + 1;
+    }
+    for (ll j = 1; j < lg; ++j)
+    {
+        for (ll i = 1; i + (1 << j) - 1 <= n; ++i)
+        {
+            st[i][j] = __gcd(st[i][j - 1], st[i + (1 << (j - 1))][j - 1]);
+        }
+    }
+    while (m--)
+    {
+        sc(l), sc(r);
+        ll p = lg2[r - l + 1];
+        ll ans = __gcd(st[l][p], st[r - (1 << p) + 1][p]);
+        printf("%d\n", ans);
+    }
+    return 0;
+}
+```
+
+
+
+
+
+## 图论
+
+### 树
+
+#### 重心
+
+以树的重心为根时，所有子树的大小都不超过整棵树大小的一半。
+
+树中所有点到某个点的距离和中，到重心的距离和是最小的；如果有两个重心，那么到它们的距离和一样。
+
+把两棵树通过一条边相连得到一棵新的树，那么新的树的重心在连接原来两棵树的重心的路径上。
+
+在一棵树上添加或删除一个叶子，那么它的重心最多只移动一条边的距离。
+
+> 例题POJ1655：给定 $t(\le 20)$ 询问，每次节点为 $n(n\le2\times10^4)$ 的树，求最小编号重心及其最大子树节点数
+
+```c++
+#include <cstdio>
+#include <algorithm>
+#include <cstring>
+using namespace std;
+typedef long long ll;
+#define mn 20010
+struct edge
+{
+    ll to, nx;
+} e[mn << 1];
+ll t, n, hd[mn], cnt, cf, cfv, siz[mn], w[mn];
+void adde(ll u, ll v)
+{
+    e[++cnt] = {v, hd[u]};
+    hd[u] = cnt;
+}
+#define sc(x) scanf("%lld", &x)
+void dfs(ll u, ll fa)
+{
+    siz[u] = 1, w[u] = 0;
+    for (ll i = hd[u], v; i; i = e[i].nx)
+    {
+        v = e[i].to;
+        if (v == fa)
+        {
+            continue;
+        }
+        dfs(v, u);
+        siz[u] += siz[v];
+        w[u] = max(w[u], siz[v]);
+    }
+    w[u] = max(w[u], n - siz[u]);
+    if (w[u] <= n / 2 && u < cf)
+    {
+        cf = u, cfv = w[u];
+    }
+}
+signed main()
+{
+    for (sc(t); t; --t)
+    {
+        sc(n), cnt = 0, memset(hd, 0, sizeof hd), cf = n + 1;
+        for (ll i = 1, u, v; i < n; ++i)
+        {
+            sc(u), sc(v), adde(u, v), adde(v, u);
+        }
+        dfs(1, 0);
+        printf("%lld %lld\n", cf, cfv);
+    }
+    return 0;
+}
+```
+
+
+
+#### 直径
+
+两次 DFS 法求直径
+
+```c++
+#include <bits/stdc++.h>
+using namespace std;
+typedef long long ll;
+#define sc(x) scanf("%lld", &x)
+#define mn 200002
+ll n, cnt, hd[mn], rot, mxd;
+bool vis[mn];
+struct edge
+{
+    ll to, nx;
+} e[mn << 1];
+void adde(ll &u, ll &v)
+{
+    e[++cnt] = {v, hd[u]};
+    hd[u] = cnt;
+}
+void dfs(ll x, ll fa, ll d)
+{
+    vis[x] = true;
+    if (d > mxd)
+    {
+        mxd = d, rot = x;
+    }
+    for (ll i = hd[x]; i; i = e[i].nx)
+    {
+        ll toi = e[i].to;
+        if (!vis[toi])
+            dfs(toi, x, d + 1);
+    }
+}
+signed main()
+{
+    sc(n);
+    for (ll i = 1, u, v; i < n; ++i)
+        sc(u), sc(v), adde(u, v), adde(v, u);
+    dfs(1, 0, 0);
+    mxd = 0;
+    memset(vis, 0, sizeof vis);
+    dfs(rot, 0, 0);
+    printf("%lld", mxd);
+    return 0;
+}
+```
+
+
+
+#### 最近公共祖先
+
+解法一：倍增法求 LCA 可以 $O(n\log n)$ 预处理和 $O(\log n)$ 查询
+
+```c++
+#include <bits/stdc++.h>
+using namespace std;
+#define sc(x) scanf("%lld", &x)
+typedef long long ll;
+#define mn 500010
+#define mm 20
+struct edge
+{
+    ll to, nx;
+} e[mn << 1];
+ll fa[mn][mm], n, m, hd[mn], cnt, d[mn], u, v, lg[mn], s;
+void adde(ll &u, ll &v)
+{
+    e[++cnt] = {v, hd[u]};
+    hd[u] = cnt;
+}
+void dfs(ll h, ll faa)
+{
+    fa[h][0] = faa;
+    d[h] = d[faa] + 1;
+    for (ll i = 1; i <= lg[d[h]]; ++i)
+    {
+        fa[h][i] = fa[fa[h][i - 1]][i - 1];
+    }
+    for (ll i = hd[h]; i; i = e[i].nx)
+    {
+        ll toi = e[i].to;
+        if (toi != faa)
+            dfs(toi, h);
+    }
+}
+ll lca(ll u, ll v)
+{
+    if (d[u] < d[v])
+        swap(u, v);
+    while (d[u] > d[v])
+        u = fa[u][lg[d[u] - d[v]] - 1];
+    assert(d[u] == d[v]);
+    if (u == v)
+        return u;
+    for (ll k = lg[d[u]] - 1; k >= 0; --k)
+    {
+        if (fa[u][k] != fa[v][k])
+        {
+            u = fa[u][k];
+            v = fa[v][k];
+        }
+    }
+    return fa[u][0];
+}
+signed main()
+{
+    sc(n), sc(m), sc(s); // s是根节点
+    for (ll i = 1; i < n; ++i)
+        sc(u), sc(v), adde(u, v), adde(v, u);
+    for (ll i = 1; i <= n; ++i) // 1+floor(log(,2))
+        lg[i] = lg[i / 2] + 1;  // 如1,2,2,3,3
+    dfs(s, 0);
+    while (m--)
+    {
+        sc(u), sc(v);
+        printf("%lld\n", lca(u, v));
+    }
+    return 0;
+}
+```
+
+解法二：欧拉序上 RMQ ，可以 $O(n\log n)$ 预处理和 $O(1)$ 查询
+
+欧拉序就是每个点进入时记录一次，从每一个子树出来时记录一次
+
+```c++
+#include <bits/stdc++.h>
+using namespace std;
+#define sc(x) scanf("%d", &x)
+typedef int ll;
+const ll N = 1e6 + 10; //开二倍长
+ll n, m, s, tot, cnt;
+ll head[N], to[N], Next[N], Log[N];
+inline void addedge(ll x, ll y)
+{
+    to[++tot] = y;
+    Next[tot] = head[x];
+    head[x] = tot;
+}
+ll a[N], dep[N], mn[21][N], p[N];
+inline void dfs(ll x, ll fa)
+{
+    a[++cnt] = x;
+    p[x] = cnt;
+    dep[x] = dep[fa] + 1;
+    for (ll i = head[x]; i; i = Next[i])
+    {
+        ll u = to[i];
+        if (u == fa)
+            continue;
+        dfs(u, x);
+        a[++cnt] = x;
+    }
+}
+signed main()
+{
+    sc(n), sc(m), sc(s);
+    Log[0] = -1;
+    for (ll i = 1, x, y; i < n; ++i)
+        sc(x), sc(y), addedge(x, y), addedge(y, x);
+    dfs(s, 0);
+    for (ll i = 1; i <= cnt; ++i)
+        mn[0][i] = a[i];
+    for (ll i = 1; i <= 20; ++i)
+        for (ll j = 1; j + (1 << i) <= cnt; ++j)
+            if (dep[mn[i - 1][j]] < dep[mn[i - 1][j + (1 << (i - 1))]])
+                mn[i][j] = mn[i - 1][j];
+            else
+                mn[i][j] = mn[i - 1][j + (1 << (i - 1))];
+    for (ll i = 1; i <= cnt; ++i)
+        Log[i] = Log[i >> 1] + 1;
+    for (ll i = 1, x, y; i <= m; ++i)
+    {
+        sc(x), sc(y);
+        if (p[x] > p[y])
+            swap(x, y);
+        ll k = Log[p[y] - p[x] + 1], ans;
+        if (dep[mn[k][p[x]]] < dep[mn[k][p[y] - (1 << k) + 1]])
+            ans = mn[k][p[x]];
+        else
+            ans = mn[k][p[y] - (1 << k) + 1];
+        printf("%d\n", ans);
+    }
+    return 0;
+}
+```
+
+
+
+#### 树上k级祖先
+
+> 例题P5903：给定 $n(2\le n\le5\times10^5)$ 点有根树， $q(1\le q\le5\times10^6)$ 询问，随机种子 $s$ 。接下来输入每个点的父亲 ( $0$ 为根)，然后有根据随机种子生成的询问，每次求节点 $x$ 的 $k$ 级祖先。输出 $\oplus_{i=1}^qi\times ans_i$ 。s
+
+长链剖分，先一次性跳到长链，而后在链上 $O(1)$ 解决。结论：跳 $\lceil\log k\rceil$ 次一定在长链上
+
+长链： 重子节点表示其子节点中子树深度最大的子结点。长链剖分从一个节点到根的路径的轻边切换条数是 $\sqrt n$ 级别的
+
+设重链长 $d$ ，且存在 $i$ 满足 $2^i < k < 2^{i+1}$ ，那么 $k-2^i < 2^i\le d$
+
+```c++
+#include <bits/stdc++.h>
+using namespace std;
+typedef int ll;
+#define MAXN 500002
+#define ui unsigned int
+#define sc(x) scanf("%d", &x)
+ll n, g[MAXN], d[MAXN], f[MAXN][20], son[MAXN], dep[MAXN], top[MAXN];
+ll q, rt, ans, o, x, k;
+vector<ll> e[MAXN], u[MAXN], v[MAXN];
+long long res;
+ui s;
+inline ui get(ui x)
+{
+    x ^= x << 13, x ^= x >> 17, x ^= x << 5;
+    return s = x;
+}
+void dfs1(ll x)
+{
+    dep[x] = d[x] = d[f[x][0]] + 1;
+    for (auto y : e[x])
+    {
+        f[y][0] = x;
+        for (ll i = 0; f[y][i]; ++i)
+            f[y][i + 1] = f[f[y][i]][i];
+        dfs1(y);
+        if (dep[y] > dep[x])
+            dep[x] = dep[y], son[x] = y;
+    }
+}
+void dfs2(ll x, ll p)
+{
+    top[x] = p;
+    if (x == p)
+    {
+        o = x;
+        for (ll i = 0; i <= dep[x] - d[x]; ++i)
+            u[x].push_back(o), o = f[o][0];
+        o = x;
+        for (ll i = 0; i <= dep[x] - d[x]; ++i)
+            v[x].push_back(o), o = son[o];
+    }
+    if (son[x])
+        dfs2(son[x], p);
+    for (auto y : e[x])
+        if (y != son[x])
+            dfs2(y, y);
+}
+inline ll ask(ll x, ll k)
+{
+    if (!k)
+        return x;
+    x = f[x][g[k]], k -= 1 << g[k];
+    k -= d[x] - d[top[x]], x = top[x];
+    return k >= 0 ? u[x][k] : v[x][-k];
+}
+signed main()
+{
+    scanf("%d%d%d", &n, &q, &s);
+    g[0] = -1;
+    for (ll i = 1; i <= n; ++i)
+    {
+        scanf("%d", &f[i][0]);
+        e[f[i][0]].push_back(i), g[i] = g[i >> 1] + 1;
+    }
+    rt = e[0][0];
+    dfs1(rt);
+    dfs2(rt, rt);
+    for (ll i = 1; i <= q; ++i)
+    {
+        x = (get(s) ^ ans) % n + 1;
+        k = (get(s) ^ ans) % d[x];
+        res ^= 1LL * i * (ans = ask(x, k));
+    }
+    printf("%lld", res);
+    return 0;
+}
+```
+
+
+
+#### LCA应用
+
+##### 前缀和差分
+
+路径点权和：$s[u]+s[v]-s[lca]-s[fa_{lca}]$
+
+路径边权和： $s[u]+s[v]-2s[lca]$
+
+路径点差分：$s[u],s[v]$ 加一， $s[lca],s[fa_{lca}]$ 减一
+
+路径边差分：$s[u],s[v]$ 加一， $s[lca]$ 减二
+
+
+
+##### 两点距离
+
+在 LCA 的基础上，设深度为 $d[x]$ ，则距离为 $d[u]+d[v]-2d[lca]$ 。
+
+> 也可以表示为：$|d[u]-d[LCA]|+|d[v]-d[LCA]|$
+
+
+
+##### 路径相交
+
+对 $AB,CD$ ，分别求出 $LCA$ 为 $X,Y$ ，若两点距离满足 $|AY|+|BY|=|AB|$ 或 $|CX|+|DX|=|CD|$ ，证明相交
+
+
+
+##### 其他
+
+从树上三个点出发，求一个目的点，使得路径和最小，输出最小路径和
+
+两两求LCA，可以发现必然有一个重复点，并且可以发现不重复点必然是最优解，设深度为d，最小路径和为：
+$$
+d_a+d_b+d_c-(d_{lca(a)}+d_{lca(b)}+d_{lca(c)})
+$$
+此外，目的是三个LCA深度最大的一个，可以得知，最深的是不重复的
+
+
+
+#### 树链剖分
+
+性质：
+
+1. DFS序新编号的重建树，保证子树`x`的节点范围是`[x,x+siz[x]-1]`。因此，对于重建树，可以使用线段树等结构维护节点值。
+2. 任意一条路径可以表示为不超过$\Omicron(\log n)$条连续重链(或部分重链)。
+
+因此初始化的时间复杂度是$\Omicron(n)$，使用线段树维护时，单路径查询的时间复杂度是$\Omicron(\log^2n)$，单子树查询的时间复杂度是$\Omicron(\log n)$。
+
+
+
+> P3384例题：给定 $n,m,r,p$ ，$r$ 是根节点编号。对 $m$ 次操作：
+>
+> 1. `1 x y z` 将 $x,y$ 路径上全部点加上 $z$
+> 2. `2 x y` 查询路径和对 $p$ 取模 
+> 3. `3 x z` 将 $x$ 为根节点的子树(含根下同)全部点加上 $z$
+> 4. `4 x` 查询子树节点和对 $p$ 取模 
+>
+> $1\le n,m\le10^5,1\le p\le2^{31}-1$ 
+
+```c++
+#include <bits/stdc++.h>
+using namespace std;
+typedef long long ll;
+#define sc(x) scanf("%lld", &x)
+#define mn 100020
+ll n, m, r, mod, ui, vi, k, x, y, z;
+#define mkcf ll cf = (lf + rf) >> 1
+#define lfs p << 1
+#define rfs p << 1 | 1
+ll hd[mn], cnt, w[mn], wt[mn];
+struct edge
+{
+    ll to, nx;
+} e[mn];
+void adde(ll u, ll v)
+{
+    e[++cnt] = {v, hd[u]};
+    hd[u] = cnt;
+}
+ll a[mn << 2], laz[mn << 2], lc, rc, res, updv;
+ll hvson[mn], id[mn], fa[mn], dfn, dep[mn], siz[mn], top[mn];
+
+void pushdown(ll lf, ll rf, ll p)
+{
+    mkcf;
+    laz[lfs] += laz[p], laz[rfs] += laz[p];
+    (a[lfs] += laz[p] * (cf - lf + 1)) %= mod;
+    (a[rfs] += laz[p] * (rf - cf)) %= mod;
+    laz[p] = 0;
+}
+void build(ll lf = 1, ll rf = n, ll p = 1)
+{
+    if (lf == rf)
+    {
+        a[p] = wt[lf] % mod;
+        return;
+    }
+    mkcf;
+    build(lf, cf, lfs), build(cf + 1, rf, rfs);
+    a[p] = (a[lfs] + a[rfs]) % mod;
+}
+void query(ll lf = 1, ll rf = n, ll p = 1)
+{
+    if (lc <= lf && rf <= rc)
+    {
+        (res += a[p]) %= mod;
+        return;
+    }
+    pushdown(lf, rf, p);
+    mkcf;
+    if (lc <= cf)
+    {
+        query(lf, cf, lfs);
+    }
+    if (rc > cf)
+    {
+        query(cf + 1, rf, rfs);
+    }
+}
+void update(ll lf = 1, ll rf = n, ll p = 1)
+{
+    if (lc <= lf && rf <= rc)
+    {
+        laz[p] += updv;
+        a[p] += updv * (rf - lf + 1) % mod;
+        return;
+    }
+    pushdown(lf, rf, p);
+    mkcf;
+    if (lc <= cf)
+    {
+        update(lf, cf, lfs);
+    }
+    if (rc > cf)
+    {
+        update(cf + 1, rf, rfs);
+    }
+    a[p] = (a[lfs] + a[rfs]) % mod;
+}
+
+ll qrange(ll x, ll y)
+{
+    ll ans = 0;
+    while (top[x] != top[y])
+    {
+        if (dep[top[x]] < dep[top[y]])
+        {
+            swap(x, y);
+        }
+        res = 0, lc = id[top[x]], rc = id[x], query();
+        (ans += res) %= mod;
+        x = fa[top[x]];
+    }
+    if (dep[x] > dep[y])
+    {
+        swap(x, y);
+    }
+    res = 0, lc = id[x], rc = id[y], query();
+    return (ans + res) % mod;
+}
+
+void frange(ll x, ll y, ll k)
+{
+    updv = k % mod;
+    while (top[x] != top[y])
+    {
+        if (dep[top[x]] < dep[top[y]])
+        {
+            swap(x, y);
+        }
+        lc = id[top[x]], rc = id[x], update();
+        x = fa[top[x]];
+    }
+    if (dep[x] > dep[y])
+    {
+        swap(x, y);
+    }
+    lc = id[x], rc = id[y], update();
+}
+
+ll qson(ll x)
+{
+    res = 0, lc = id[x], rc = id[x] + siz[x] - 1, query();
+    return res;
+}
+
+void fson(ll x, ll k)
+{
+    updv = k % mod, lc = id[x], rc = id[x] + siz[x] - 1, update();
+}
+
+void dfs(ll x, ll f, ll deep)
+{
+    dep[x] = deep, fa[x] = f, siz[x] = 1;
+    ll hvsonv = -1, y;
+    for (ll i = hd[x]; i; i = e[i].nx)
+    {
+        y = e[i].to;
+        if (y == f)
+        {
+            continue;
+        }
+        dfs(y, x, deep + 1);
+        siz[x] += siz[y];
+        if (siz[y] > hvsonv)
+        {
+            hvson[x] = y, hvsonv = siz[y];
+        }
+    }
+}
+
+void dfs(ll x, ll topi)
+{
+    id[x] = ++dfn, wt[dfn] = w[x], top[x] = topi;
+    if (!hvson[x])
+    {
+        return;
+    }
+    dfs(hvson[x], topi);
+    for (ll i = hd[x]; i; i = e[i].nx)
+    {
+        ll y = e[i].to;
+        if (y == fa[x] || y == hvson[x])
+        {
+            continue;
+        }
+        dfs(y, y);
+    }
+}
+
+signed main()
+{
+    sc(n), sc(m), sc(r), sc(mod);
+    for (ll i = 1; i <= n; ++i)
+    {
+        sc(w[i]);
+    }
+    for (ll i = 1; i < n; ++i)
+    {
+        sc(ui), sc(vi), adde(ui, vi), adde(vi, ui);
+    }
+    dfs(r, 0, 1), dfs(r, r), build();
+    while (m--)
+    {
+        sc(k), sc(x);
+        if (k == 1)
+        {
+            sc(y), sc(z), frange(x, y, z);
+        }
+        else if (k == 2)
+        {
+            sc(y), printf("%lld\n", qrange(x, y));
+        }
+        else if (k == 3)
+        {
+            sc(y), fson(x, y);
+        }
+        else
+        {
+            printf("%lld\n", qson(x));
+        }
+    }
+    return 0;
+}
+```
+
+
+
+
+
+#### 启发式合并
+
+dsu on tree
+
+预处理过程：DFS 一次，得到轻重儿子关系和 DFN 序(后者可选)
+
+核心 DFS 合并过程：
+
+1. DFS 轻儿子，合并所有轻子树上答案值
+2. DFS 重儿子，合并重子树上的答案并保存当前总合并答案
+3. 遍历当前节点的轻子树和当前节点，累加子树各点的答案值，保存答案
+4. 遍历当前节点的轻子树，删掉轻子树合并值
+
+简单理解就是，先 DFS 轻的部分，然后直接计算并保存其答案；然后因为其兄弟节点子树也有轻的，而当前子树不会给兄弟节点子树贡献，所以要把当前的答案全部丢弃，然后再计算兄弟节点子树。当轻子树都计算完后，计算重子树，但是不进行丢弃，此时回到当前的根，再次遍历全部轻子树永久加上轻子树的贡献。
+
+在树上启发式合并里，整个板子是基本不用动的，唯一需要更改的地方是合并函数的增删处理。
+
+用途：求出静态有根树的每个子树(显然共 $n$ 个子树)的某个要求的值，这个过程是 $O(n\log n)$ 的
+
+根据轻重链剖分的性质可知，经过一条轻边时，子树的大小至少会除以二，所以树上任意一条路径最多包含 $\log n$ 条轻边。如果某点到根节点经过了 $x$ 条轻边，那么它的大小 $y$ 满足： $y <\dfrac n{2^x}$ 
+
+一个节点被遍历的次数等于它到根节点上轻边的数目+1(重节点只被遍历一次)，根据上述性质，即一个节点最多被遍历 $\log n+1$ 次，所以时间复杂度为 $O(n\log n)$
+
+> 例题洛谷U41492：$n(n\le 10^5)$ 个节点的树，每个节点有不同的颜色( $10^5$ 种)，问每个节点为根的子树中，所有节点有多少种不同的颜色；$m(m\le 10^5)$ 次询问，每次问一棵子树 
+
+写法一：DFN序
+
+```c++
+#include <bits/stdc++.h>
+using namespace std;
+typedef long long ll;
+typedef double db;
+#define sc(x) scanf("%lld", &x)
+#define mn 100010
+ll n, m, cnt, dfn[mn], big[mn], siz[mn], tot, c[mn], ecnt, hd[mn];
+ll lf[mn], rf[mn], s[mn], ans[mn], x;
+struct edge
+{
+    ll to, nx;
+} e[mn * 2];
+void adde(ll u, ll v)
+{
+    e[++ecnt] = {v, hd[u]};
+    hd[u] = ecnt;
+}
+void dfs1(ll u, ll fa)
+{
+    lf[u] = ++cnt, dfn[cnt] = u, siz[u] = 1;
+    for (ll i = hd[u], v; i; i = e[i].nx)
+    {
+        v = e[i].to;
+        if (v == fa)
+        {
+            continue;
+        }
+        dfs1(v, u);
+        siz[u] += siz[v];
+        if (siz[big[u]] < siz[v])
+        {
+            big[u] = v;
+        }
+    }
+    rf[u] = cnt;
+}
+void add(ll u)
+{
+    tot += (s[c[u]]++ == 0);
+}
+void remove(ll u)
+{
+    tot -= (--s[c[u]] == 0);
+}
+void dfs2(ll u, ll fa, bool save)
+{
+    for (ll i = hd[u], v; i; i = e[i].nx)
+    {
+        v = e[i].to;
+        if (v != fa && v != big[u])
+        {
+            dfs2(v, u, false);
+        }
+    }
+    if (big[u])
+    {
+        dfs2(big[u], u, true);
+    }
+    for (ll i = hd[u], v; i; i = e[i].nx)
+    {
+        v = e[i].to;
+        if (v != fa && v != big[u])
+        {
+            for (ll j = lf[v]; j <= rf[v]; ++j)
+            {
+                add(dfn[j]);
+            }
+        }
+    }
+    add(u);
+    ans[u] = tot;
+    if (!save)
+    {
+        for (ll j = lf[u]; j <= rf[u]; ++j)
+        {
+            remove(dfn[j]);
+        }
+    }
+}
+signed main()
+{
+    sc(n);
+    for (ll i = 1, u, v; i < n; ++i)
+    {
+        sc(u), sc(v), adde(u, v), adde(v, u);
+    }
+    for (ll i = 1; i <= n; ++i)
+    {
+        sc(c[i]);
+    }
+    dfs1(1, 0), dfs2(1, 0, false);
+    for (sc(m); m; --m)
+    {
+        sc(x);
+        printf("%lld\n", ans[x]);
+    }
+    return 0;
+}
+```
+
+写法二：不带DFN序
+
+```c++
+#include <cstdio>
+#include <cstring>
+#define maxn 100010
+
+int n,m,col[maxn];
+struct edge{int y,next;};
+edge e[maxn*2];
+int first[maxn];
+void buildroad(int x,int y)
+{
+	static int len=0;
+	e[++len]=(edge){y,first[x]};
+	first[x]=len;
+}
+int size[maxn],mson[maxn];
+void dfs1(int x,int fa)//求重儿子
+{
+	size[x]=1;
+	for(int i=first[x];i;i=e[i].next)
+	{
+		int y=e[i].y;
+		if(y==fa)continue;
+		dfs1(y,x);
+		if(size[y]>size[mson[x]])mson[x]=y;
+		size[x]+=size[y];
+	}
+}
+int tong[maxn],ans[maxn],now_ans=0;
+void go(int x,int fa,int type)
+{
+	tong[col[x]]+=type;
+	if(type==1&&tong[col[x]]==1)now_ans++;
+	if(type==-1&&tong[col[x]]==0)now_ans--;
+	for(int i=first[x];i;i=e[i].next)
+	if(e[i].y!=fa)go(e[i].y,x,type);
+}
+void dfs2(int x,int fa,bool del)
+//求解，del表示求完x的子树的答案后需不需要清空x的子树的信息
+{
+	for(int i=first[x];i;i=e[i].next)//先统计轻儿子的答案
+	if(e[i].y!=fa&&e[i].y!=mson[x])dfs2(e[i].y,x,true);
+	if(mson[x]!=0)dfs2(mson[x],x,false);//最后统计重儿子的答案
+	
+	tong[col[x]]++;if(tong[col[x]]==1)now_ans++;//统计自己以及轻子树的信息
+	for(int i=first[x];i;i=e[i].next)
+	if(e[i].y!=fa&&e[i].y!=mson[x])go(e[i].y,x,1);
+	ans[x]=now_ans;//得到自己的答案
+	
+	if(del)go(x,fa,-1);//假如要删掉自己的信息，就暴力地删掉
+}
+
+int main()
+{
+	scanf("%d",&n);
+	for(int i=1,x,y;i<n;i++)
+	scanf("%d %d",&x,&y),buildroad(x,y),buildroad(y,x);
+	for(int i=1;i<=n;i++)
+	scanf("%d",&col[i]);
+	dfs1(1,0);
+	dfs2(1,0,false);
+	scanf("%d",&m);
+	for(int i=1,x;i<=m;i++)
+	scanf("%d",&x),printf("%d\n",ans[x]);
+}
+
+```
+
+
+
+
+
+#### 虚树
+
+virtual tree
+
+对于原树上的 $k$ 个关键点，它们及其两两LCA所组成的树是虚树
+
+实现方法是把关键点按 DFS 序排序，对两两相邻的关键点求 LCA，哈希表判重。根据原树的祖先后代关系建树。
+
+在虚树里，只要保证祖先后代的关系没有改变，就可以随意添加原树的非关键点。
+
+使用单调栈建立虚树。先把根节点 $1$ 加入栈。按 DFS 序遍历节点，若当前节点与栈顶节点的 LCA 是栈顶，直接入栈；否则，把 LCA 连栈顶建虚树，栈顶弹栈。根据栈顶节点 DFS 序和次大节点(栈顶下方节点) DFS 序与 LCA 作比较，判断 LCA 是否入栈过，如果 LCA 未入栈，则 LCA 入栈。然后才新节点入栈。遍历结束后，栈内形成链，两两相连即可。
+
+细节优化是可以把清空邻接表改成有一个从未入栈的元素入栈的时候清空该元素对应的邻接表。
+
+> 例题洛谷P2495：有 $n(2\le n\le2.5\times10^5)$ 节点的树，边带权，有 $m(1\le m\le5\times10^5)$ 次询问，每次询问有 $k(1\le k\le n,\sum k\le5\times10^5)$ 个点，对每次询问，删掉树上若干边，使得删的边权和最小，满足删后根节点 $1$ 不能到达任一个给定询问点
+
+```c++
+#include <bits/stdc++.h>
+using namespace std;
+typedef long long ll;
+#define mn 500010
+#define mm 10000
+#define big 0x3ffffffffffffffa
+#define mlg 20
+struct edge
+{
+    ll to, nx, w;
+} e[mn << 1], e2[mn << 1];
+ll hd[mn], hd2[mn], cnt, cnt2, n, q, k;
+void adde(const ll &u, const ll &v, const ll &w, ll *hd, ll &cnt, edge *e)
+{
+    e[++cnt] = {v, hd[u], w};
+    hd[u] = cnt;
+}
+ll dfn[mn], dep[mn], fa[mn][mlg], mi[mn], m[mn], lst[mn];
+bool vis[mn];
+ll num, top, dfscnt, stk[mn];
+
+void dfs1(ll u)
+{
+    ll k = 0;
+    for (; fa[u][k]; ++k)
+    {
+        fa[u][k + 1] = fa[fa[u][k]][k];
+    }
+    m[u] = k;
+    dfn[u] = ++dfscnt;
+    for (ll i = hd[u], v; i; i = e[i].nx)
+    {
+        v = e[i].to;
+        if (!dfn[v])
+        {
+            dep[v] = dep[u] + 1;
+            mi[v] = min(mi[u], e[i].w);
+            fa[v][0] = u;
+            dfs1(v);
+        }
+    }
+}
+
+ll lca(ll x, ll y)
+{
+    if (dep[x] < dep[y])
+    {
+        swap(x, y);
+    }
+    for (ll i = m[x]; i >= 0; --i)
+    {
+        if (dep[fa[x][i]] >= dep[y])
+        {
+            x = fa[x][i];
+        }
+    }
+    if (x == y)
+    {
+        return x;
+    }
+    for (ll i = m[x]; i >= 0; --i)
+    {
+        if (fa[x][i] != fa[y][i])
+        {
+            x = fa[x][i], y = fa[y][i];
+        }
+    }
+    return fa[x][0];
+}
+
+ll dfs2(ll u) //dp
+{
+    ll sum = 0;
+    for (ll i = hd2[u], v; i; i = e2[i].nx)
+    {
+        v = e2[i].to;
+        sum += dfs2(v);
+    }
+    ll res = vis[u] ? mi[u] : min(mi[u], sum); //vis[u] hd.d af
+    hd2[u] = 0, vis[u] = false;                //clear
+    return res;
+}
+
+#define sc(x) scanf("%lld", &x)
+signed main()
+{
+    sc(n);
+    for (ll i = 1, u, v, w; i < n; ++i)
+    {
+        sc(u), sc(v), sc(w);
+        adde(u, v, w, hd, cnt, e), adde(v, u, w, hd, cnt, e);
+    }
+    mi[1] = big;
+    dfs1(1);
+    for (sc(q); q; --q)
+    {
+        sc(k);
+        for (ll i = 1; i <= k; ++i)
+        {
+            sc(lst[i]), vis[lst[i]] = true;
+        }
+        sort(lst + 1, lst + 1 + k, [](const ll &x, const ll &y)
+             { return dfn[x] < dfn[y]; });
+        stk[top = 1] = lst[1];
+        for (ll i = 2; i <= k; ++i)
+        {
+            ll now = lst[i], lc = lca(now, stk[top]);
+            while (true)
+            {
+                if (dep[lc] >= dep[stk[top - 1]])
+                {
+                    if (lc != stk[top])
+                    {
+                        adde(lc, stk[top], 0, hd2, cnt2, e2);
+                        if (lc != stk[top - 1])
+                        {
+                            stk[top] = lc;
+                        }
+                        else
+                        {
+                            --top;
+                        }
+                    }
+                    break;
+                }
+                else
+                {
+                    adde(stk[top - 1], stk[top], 0, hd2, cnt2, e2);
+                    --top;
+                }
+            }
+            stk[++top] = now;
+        }
+        while (--top)
+        {
+            adde(stk[top], stk[top + 1], 0, hd2, cnt2, e2);
+        }
+        printf("%lld\n", dfs2(stk[1])), cnt2 = 0;
+    }
+    return 0;
+}
+```
+
+
+
+#### 点分治
+
+求解问题：枚举所有路径，计算相关的信息
+
+树上路径可以分为两种：一种是经过根的，一种是不经过的；对前者，一种根作为端点，一种不作为端点，其中后者等效于两条前者。
+
+预处理：求重心，然后求以重心为根各子树的大小。然后从重心开始点分治。
+
+在每次点分治过程：当前重心为根，DFS计算所有以该点为端点的路径所要求的值，然后删掉该点，对该点的每个子树，再次求重心，然后求新重心为根各子树大小，然后以新重心为根继续递归执行上述过程。
+
+经过点分治，可以求出满足可加的每一条路径的值。点分治的复杂度是 $O(n\log n)$
+
+> 例题洛谷P3806：$n(1\le n\le10^4)$ 点带权树，$m(1\le m\le100)$ 次询问，每次询问求树上是否有距离为 $k$ 个点对，有就输出 `AYE` 
+>
+
+```c++
+#include <bits/stdc++.h>
+using namespace std;
+typedef long long ll;
+#define sc(x) scanf("%lld", &x)
+#define mn 10010
+#define mm 105
+#define mb 10000010
+struct edge
+{
+    ll to, nx, w;
+} e[mn << 2];
+ll hd[mn], ecnt;
+void adde(ll &u, ll &v, ll &w)
+{
+    e[++ecnt] = {v, hd[u], w};
+    hd[u] = ecnt;
+}
+bool died[mn], bin[mb], suc[mm];
+ll n, m, q[mn];
+ll p, sz[mn], n2, smx[mn];
+void dfs(ll u, ll fa)
+{
+    sz[u] = 1, smx[u] = 0;
+    for (ll i = hd[u], v; i; i = e[i].nx)
+    {
+        v = e[i].to;
+        if (v == fa || died[v])
+        {
+            continue;
+        }
+        dfs(v, u);
+        sz[u] += sz[v];
+        smx[u] = max(smx[u], sz[v]);
+    }
+    smx[u] = max(smx[u], n2 - smx[u]);
+    if (smx[u] < smx[p])
+    {
+        p = u;
+    }
+}
+ll ds[mn], dcnt, d[mn];
+void dfs2(ll u, ll fa)
+{
+    ds[++dcnt] = d[u];
+    for (ll i = hd[u], v; i; i = e[i].nx)
+    {
+        v = e[i].to;
+        if (v == fa || died[v])
+        {
+            continue;
+        }
+        d[v] = d[u] + e[i].w;
+        dfs2(v, u);
+    }
+}
+stack<ll> qd;
+void dfz(ll u, ll fa)
+{
+    bin[0] = true;
+    qd.push(0);
+    died[u] = true;
+    for (ll i = hd[u], v; i; i = e[i].nx)
+    {
+        v = e[i].to;
+        if (v == fa || died[v])
+        {
+            continue;
+        }
+        d[v] = e[i].w;
+        dfs2(v, u);
+        for (ll j = 1; j <= dcnt; ++j)
+        {
+            for (ll k = 1; k <= m; ++k)
+            {
+                if (q[k] >= ds[j])
+                {
+                    suc[k] |= bin[q[k] - ds[j]];
+                }
+            }
+        }
+        for (ll j = 1; j <= dcnt; ++j)
+        {
+            if (ds[j] < mb)
+            {
+                bin[ds[j]] = true;
+                qd.push(ds[j]);
+            }
+        }
+        dcnt = 0;
+    }
+    while (!qd.empty())
+    {
+        bin[qd.top()] = false;
+        qd.pop();
+    }
+    for (ll i = hd[u], v; i; i = e[i].nx)
+    {
+        v = e[i].to;
+        if (v == fa || died[v])
+        {
+            continue;
+        }
+        n2 = sz[v], p = 0;
+        dfs(v, u), dfs(p, 0);
+        dfz(p, u);
+    }
+}
+signed main()
+{
+    sc(n), sc(m), n2 = n, smx[0] = 0x7fffffff;
+    for (ll i = 1, u, v, w; i < n; ++i)
+    {
+        sc(u), sc(v), sc(w), adde(u, v, w), adde(v, u, w);
+    }
+    for (ll i = 1; i <= m; ++i)
+    {
+        sc(q[i]);
+    }
+    dfs(1, 0), dfs(p, 0);
+    dfz(p, 0);
+    for (ll i = 1; i <= m; ++i)
+    {
+        printf(suc[i] ? "AYE\n" : "NAY\n");
+    }
+    return 0;
+}
+```
+
+
+
+
+
+#### 杂项
+
+##### 最小距离和
+
+> 例题P1364：给定 $n(1\le n\le100)$ 节点二叉树(输入为 $w,u,v$ 为第 $i$ 个节点点权和左右儿子( $0$ 是无子))，求最小距离和(以某点为原点各点点权乘以路径长)( $1\le w\le10^5$ )
+
+设 $dp$ 为距离和，对 $u$ 的邻点 $v$ ，有 $dp[v]=dp[u]+size[1]-2size[v]$
+
+在dp[u]的基础上当根从u变为v的时候，v的子树的所有结点的距离都减少1，那么总距离就减少size[v]，同时，以v为根的子树以外的所有节点路程都增加了1，总路程就增加了size[1]-size[v]
+
+```c++
+#include <bits/stdc++.h>
+using namespace std;
+typedef long long ll;
+#define mn 105
+#define sc(x) scanf("%lld", &x)
+struct edge
+{
+    ll to, nx;
+} e[mn << 1];
+ll hd[mn], cnt, siz[mn], w[mn], dp[mn], n, ans = 0x7fffffff;
+void adde(ll u, ll v)
+{
+    e[++cnt] = {v, hd[u]};
+    hd[u] = cnt;
+}
+void dfs1(ll u, ll fa, ll d)
+{
+    siz[u] = w[u];
+    for (ll i = hd[u], v; i; i = e[i].nx)
+    {
+        v = e[i].to;
+        if (v == fa)
+        {
+            continue;
+        }
+        dfs1(v, u, d + 1);
+        siz[u] += siz[v];
+    }
+    dp[1] += d * w[u];
+}
+void dfs2(ll u, ll fa)
+{
+    for (ll i = hd[u], v; i; i = e[i].nx)
+    {
+        v = e[i].to;
+        if (v == fa)
+        {
+            continue;
+        }
+        dp[v] = dp[u] + (siz[1] - siz[v]) - siz[v];
+        dfs2(v, u);
+    }
+    ans = min(ans, dp[u]);
+}
+signed main()
+{
+    scanf("%lld", &n);
+    for (ll i = 1, x, y; i <= n; ++i)
+    {
+        sc(w[i]), sc(x), sc(y);
+        if (x)
+        {
+            adde(i, x), adde(x, i);
+        }
+        if (y)
+        {
+            adde(i, y), adde(y, i);
+        }
+    }
+    dfs1(1, 0, 0);
+    dfs2(1, 0);
+    printf("%lld", ans);
+    return 0;
+}
+```
+
+
+
 
 
 ## 字符串
