@@ -6,7 +6,7 @@
 
 ![image-20220325120131181](img/image-20220325120131181.png)
 
-<div align="center" style="font-size:18px">Last built at Mar. 25, 2022</div>
+<div align="center" style="font-size:18px">Last built at Mar. 26, 2022</div>
 
 <div STYLE="page-break-after: always;"></div>
 
@@ -52,6 +52,12 @@
 $$
 (x+y)^n=\sum_{k=0}^n\begin{pmatrix}n\\k\end{pmatrix}x^ky^{n-k}
 $$
+
+多重全排列公式：
+$$
+P(n;r_1,r_2,\cdots, r_t)=\dfrac{n!}{r_1!r_2!\cdots r_t!}
+$$
+
 
 推论：
 
@@ -377,6 +383,1990 @@ signed main()
         ll ans = __gcd(st[l][p], st[r - (1 << p) + 1][p]);
         printf("%d\n", ans);
     }
+    return 0;
+}
+```
+
+
+
+### 线段树
+
+凡是符合结合律的二目操作都可以使用线段树
+
+#### 常见应用
+
+##### 区间加法
+
+> 洛谷P3372：给定长为 $n(1\le n\le10^5)$ 的序列和 $m(1\le m\le10^5)$ 次操作：
+>
+> 1. `1 x y k` 区间 $[x,y]$ 每个数加上 $k$
+> 2. `2 x y` 输出区间 $[x,y]$ 的和
+
+```c++
+#include <bits/stdc++.h>
+using namespace std;
+typedef long long ll;
+#define sc(x) scanf("%lld", &x)
+#define mn 100010
+ll t[mn << 2], laz[mn << 2], n, m, c, lc, rc, v, a[mn], ans;
+#define lfs p << 1
+#define rfs p << 1 | 1
+#define mkcf ll cf = (lf + rf) >> 1
+void build(ll p, ll lf, ll rf)
+{
+    if (lf == rf)
+    {
+        t[p] = a[lf];
+        return;
+    }
+    mkcf;
+    build(lfs, lf, cf);
+    build(rfs, cf + 1, rf);
+    t[p] = t[lfs] + t[rfs];
+}
+void pushdown(ll p, ll lf, ll rf)
+{
+    mkcf;
+    t[lfs] += (cf - lf + 1) * laz[p];
+    t[rfs] += (rf - cf) * laz[p];
+    laz[lfs] += laz[p];
+    laz[rfs] += laz[p];
+    laz[p] = 0;
+}
+void update(ll p, ll lf, ll rf)
+{
+    if (lf >= lc && rf <= rc)
+    {
+        t[p] += v * (rf - lf + 1);
+        laz[p] += v;
+        return;
+    }
+    pushdown(p, lf, rf);
+    mkcf;
+    if (cf >= lc)
+    {
+        update(lfs, lf, cf);
+    }
+    if (cf < rc)
+    {
+        update(rfs, cf + 1, rf);
+    }
+    t[p] = t[lfs] + t[rfs];
+}
+void query(ll p, ll lf, ll rf)
+{
+    if (lf >= lc && rf <= rc)
+    {
+        ans += t[p];
+        return;
+    }
+    pushdown(p, lf, rf);
+    mkcf;
+    if (cf >= lc)
+    {
+        query(lfs, lf, cf);
+    }
+    if (cf < rc)
+    {
+        query(rfs, cf + 1, rf);
+    }
+    //t[p] = t[lfs] + t[rfs];
+}
+signed main()
+{
+    sc(n), sc(m);
+    for (ll i = 1; i <= n; ++i)
+    {
+        sc(a[i]);
+    }
+    build(1, 1, n);
+    while (m--)
+    {
+        sc(c), sc(lc), sc(rc);
+        if (c == 1)
+        {
+            sc(v);
+            update(1, 1, n);
+        }
+        else
+        {
+            ans = 0;
+            query(1, 1, n);
+            printf("%lld\n", ans);
+        }
+    }
+    return 0;
+}
+```
+
+
+
+##### 区间加乘
+
+> 洛谷P3373，给定长为 $n(1\le n\le10^5)$ 的序列和 $m(1\le m\le10^5)$ 次操作和 $p$ ：
+>
+> 1. `1 x y k` 区间每个数乘 $k$
+> 2. `2 x y k` 区间每个数加 $k$
+> 3. `3 x y` 输出区间每个数的和对 $p$ 取模
+
+先乘后加
+
+```c++
+#include <iostream>
+#include <cstdio>
+using namespace std;
+int p;
+long long a[100007];
+//线段树结构体，v表示此时的答案，mul表示乘法意义上的lazytag，add是加法意义上的
+struct node{
+    long long v, mul, add;
+}st[400007];
+void bt(int root, int l, int r){
+//初始化lazytag
+    st[root].mul=1;
+    st[root].add=0;
+    if(l==r){
+        st[root].v=a[l];
+    }
+    else{
+        int m=(l+r)/2;
+        bt(root*2, l, m);
+        bt(root*2+1, m+1, r);
+        st[root].v=st[root*2].v+st[root*2+1].v;
+    }
+    st[root].v%=p;
+    return ;
+}
+//核心代码，维护lazytag
+void pushdown(int root, int l, int r){
+    int m=(l+r)/2;
+//根据我们规定的优先度，儿子的值=此刻儿子的值*父亲的乘法lazytag+儿子的区间长度*父亲的加法lazytag
+    st[root*2].v=(st[root*2].v*st[root].mul+st[root].add*(m-l+1))%p;
+    st[root*2+1].v=(st[root*2+1].v*st[root].mul+st[root].add*(r-m))%p;
+//很好维护的lazytag
+    st[root*2].mul=(st[root*2].mul*st[root].mul)%p;
+    st[root*2+1].mul=(st[root*2+1].mul*st[root].mul)%p;
+    st[root*2].add=(st[root*2].add*st[root].mul+st[root].add)%p;
+    st[root*2+1].add=(st[root*2+1].add*st[root].mul+st[root].add)%p;
+//把父节点的值初始化
+    st[root].mul=1;
+    st[root].add=0;
+    return ;
+}
+//update1，乘法，stdl此刻区间的左边，stdr此刻区间的右边，l给出的左边，r给出的右边
+void ud1(int root, int stdl, int stdr, int l, int r, long long k){
+//假如本区间和给出的区间没有交集
+    if(r<stdl || stdr<l){
+        return ;
+    }
+//假如给出的区间包含本区间
+    if(l<=stdl && stdr<=r){
+        st[root].v=(st[root].v*k)%p;
+        st[root].mul=(st[root].mul*k)%p;
+        st[root].add=(st[root].add*k)%p;
+        return ;
+    }
+//假如给出的区间和本区间有交集，但是也有不交叉的部分
+//先传递lazytag
+    pushdown(root, stdl, stdr);
+    int m=(stdl+stdr)/2;
+    ud1(root*2, stdl, m, l, r, k);
+    ud1(root*2+1, m+1, stdr, l, r, k);
+    st[root].v=(st[root*2].v+st[root*2+1].v)%p;
+    return ;
+}
+//update2，加法，和乘法同理
+void ud2(int root, int stdl, int stdr, int l, int r, long long k){
+    if(r<stdl || stdr<l){
+        return ;
+    }
+    if(l<=stdl && stdr<=r){
+        st[root].add=(st[root].add+k)%p;
+        st[root].v=(st[root].v+k*(stdr-stdl+1))%p;
+        return ;
+    }
+    pushdown(root, stdl, stdr);
+    int m=(stdl+stdr)/2;
+    ud2(root*2, stdl, m, l, r, k);
+    ud2(root*2+1, m+1, stdr, l, r, k);
+    st[root].v=(st[root*2].v+st[root*2+1].v)%p;
+    return ;
+}
+//访问，和update一样
+long long query(int root, int stdl, int stdr, int l, int r){
+    if(r<stdl || stdr<l){
+        return 0;
+    }
+    if(l<=stdl && stdr<=r){
+        return st[root].v;
+    }
+    pushdown(root, stdl, stdr);
+    int m=(stdl+stdr)/2;
+    return (query(root*2, stdl, m, l, r)+query(root*2+1, m+1, stdr, l, r))%p;
+}
+int main(){
+    int n, m;
+    scanf("%d%d%d", &n, &m, &p);
+    for(int i=1; i<=n; i++){
+        scanf("%lld", &a[i]);
+    }
+    bt(1, 1, n);
+    while(m--){
+        int chk;
+        scanf("%d", &chk);
+        int x, y;
+        long long k;
+        if(chk==1){
+            scanf("%d%d%lld", &x, &y, &k);
+            ud1(1, 1, n, x, y, k);
+        }
+        else if(chk==2){
+            scanf("%d%d%lld", &x, &y, &k);
+            ud2(1, 1, n, x, y, k);
+        }
+        else{
+            scanf("%d%d", &x, &y);
+            printf("%lld\n", query(1, 1, n, x, y));
+        }
+    }
+    return 0;
+}
+```
+
+
+
+##### 区间查重
+
+> SCNUOJ1454 $n$个柜子(编号从1开始)，每个柜子一开始放了一个编号为$a_i$的物品。维护下面的操作：
+>
+> - `1 x` 取走第$x$个柜子的物品(保证此时存在物品)
+> - `2 l r` 判断$[l,r]$内的未被取走的物品是否有两个编号相同
+>
+> $1\le n,q\le 5\times10^5,1\le a_i\le10^6,1\le x,l\le r\le n$
+
+思路见代码注释：
+
+```c++
+#include <bits/stdc++.h>
+using namespace std;
+typedef int ll;
+#define sc(x) scanf("%d", &x)
+#define mn 500010
+ll n, q, a[mn], v, i;
+// 维护编号为v的双向链表
+ll index_before[mn]; //第i个柜子的编号上一次出现的下标 即 链表prev
+ll last_pos[mn];     //v最后一次出现的下标是last_pos[v] 即链表v的尾部指针
+ll index_after[mn];  //第i个柜子的编号下一次出现的下标 即 链表next
+
+//区间[lc,rc]内不重复的充要条件是index_before[i]或index_after[i]均不在这个区间内
+//任取其一判断即可，这里取index_before[i]
+//合并物品，构造线段树，每个节点维护的区间代表这个区间内的编号最近会在上一次重复的下标
+//只需要对区间内每个index_before取最值；显然max操作可以维护线段树
+ll t[mn << 2], lc, rc, res, cmd, pos;
+#define lfs p << 1
+#define rfs p << 1 | 1
+#define mkcf ll cf = (lf + rf) >> 1
+void build(ll lf, ll rf, ll p)
+{
+    if (lf == rf)
+    {
+        t[p] = index_before[lf];
+        return;
+    }
+    mkcf;
+    build(lf, cf, lfs);
+    build(cf + 1, rf, rfs);
+    t[p] = max(t[lfs], t[rfs]);
+}
+void query(ll lf, ll rf, ll p)
+{
+    if (lc <= lf && rf <= rc)
+    {
+        res = max(res, t[p]);
+        return;
+    }
+    mkcf;
+    if (cf >= lc)
+        query(lf, cf, lfs);
+    if (cf < rc)
+        query(cf + 1, rf, rfs);
+}
+void fix(ll lf, ll rf, ll p)
+{
+    if (lf == rf)
+    {
+        t[p] = v;
+        return;
+    }
+    mkcf;
+    if (cf >= pos)
+        fix(lf, cf, lfs);
+    else
+        fix(cf + 1, rf, rfs);
+    t[p] = max(t[lfs], t[rfs]);
+}
+
+signed main()
+{
+    sc(n), sc(q);
+    for (ll i = 1; i <= n; ++i)
+    {
+        sc(v);
+        //下面三行代码实际上在维护编号为v的双向链表
+        index_before[i] = last_pos[v];
+        index_after[last_pos[v]] = i;
+        last_pos[v] = i;
+        a[i] = v;
+    }
+    build(1, n, 1); //不build见祖宗
+    while (q--)
+    {
+        sc(cmd);
+        if (cmd == 2)
+        {
+            sc(lc), sc(rc), res = 0;
+            query(1, n, 1);
+            printf("%d\n", res >= lc);
+        }
+        else
+        {
+            sc(i);
+            //双向链表删除节点
+            lc = index_before[i], rc = index_after[i];
+            if (lc)
+                index_after[lc] = rc;
+            if (rc)
+                index_before[rc] = lc;
+
+            //线段树修改
+            //编号为0的双向链表不计重复，均头结点指向0
+            pos = i, v = 0, fix(1, n, 1);
+            //双向链表的后继节点指向更新 对线段树生效
+            if (rc)
+                pos = rc, v = lc, fix(1, n, 1);
+        }
+    }
+    return 0;
+}
+```
+
+
+
+##### 区间最值
+
+维护操作：① 区间每个数与 $t$ 取 $\min$ ② 输出区间和 ③ 输出区间最大值
+
+对每个节点区间：维护该区间最大值 $mx$、最大值出现次数 $se$ 、严格次大值 $cnt$ 
+
+对操作 $1$ ：
+
+- 若 $mx\le t$ ，整个区间都没 $t$ 大，不操作 (相等也等于没操作)
+- 若 $se < t < mx$  ，那么所有最大值都变成 $t$ ，次大值和更小的值都不变，所以 $cnt$ 个 $mx$ 被删掉，再加上 $cnt$ 个 $t$ ，即区间更新 $cnt(t-mx)$ ，并记录懒标记
+- 若 $t\le se$ ，递归往下处理子区间
+
+对操作 $2,3$ ，有手就行
+
+处理 `pushup` ：
+
+- 若左右子区间最值一样， $cnt$ 翻倍， $se$ 取左右 $se$ 较大者， $mx$ 任取左右(都一样)
+- 否则， $mx,cnt$ 取大者， $se$ 让小区间 $mx$ 和大区间 $se$ 取最值
+
+处理 `pushdown` ：
+
+- 懒标记是 $t$ 的懒标记，根据题意可以取一些诸如无穷小代表无懒标记
+
+处理建树：
+
+- 初始次大值建无穷小
+
+势能分析法知，对 $m$ 次询问，复杂度为 $O(m\log n)$ 
+
+> 以 SCNUOJ1703 为例
+
+```c++
+#include <bits/stdc++.h>
+using namespace std;
+typedef long long ll;
+#define sc(x) scanf("%lld", &x)
+#define mn 400010
+#define lfs p << 1
+#define rfs p << 1 | 1
+#define mkcf ll cf = (lf + rf) >> 1
+#define neg -1
+ll n, m, c, lc, rc, v, a[mn], s[mn], mx[mn], se[mn], cnt[mn], laz[mn], ans;
+void pushup(ll p)
+{
+    s[p] = s[lfs] + s[rfs];
+    if (mx[lfs] == mx[rfs])
+    {
+        mx[p] = mx[lfs];
+        cnt[p] = cnt[lfs] + cnt[rfs];
+        se[p] = max(se[lfs], se[rfs]);
+    }
+    else if (mx[lfs] > mx[rfs])
+    {
+        mx[p] = mx[lfs];
+        cnt[p] = cnt[lfs];
+        se[p] = max(se[lfs], mx[rfs]);
+    }
+    else if (mx[lfs] < mx[rfs])
+    {
+        mx[p] = mx[rfs];
+        cnt[p] = cnt[rfs];
+        se[p] = max(se[rfs], mx[lfs]);
+    }
+}
+void build(ll p, ll lf, ll rf)
+{
+    laz[p] = -1;
+    if (lf == rf)
+    {
+        s[p] = mx[p] = a[lf];
+        cnt[p] = 1;
+        se[p] = -1;
+        return;
+    }
+    mkcf;
+    build(lfs, lf, cf);
+    build(rfs, cf + 1, rf);
+    pushup(p);
+}
+void pushd(ll p, ll nw)
+{
+    if (mx[p] <= nw)
+    {
+        return;
+    }
+    s[p] += cnt[p] * (nw - mx[p]);
+    mx[p] = laz[p] = nw;
+}
+void pushdown(ll p)
+{
+    if (laz[p] == -1)
+    {
+        return;
+    }
+    pushd(lfs, laz[p]);
+    pushd(rfs, laz[p]);
+    laz[p] = -1;
+}
+void update(ll p, ll lf, ll rf)
+{
+    if (mx[p] <= v)
+    {
+        return;
+    }
+    if (lf >= lc && rf <= rc && se[p] < v)
+    {
+        return pushd(p, v);
+    }
+    pushdown(p);
+    mkcf;
+    if (cf >= lc)
+    {
+        update(lfs, lf, cf);
+    }
+    if (cf < rc)
+    {
+        update(rfs, cf + 1, rf);
+    }
+    pushup(p);
+}
+void query_mx(ll p, ll lf, ll rf)
+{
+    if (lf >= lc && rf <= rc)
+    {
+        ans = max(ans, mx[p]);
+        return;
+    }
+    pushdown(p);
+    mkcf;
+    if (cf >= lc)
+    {
+        query_mx(lfs, lf, cf);
+    }
+    if (cf < rc)
+    {
+        query_mx(rfs, cf + 1, rf);
+    }
+}
+void query_sum(ll p, ll lf, ll rf)
+{
+    if (lf >= lc && rf <= rc)
+    {
+        ans += s[p];
+        return;
+    }
+    pushdown(p);
+    mkcf;
+    if (cf >= lc)
+    {
+        query_sum(lfs, lf, cf);
+    }
+    if (cf < rc)
+    {
+        query_sum(rfs, cf + 1, rf);
+    }
+}
+signed main()
+{
+    sc(n), sc(m);
+    for (ll i = 1; i <= n; ++i)
+    {
+        sc(a[i]);
+    }
+    build(1, 1, n);
+    while (m--)
+    {
+        sc(c), sc(lc), sc(rc);
+        if (c == 0)
+        {
+            sc(v);
+            update(1, 1, n);
+        }
+        else if (c == 1)
+        {
+            ans = -1;
+            query_mx(1, 1, n);
+            printf("%lld\n", ans);
+        }
+        else
+        {
+            ans = 0;
+            query_sum(1, 1, n);
+            printf("%lld\n", ans);
+        }
+    }
+    return 0;
+}
+```
+
+
+
+##### 历史最值
+
+> 洛谷P6242:长为 $n$ 的数列 $A$ , $m$ 次操作，每次操作后 $B_i=\max(B_i,A_i)$ ：
+>
+> 1. `1 l r k` 对 $A$ 区间加法( $k$ 可以是负数 )
+> 2. `2 l r v` 区间求 $A_i=\min(A_i,v)$
+> 3. `3 l r` 对 $A$ 区间求和
+> 4. `4 l r` 对 $A$ 求区间最大值
+> 5. `5 l r` 对 $B$ 求区间最大值
+>
+> $1\le n,m\le5\times10^5,-5\times10^8\le A_i,v\le5\times10^8,-2000\le k\le2000$
+
+代码解释：
+
+四种不同的懒标记：
+
+- add\_a ：该区间最大值的加法的懒标记。
+- add\_a1 ：该区间非最大值的加法的懒标记。
+- add\_b ：该区间最大的历史最大值的加法的懒标记。
+- add\_b1 ：该区间非最大的历史最大值的加法的懒标记。
+
+可能后面两个懒标记比较难理解，但是一定要理解。
+
+其他就简单了：
+
+- l：该区间的左端点。
+- r ：该区间的右端点。
+- sum：该区间的的和。
+- maxa ：该区间的最大值。
+- se ：该区间的严格次大值。
+- cnt ：该区间最大值的个数。
+- maxb ：该区间的历史最大值。
+
+- k1：最大值要加的数。
+- k2：最大的历史最大值要加的数。
+- k3：非最大值要加的数。
+- k4：非最大的历史最大值要加的数。
+
+```c++
+#include<bits/stdc++.h>																																							请勿抄袭 
+#define ll long long
+using namespace std;
+int n,m,op,l,r,k;
+struct tree{
+	ll sum;
+	int add_a,add_a1,add_b,add_b1;
+	int l,r,maxa,se,maxb,cnt;
+}s[2000005];
+char buf[1<<21],*p1=buf,*p2=buf,obuf[1<<21],*o=obuf;
+#define g()(p1==p2&&(p2=(p1=buf)+fread(buf,1,1<<21,stdin),p1==p2)?EOF:*p1++)
+inline int read()
+{
+    int s=0,f=1;char c=g();
+    for(;c<'0'||c>'9';c=g())
+		if(c=='-')f=-1;
+    for(;c>='0'&&c<='9';c=g())
+		s=s*10+c-'0';
+    return s*f;
+}
+inline void write(ll x)
+{
+    static char buf[16];
+    static int len=-1;
+    if(x<0)putchar('-'),x=-x;
+    do buf[++len]=x%10,x/=10;while(x);
+    while(len>=0)putchar(buf[len--]+'0');
+    putchar('\n');
+}
+inline void push_up(int p)
+{
+	s[p].maxa=max(s[p*2].maxa,s[p*2+1].maxa);
+	s[p].maxb=max(s[p*2].maxb,s[p*2+1].maxb);
+	s[p].sum=s[p*2].sum+s[p*2+1].sum;
+	if(s[p*2].maxa==s[p*2+1].maxa)
+	{
+		s[p].se=max(s[p*2].se,s[p*2+1].se);
+		s[p].cnt=s[p*2].cnt+s[p*2+1].cnt;
+	}
+	if(s[p*2].maxa>s[p*2+1].maxa)
+	{
+		s[p].se=max(s[p*2].se,s[p*2+1].maxa);
+		s[p].cnt=s[p*2].cnt;
+	}
+	if(s[p*2].maxa<s[p*2+1].maxa)
+	{
+		s[p].se=max(s[p*2].maxa,s[p*2+1].se);
+		s[p].cnt=s[p*2+1].cnt;
+	}
+}
+void build(int l,int r,int p)
+{
+	s[p].l=l,s[p].r=r;
+	if(l==r)
+	{
+		s[p].sum=s[p].maxa=s[p].maxb=read();
+		s[p].se=-1e9;
+		s[p].cnt=1;
+		return;
+	}
+	int mid=(l+r)/2;
+	build(l,mid,p*2);
+	build(mid+1,r,p*2+1);
+	push_up(p);
+}
+inline void update(int k1,int k2,int k3,int k4,int p)
+{
+	s[p].sum+=1ll*k1*s[p].cnt+1ll*k3*(s[p].r-s[p].l+1-s[p].cnt);
+	s[p].maxb=max(s[p].maxb,s[p].maxa+k2);
+	s[p].add_b=max(s[p].add_b,s[p].add_a+k2);
+	s[p].add_b1=max(s[p].add_b1,s[p].add_a1+k4);
+	s[p].maxa+=k1,s[p].add_a+=k1;
+	s[p].add_a1+=k3;
+	if(s[p].se!=-1e18)s[p].se+=k3;
+}
+inline void push_down(int p)
+{
+	int maxn=max(s[p*2].maxa,s[p*2+1].maxa);
+	if(s[p*2].maxa==maxn)
+	    update(s[p].add_a,s[p].add_b,s[p].add_a1,s[p].add_b1,p*2);
+	else update(s[p].add_a1,s[p].add_b1,s[p].add_a1,s[p].add_b1,p*2);
+	if(s[p*2+1].maxa==maxn)
+		update(s[p].add_a,s[p].add_b,s[p].add_a1,s[p].add_b1,p*2+1);
+	else update(s[p].add_a1,s[p].add_b1,s[p].add_a1,s[p].add_b1,p*2+1);
+	s[p].add_a=s[p].add_b=s[p].add_a1=s[p].add_b1=0;
+}
+void update_add(int p)
+{
+	if(s[p].l>r||s[p].r<l)return;
+	if(l<=s[p].l&&s[p].r<=r)
+	    return update(k,k,k,k,p);
+	push_down(p);
+	update_add(p*2),update_add(p*2+1);
+	push_up(p);
+}
+void update_min(int p)
+{
+	if(s[p].l>r||s[p].r<l||k>=s[p].maxa)return;
+	if(l<=s[p].l&&s[p].r<=r&&k>s[p].se)
+	    return update(k-s[p].maxa,k-s[p].maxa,0,0,p);
+	push_down(p);
+	update_min(p*2),update_min(p*2+1);
+	push_up(p);
+}
+ll query_add(int p)
+{
+	if(s[p].l>r||s[p].r<l)return 0;
+	if(l<=s[p].l&&s[p].r<=r)return s[p].sum;
+	push_down(p);
+	return query_add(p*2)+query_add(p*2+1);
+}
+int query_maxa(int p)
+{
+	if(s[p].l>r||s[p].r<l)return -1e9;
+	if(l<=s[p].l&&s[p].r<=r)return s[p].maxa;
+	push_down(p);
+	return max(query_maxa(p*2),query_maxa(p*2+1));
+}
+int query_maxb(int p)
+{
+	if(s[p].l>r||s[p].r<l)return -1e9;
+	if(l<=s[p].l&&s[p].r<=r)return s[p].maxb;
+	push_down(p);
+	return max(query_maxb(p*2),query_maxb(p*2+1));
+}
+int main()
+{
+	n=read(),m=read();
+	build(1,n,1);
+	while(m--)
+	{
+		op=read(),l=read(),r=read();
+		if(op==1)k=read(),update_add(1);
+		if(op==2)k=read(),update_min(1);
+		if(op==3)write(query_add(1));
+		if(op==4)write(query_maxa(1));
+		if(op==5)write(query_maxb(1));
+	}
+	return 0;
+}
+```
+
+
+
+#### zkw线段树
+
+
+
+
+
+#### 主席树
+
+##### 可持久化数组
+
+> 洛谷P3919：给定长为 $n(1\le n\le10^6)$ 值域在 $[-10^9,10^9]$ 初始版本号为 $0$ 的数组，有 $m(1\le m\le 10^6)$ 次操作：
+>
+> 1. 修改版本号为 $ver$ 的数组下标为 $loc$ 位置值为 $x$
+> 2. 查询版本为 $ver$ 的数组下标为 $loc$ 位置值
+>
+> 每次操作结束后，将当前版本号数组复制为 $ver$ 数组。
+
+```c++
+#include <bits/stdc++.h>
+using namespace std;
+typedef int ll;
+#define sc(x) scanf("%d", &x)
+#define mn 1000010
+#define lg 24 // log(mn)+4mn
+struct node
+{
+    ll l, r, v;
+} t[mn * lg];
+ll n, m, rot[mn], a[mn], cnt, cmd, loc, ver, x;
+#define mkcf ll cf = (lf + rf) >> 1
+ll build(ll lf, ll rf)
+{
+    ll p = ++cnt;
+    if (lf == rf)
+    {
+        t[p].v = a[lf];
+    }
+    else
+    {
+        mkcf;
+        t[p].l = build(lf, cf);
+        t[p].r = build(cf + 1, rf);
+    }
+    return p;
+}
+ll update(ll r, ll lf, ll rf)
+{
+    ll p = ++cnt;
+    if (lf == rf)
+    {
+        t[p].v = x;
+    }
+    else
+    {
+        mkcf;
+        if (loc <= cf)
+        {
+            t[p].l = update(t[r].l, lf, cf);
+            t[p].r = t[r].r;
+        }
+        else
+        {
+            t[p].l = t[r].l;
+            t[p].r = update(t[r].r, cf + 1, rf);
+        }
+    }
+    return p;
+}
+void query(ll r, ll lf, ll rf)
+{
+    if (lf == rf)
+    {
+        x = t[r].v;
+        return;
+    }
+    mkcf;
+    if (loc <= cf)
+    {
+        query(t[r].l, lf, cf);
+    }
+    else
+    {
+        query(t[r].r, cf + 1, rf);
+    }
+}
+signed main()
+{
+    sc(n), sc(m);
+    for (ll i = 1; i <= n; ++i)
+    {
+        sc(a[i]);
+    }
+    rot[0] = build(1, n);
+    for (ll i = 1; i <= m; ++i)
+    {
+        sc(ver), sc(cmd), sc(loc);
+        if (cmd == 1)
+        {
+            sc(x);
+            rot[i] = update(rot[ver], 1, n);
+        }
+        else
+        {
+            query(rot[ver], 1, n);
+            rot[i] = rot[ver];
+            printf("%d\n", x);
+        }
+    }
+    return 0;
+}
+```
+
+
+
+##### 静态区间第k小
+
+> 洛谷P3824：长为 $n(1\le n\le2\times 10^5)$ 值域的序列，有 $m(1\le m\le2\times 10^5)$ 次询问，问区间 $[l,r]$ 内严格第 $k$ 小(即去重后)的值是什么
+
+设去重后长度为 $n'$ ，设主席树，版本为 $i(0\le i\le n)$ 的主席树代表前 $i$ 个数，当前节点维护排名(从小到大)区间 $[l,r]$ ，其值代表在该区间内有多少个数。对叶子节点，表示特定排名数字数目。
+
+可以通过前缀和思想来建树，每次继承上一个根节点主席树。通过二分查找找到第 $i$ 个数的排名。
+
+对于查询，对前缀和求差分，对查询的 $[l,r]$ 区间，取版本为 $r$ 的主席树节点与版本为 $l-1$ 的同一区间主席树节点作差，即得 $[1,r]$ 出现个数减去 $[1,l-1]$ 出现个数即 $[l,r]$ 出现个数。如果左子区间出现个数 $s$ 大于等于 $k$ ，也就是说左子区间里有当前子区间的第 $1$ 到第 $s$ 小，包含了第 $k$ 小，所以需要在左子区间里继续找。否则，证明第 $k$ 小在右子区间，因为左子区间有前 $s$ 小，所以分配到右子时，要减去 $s$ 。
+
+```c++
+#include <bits/stdc++.h>
+using namespace std;
+typedef long long ll;
+#define sc(x) scanf("%lld", &x)
+#define lg 22
+#define mn 200010
+ll m, n, q, a[mn], l[mn * lg], r[mn * lg], v[mn * lg], rot[mn], lc, rc, k, cnt, a0[mn];
+#define mkcf ll cf = (lf + rf) >> 1
+ll build(ll lf, ll rf)
+{
+    ll p = ++cnt;
+    if (lf != rf)
+    {
+        mkcf;
+        l[p] = build(lf, cf);
+        r[p] = build(cf + 1, rf);
+    }
+    return p;
+}
+ll update(ll q, ll lf, ll rf)
+{
+    ll p = ++cnt;
+    l[p] = l[q], r[p] = r[q], v[p] = v[q] + 1;
+    if (lf != rf)
+    {
+        mkcf;
+        if (k <= cf)
+        {
+            l[p] = update(l[q], lf, cf);
+        }
+        else
+        {
+            r[p] = update(r[q], cf + 1, rf);
+        }
+    }
+    return p;
+}
+ll query(ll p, ll q, ll lf, ll rf, ll i)
+{
+    if (lf == rf)
+    {
+        return lf;
+    }
+    mkcf;
+    ll j = v[l[q]] - v[l[p]];
+    if (j >= i)
+    {
+        return query(l[p], l[q], lf, cf, i);
+    }
+    else
+    {
+        return query(r[p], r[q], cf + 1, rf, i - j);
+    }
+}
+signed main()
+{
+    sc(m), sc(q);
+    for (ll i = 1; i <= m; ++i)
+    {
+        sc(a[i]);
+        a0[i] = a[i];
+    }
+    sort(a + 1, a + 1 + m);
+    n = unique(a + 1, a + 1 + m) - (a + 1);
+    rot[0] = build(1, n);
+    for (ll i = 1; i <= m; ++i)
+    {
+        k = lower_bound(a + 1, a + 1 + n, a0[i]) - a;
+        rot[i] = update(rot[i - 1], 1, n);
+    }
+    while (q--)
+    {
+        sc(lc), sc(rc), sc(k);
+        ll i = query(rot[lc - 1], rot[rc], 1, n, k);
+        printf("%lld\n", a[i]);
+    }
+    return 0;
+}
+```
+
+
+
+### 树状数组
+
+一种 $O(n)$ 建树方法：
+
+```c++
+// C++ Version
+// O(n)建树
+void init() {
+  for (int i = 1; i <= n; ++i) {
+    t[i] += a[i];
+    int j = i + lowbit(i);
+    if (j <= n) t[j] += t[i];
+  }
+}
+```
+
+
+
+#### 静态区间最值
+
+以静态区间最小值为例。不支持可以反向变化的最值维护
+
+```c++
+#include <bits/stdc++.h>
+//#pragma warning(disable:6031)
+#define MAXN 100002
+const int BIG = 0x7fffffff;
+using namespace std;
+int tr[MAXN], n, m, lf, rf, a[MAXN];
+inline int lowbit(int& k)
+{
+	return k & -k;
+}
+inline void add(int x, int& k)
+{
+	while (x <= n)
+	{
+		if (k < tr[x]) tr[x] = k;//这两行换成min(tr[x],k)也可
+		else return;//但是那样的话会慢些
+		x += lowbit(x);
+	}
+}
+inline int query(int lf, int rf)
+{
+	int drt = rf, res = BIG;
+	while (drt >= lf)
+	{
+		if (drt - lowbit(drt) > lf)
+		{
+			res = min(res, tr[drt]);
+			drt -= lowbit(drt);
+		}
+		else
+		{
+			res = min(res, a[drt]);
+			--drt;
+		}
+	}
+	return res;
+}
+signed main()
+{
+	scanf("%d%d", &n, &m);
+	for (int i = 1; i <= n; ++i)//不能在下面那个for
+	{
+		tr[i] = BIG;
+	}
+	for (int i = 1; i <= n; ++i)
+	{
+		scanf("%d", &a[i]);
+		add(i, a[i]);
+	}
+	while (m--)
+	{
+		scanf("%d%d", &lf, &rf);
+		printf("%d ", query(lf, rf));
+	}
+	return 0;
+}
+```
+
+
+
+#### 动态整体第k小
+
+> 洛谷P1168以求数组前 $1,3,5,\cdots$ 项中位数为例 $n\le10^5,a\le10^9$
+
+```c++
+#include<iostream>
+#include<cstdio>
+#include<algorithm>
+using namespace std;
+
+int n,tot;
+const int maxn=1e5+10;
+int bit[maxn];
+int a[maxn],b[maxn];
+
+inline int lowbit(int x)
+{
+	return x&-x;
+}
+inline void add(int pos,int x)
+{
+	for(int i=pos;i<=tot;i+=lowbit(i))bit[i]+=x;
+}
+inline int find_kth(int k)
+{
+	int ans=0,now=0;				//这里主要解释一下这个的原理 ans就是答案，now是比当前找到的数的小的数字的个数。 
+	for(int i=20;i>=0;i--)			//2^20可以说很大了，满足我们的需求了，我们按照20倍增就可以 
+	{
+		ans+=(1<<i);			//先让答案加上去，试试 
+		if(ans>tot||now+bit[ans]>=k)ans-=(1<<i);//如果超了总体的最大值（防止数组越界），或者是 超过了k个，就退回去，这里注意是大于等于，因为要考虑有重复元素，所以我们找的其实是一个满足小于他的个数小于k的最大数
+		else now+=bit[ans];//能加就加上，这里不用怕加到了原来的数，因为树状数组的结构使这个新倍增出来的数就是多出来的那一条枝 
+	}
+	return ans+1;//然后加上1就是答案啦 
+}
+
+int main()
+{
+	scanf("%d",&n);
+	for(int i=1;i<=n;i++)
+	{
+		scanf("%d",&a[++tot]);		//读个入 
+		b[tot]=a[tot];
+	}
+	sort(a+1,a+1+n);				//排个序 
+	tot=unique(a+1,a+1+tot)-a-1;	//去个重 
+	for(int i=1;i<=n;i++)b[i]=lower_bound(a+1,a+1+tot,b[i])-a;//离散化一下 
+	for(int i=1;i<=n;i++)
+	{
+		add(b[i],1);			//动态加点 
+		if(i&1)printf("%d\n",a[find_kth((i+1)>>1)]);//查kth 
+	}
+	return 0;
+}
+```
+
+
+
+#### 动态区间第k小
+
+> 洛谷P2617:给定长为 $n$ 的数列 $a$ ，支持 $m$ 次两种操作：$1\le n,m\le10^5,0\le a_i,y\le10^9$
+>
+> - `Q l r k` 查询区间第 $k$ 小
+> - `C x y` 将 $a_x$ 改为 $y$
+
+```c++
+#include <bits/stdc++.h>
+using namespace std;
+#define sc(x) scanf("%lld", &x)
+typedef long long ll;
+#define mn 100010
+#define lg 310
+ll v[mn * lg], l[mn * lg], r[mn * lg], cnt, rot[mn];
+ll n, m, a[mn], h[mn * 2], hs;
+#define mkcf ll cf = (lf + rf) >> 1
+#define lowbit(x) (x & -x)
+void update(ll &p, ll lf, ll rf, const ll &pos, const ll &x)
+{
+    if (!p)
+    {
+        p = ++cnt;
+    }
+    v[p] += x;
+    if (lf != rf)
+    {
+        mkcf;
+        if (pos <= cf)
+        {
+            update(l[p], lf, cf, pos, x);
+        }
+        else
+        {
+            update(r[p], cf + 1, rf, pos, x);
+        }
+    }
+}
+void updates(ll pos, ll x)
+{
+    ll k = lower_bound(h + 1, h + 1 + hs, a[pos]) - h;
+    for (ll i = pos; i <= n; i += lowbit(i))
+    {
+        update(rot[i], 1, hs, k, x);
+    }
+}
+ll addcnt, addid[lg], subcnt, subid[lg];
+ll query(ll lf, ll rf, ll k)
+{
+    if (lf == rf)
+    {
+        return lf;
+    }
+    mkcf;
+    ll res = 0;
+    for (ll i = 1; i <= addcnt; ++i)
+    {
+        res += v[l[addid[i]]];
+    }
+    for (ll i = 1; i <= subcnt; ++i)
+    {
+        res -= v[l[subid[i]]];
+    }
+    if (k <= res)
+    {
+        for (ll i = 1; i <= addcnt; ++i)
+        {
+            addid[i] = l[addid[i]];
+        }
+        for (ll i = 1; i <= subcnt; ++i)
+        {
+            subid[i] = l[subid[i]];
+        }
+        return query(lf, cf, k);
+    }
+    else
+    {
+        for (ll i = 1; i <= addcnt; ++i)
+        {
+            addid[i] = r[addid[i]];
+        }
+        for (ll i = 1; i <= subcnt; ++i)
+        {
+            subid[i] = r[subid[i]];
+        }
+        return query(cf + 1, rf, k - res);
+    }
+}
+ll querys(ll lf, ll rf, ll k)
+{
+    addcnt = subcnt = 0;
+    for (ll i = rf; i; i -= lowbit(i))
+    {
+        addid[++addcnt] = rot[i];
+    }
+    for (ll i = lf - 1; i; i -= lowbit(i))
+    {
+        subid[++subcnt] = rot[i];
+    }
+    return query(1, hs, k);
+}
+struct queries
+{
+    ll cmd, l, r, k;
+} q[mn * 2];
+char c[10];
+signed main()
+{
+    sc(n), sc(m), hs = n;
+    for (ll i = 1; i <= n; ++i)
+    {
+        sc(a[i]), h[i] = a[i];
+    }
+    for (ll i = 1; i <= m; ++i)
+    {
+        scanf("%s", c), sc(q[i].l), sc(q[i].r);
+        if (c[0] == 'Q')
+        {
+            sc(q[i].k);
+        }
+        else
+        {
+            q[i].cmd = 1, h[++hs] = q[i].r;
+        }
+    }
+    sort(h + 1, h + 1 + hs);
+    hs = unique(h + 1, h + 1 + hs) - (h + 1);
+    for (ll i = 1; i <= n; ++i)
+    {
+        updates(i, 1);
+    }
+    for (ll i = 1; i <= m; ++i)
+    {
+        if (q[i].cmd == 0)
+        {
+            printf("%lld\n", h[querys(q[i].l, q[i].r, q[i].k)]);
+        }
+        else
+        {
+            updates(q[i].l, -1);
+            a[q[i].l] = q[i].r;
+            updates(q[i].l, 1);
+        }
+    }
+    return 0;
+}
+```
+
+
+
+#### 二维树状数组
+
+维护矩阵，支持单点修改和区间查询。可以维护一维能维护的内容，区间即二维上的子矩阵。注意空间复杂度是 $O(n^2)$ 
+
+以区间求和为例，更新和查询函数如下：
+
+```c++
+for (int x = i; x < A.length; x += lowbit(x))
+    for (int y = j; y < A[i].length; y += lowbit(y))
+        C[x][y] += delta;
+```
+
+```c++
+int result = 0;
+for (int x = i; x > 0; x -= lowbit(x))
+    for (int y = j; y > 0; y -= lowbit(y))
+        result += C[x][y];
+return result;
+```
+
+> 输入`X n m`给定$n\times m$矩阵，接下来输入若干行，每行可能输入`L a b c d delta`代表将顶点为$(a,b),(c,d)$的矩形区域每个数字加上$delta$，或输入`k a b c d`代表求矩形区域和。
+>
+> $1\le n,m\le2048,-500\le delta\le500,line\le2\times10^5$，过程在int内
+
+考虑用二维差分数组$d[n][m]$维护区间修改的二维前缀和查询。设原数组为$a[n][m]$，二维前缀和数组为$s[n][m]$，则：
+$$
+s[x][y]=\sum_{h=1}^x\sum_{k=1}^ya[h][k]\\
+a[i][j]=\sum_{i=1}^h\sum_{j=1}^kd[i][j]\\
+\therefore s[x][y]=\sum_{h=1}^x\sum_{k=1}^y\sum_{i=1}^h\sum_{j=1}^kd[i][j]
+$$
+对求和化简，容易可得：
+$$
+s[x][y]=\sum_{i=1}^x\sum_{j=1}^yd[i][j]\times(x-i+1)\times(y-j+1)
+$$
+分解得：
+$$
+\sum_{i=1}^x\sum_{j=1}^yd[i][j]\cdot(xy+x+y+1)-d[i][j]\cdot i(y+1)-d[i][j]\cdot j(x+1)+d[i][j]\cdot ij
+$$
+可以维护四个差分数组：$d[i][j],d[i][j]\cdot i,d[i][j]\cdot j,d[i][j]\cdot ij$。
+
+接下来就可以跑二维差分模板和二维树状数组模板了：
+
+```c++
+#include <bits/stdc++.h>
+using namespace std;
+typedef int ll;
+#define sc(x) scanf("%d", &x)
+#define mn 2050
+ll n, m, a, b, c, d, delta;
+char op[3];
+ll lowbit(ll &x) { return x & -x; }
+struct BIT
+{
+    ll t[mn][mn];
+    void add(ll lf, ll rf, ll v)
+    {
+        for (ll i = lf; i <= n; i += lowbit(i))
+            for (ll j = rf; j <= m; j += lowbit(j))
+                t[i][j] += v;
+    }
+    ll query(ll lf, ll rf)
+    {
+        ll res = 0;
+        for (ll i = lf; i; i -= lowbit(i))
+            for (ll j = rf; j; j -= lowbit(j))
+                res += t[i][j];
+        return res;
+    }
+} x, xi, xj, xij;
+void add(ll lf, ll rf, ll v)
+{
+    x.add(lf, rf, v), xi.add(lf, rf, v * lf), xj.add(lf, rf, v * rf), xij.add(lf, rf, v * lf * rf);
+}
+ll query(ll lf, ll rf)
+{
+    return x.query(lf, rf) * (lf * rf + lf + rf + 1) - xi.query(lf, rf) * (rf + 1) - xj.query(lf, rf) * (lf + 1) + xij.query(lf, rf);
+}
+signed main()
+{
+    scanf("X"), sc(n), sc(m);
+    while (~scanf("%s", op))
+    {
+        sc(a), sc(b), sc(c), sc(d);
+        if (op[0] == 'L')
+        {
+            sc(delta);
+            add(a, b, delta), add(a, d + 1, -delta), add(c + 1, b, -delta), add(c + 1, d + 1, delta);
+        }
+        else
+            printf("%d\n", query(c, d) - query(a - 1, d) - query(c, b - 1) + query(a - 1, b - 1));
+    }
+    return 0;
+}
+```
+
+
+
+
+
+### 平衡树
+
+使用示例：(洛谷P6136) (目前该题平衡树均为别人的代码,后续版本可能改)
+
+> 题意：输入 $n,m(1\le n\le10^5,1\le m\le10^6)$ ，输入 $a_i(0\le a_i < 2^{30})$ ，接下来有 $6$ 种在线操作 ( $x=x\oplus last$ )：
+>
+> 1. 插入整数 $x(0\le x < 2^{30})$
+> 2. 删除整数 $x$ (若有多个相同，只删一个)
+> 3. 查询整数 $x$ 的排名(比它小的数个数 $+1$ )
+> 4. 查询排名为 $x$ 的数(不存在时查小于 $x$ 的最大数，保证 $x$ 不越当前界)
+> 5. 求 $x$ 前驱(小于 $x$ 的最大的数)
+> 6. 求 $x$ 后继(大于 $x$ 的最小的数)
+
+> 此题用 `pb_ds` 解法见本模板后面
+
+#### FHQ-Treap
+
+```c++
+#include<cstdio>
+#define maxn 1100010
+struct pair{
+	int a,b;
+	pair(int a_=0,int b_=0) { a=a_; b=b_; }
+};
+int read(){
+    int ans=0; char ch=getchar();
+    while(ch>'9'||ch<'0')ch=getchar();
+    while(ch<='9'&&ch>='0'){
+        ans=ans*10+ch-'0';
+        ch=getchar();
+    }
+    return ans;
+}
+int key[maxn],wei[maxn],size[maxn],son[maxn][2];
+int n,m,cnt,ans,seed=1,root,last;
+int rand1() { return seed*=19260817; }
+inline void pushup(int u)
+	{ size[u]=size[son[u][0]]+size[son[u][1]]+1; }
+pair split(int u,int k){
+	if(!u) return pair(0,0);
+	if(key[u]<k){
+		pair t=split(son[u][1],k);
+		son[u][1]=t.a;
+		pushup(u);
+		return pair(u,t.b);
+	}else{
+		pair t=split(son[u][0],k);
+		son[u][0]=t.b;
+		pushup(u);
+		return pair(t.a,u);
+	}
+}
+int merge(int u,int v){
+	if(!u||!v) return u+v;
+	if(wei[u]<wei[v]){
+		son[u][1]=merge(son[u][1],v);
+		pushup(u);
+		return u;
+	}else{
+		son[v][0]=merge(u,son[v][0]);
+		pushup(v);
+		return v;
+	}
+}
+void insert(int k){
+	key[++cnt]=k; wei[cnt]=rand1(); size[cnt]=1;
+	pair t=split(root,k);
+	root=merge(merge(t.a,cnt),t.b);
+}
+void eraser(int k){
+	pair x,y;
+	x=split(root,k);
+	y=split(x.b,k+1);
+	y.a=merge(son[y.a][0],son[y.a][1]);
+	root=merge(x.a,merge(y.a,y.b));
+}
+int find1(int k){
+	int re;
+	pair t=split(root,k);
+	re=size[t.a]+1;
+	root=merge(t.a,t.b);
+	return re;
+}
+int find2(int k){
+	int pos=root;
+	while(pos){
+		if(k==size[son[pos][0]]+1) return key[pos];
+		if(k<=size[son[pos][0]]) pos=son[pos][0];
+		else { k-=size[son[pos][0]]+1; pos=son[pos][1]; }
+	}
+}
+int lst(int k) { return find2(find1(k)-1); }
+int nxt(int k) { return find2(find1(k+1)); }
+int main(){
+	n=read(); m=read();
+	for(int i=1;i<=n;i++){
+		int a=read();
+		insert(a);
+	}
+	for(int i=1;i<=m;i++){
+		int o=read(),x; x=read();
+		if(o==1) insert(x^last);
+		if(o==2) eraser(x^last);
+		if(o==3) { last=find1(x^last); ans^=last; }
+		if(o==4) { last=find2(x^last); ans^=last; }
+		if(o==5) { last=lst(x^last); ans^=last; }
+		if(o==6) { last=nxt(x^last); ans^=last; }
+	}
+	printf("%d\n",ans);
+	return 0;
+}
+```
+
+
+
+#### AVL
+
+```c++
+#include <cstdio>
+const int N=1e5+1e6+5;
+int n,m,k,x,cnt,root,last,ans;
+struct jd {
+	int l,r,val,size;
+	int ht;//树高
+}t[N]; 
+inline int read(){
+	int x=0,flag=0;char ch=getchar();
+	while(ch<'0'||ch>'9'){flag|=(ch=='-');ch=getchar();}
+	while(ch>='0'&&ch<='9'){x=(x<<3)+(x<<1)+ch-'0';ch=getchar();}
+	return flag?-x:x;
+}
+inline int newt(int val) {
+	t[++cnt]=(jd) {0,0,val,1,0};
+	return cnt;
+}
+inline int mx(int x,int y) {return x>y?x:y;}
+
+inline int bf(int now) {return t[t[now].l].ht-t[t[now].r].ht;}
+inline void update(int now) {
+	t[now].size=t[t[now].l].size+t[t[now].r].size+1;
+	t[now].ht=mx(t[t[now].l].ht,t[t[now].r].ht)+1;
+}
+inline void lt(int &now) {//左旋
+	int y=t[now].r;
+	t[now].r=t[y].l;
+	t[y].l=now;
+	now=y;
+	update(t[now].l);
+	update(now); 
+}
+inline void rt(int &now) {//右旋
+	int y=t[now].l;
+	t[now].l=t[y].r;
+	t[y].r=now;
+	now=y;
+	update(t[now].r);
+	update(now);
+}
+
+inline void ch(int &now) {//对now子树进行维护
+	int s=bf(now);
+	if(s>1) {
+		int ss=bf(t[now].l);
+		if(ss>0) rt(now);//LL
+		else lt(t[now].l),rt(now);//LR
+	}
+	else if(s<-1){
+		int ss=bf(t[now].r);
+		if(ss<0) lt(now);//RR
+		else rt(t[now].r),lt(now);//RL
+	}
+	else if(now) update(now);
+}
+
+void ins(int &now,int val) {
+	if(!now) now=newt(val);
+	else if(t[now].val<=val) ins(t[now].r,val);
+	else ins(t[now].l,val);
+	ch(now);
+}
+
+void del(int &now,int val) {//我是使用将其旋转至叶子节点后删除的
+	if(t[now].val==val) {
+		if(!t[now].l||!t[now].r)now=t[now].l^t[now].r;
+		else if(bf(now)<0) rt(now),del(now,val);//右子树高，旋转至左儿子位置可略减小维护的常数
+		else lt(now),del(now,val);//同上
+	}
+	else if(val>=t[now].val) del(t[now].r,val);
+	else del(t[now].l,val);
+	ch(now);
+}
+
+inline int rank(int val) {
+	int now=root,s=0;
+	while(now) {
+		if(t[now].val>=val) now=t[now].l;
+		else s+=t[t[now].l].size+1,now=t[now].r;
+	}
+	return s+1;
+}
+
+inline int num(int val) {
+	int now=root;
+	while(now) {
+		if(t[t[now].l].size+1==val)
+			return t[now].val;
+		if(t[t[now].l].size>=val) now=t[now].l;
+		else val=val-t[t[now].l].size-1,now=t[now].r;
+	}
+}
+int main() {
+	n=read();m=read();
+	for(int i=1;i<=n;++i)
+		ins(root,read());
+	while(m--) {
+		k=read();x=read();
+		x^=last;
+		switch(k) {
+			case 1:
+				ins(root,x);
+				break;
+			case 2:
+				del(root,x);
+				break;
+			case 3:
+				ans^=last=rank(x);
+				break;
+			case 4:
+				ans^=last=num(x);
+				break;
+			case 5:
+				ans^=last=num(rank(x)-1);
+				break;
+			case 6:
+				ans^=last=num(rank(x+1));
+				break;
+		}
+	}
+	printf("%d\n",ans);
+	return 0;
+}
+```
+
+
+
+#### Splay
+
+> 洛谷P3391：对长为 $n(1\le n\le10^5)$ 的区间，进行 $m(1\le m\le10^5)$ 次 $[l,r]$ 翻转，输出最后结果
+
+```c++
+#include <bits/stdc++.h>
+using namespace std;
+typedef int ll;
+#define mn 200002
+struct node
+{
+    ll ch[2], ff, v, size, mark;
+    void init(ll x, ll fa)
+    {
+        ff = ch[0] = ch[1] = 0;
+        size = 1;
+        v = x;
+        ff = fa;
+    }
+} t[mn];
+ll n, rot, m, tot, lf, rf;
+void pushuf(ll x)
+{
+    t[x].size = t[t[x].ch[0]].size + t[t[x].ch[1]].size + 1;
+}
+void pushdf(ll x)
+{
+    if (t[x].mark)
+    {
+        t[t[x].ch[0]].mark ^= 1;
+        t[t[x].ch[1]].mark ^= 1;
+        t[x].mark = 0;
+        swap(t[x].ch[0], t[x].ch[1]);
+    }
+}
+void rotate(ll x)
+{
+    ll y = t[x].ff;
+    ll z = t[y].ff;
+    ll k = (t[y].ch[1] == x);
+    t[z].ch[t[z].ch[1] == y] = x;
+    t[x].ff = z;
+    t[y].ch[k] = t[x].ch[k ^ 1];
+    t[t[x].ch[k ^ 1]].ff = y;
+    t[x].ch[k ^ 1] = y;
+    t[y].ff = x;
+    pushuf(y), pushuf(x);
+}
+void splay(ll x, ll tg)
+{
+    while (t[x].ff != tg)
+    {
+        ll y = t[x].ff;
+        ll z = t[y].ff;
+        if (z != tg)
+            ((t[z].ch[1] == y) ^ (t[y].ch[1] == x)) ? rotate(x) : rotate(y);
+        rotate(x);
+    }
+    if (!tg)
+        rot = x;
+}
+void insert(ll x)
+{
+    ll u = rot, ff = 0;
+    while (u)
+        ff = u, u = t[u].ch[x > t[u].v];
+    u = ++tot;
+    if (ff)
+        t[ff].ch[x > t[ff].v] = u;
+    t[u].init(x, ff);
+    splay(u, 0);
+}
+ll kth(ll k)
+{
+    ll u = rot;
+    while (1)
+    {
+        pushdf(u);
+        if (t[t[u].ch[0]].size >= k)
+            u = t[u].ch[0];
+        else if (t[t[u].ch[0]].size + 1 == k)
+            return u;
+        else
+            k -= t[t[u].ch[0]].size + 1, u = t[u].ch[1];
+    }
+}
+void write(ll u)
+{
+    pushdf(u);
+    if (t[u].ch[0])
+        write(t[u].ch[0]);
+    if (t[u].v > 1 && t[u].v < n + 2)
+        printf("%d ", t[u].v - 1);
+    if (t[u].ch[1])
+        write(t[u].ch[1]);
+}
+void wk(ll lf, ll rf)
+{
+    lf = kth(lf), rf = kth(rf + 2);
+    splay(lf, 0), splay(rf, lf);
+    t[t[t[rot].ch[1]].ch[0]].mark ^= 1;
+}
+signed main()
+{
+    scanf("%d%d", &n, &m);
+    for (ll i = 1; i <= n + 2; ++i)
+        insert(i);
+    while (m--)
+        scanf("%d%d", &lf, &rf), wk(lf, rf);
+    write(rot);
+    return 0;
+}
+```
+
+
+
+#### 笛卡尔树
+
+节点由 $(k,w)$ 组成， $k$ 满足二叉搜索树， $w$ 满足堆，若 $(k,w)$ 分别互不相同，那么结构唯一
+
+可以 $O(n)$ 构建。 例题P5854：给定排列，构建笛卡尔树，输出me给节点 $i$ 的左右儿子(不存在为 $0$ )的 $\oplus_{i=1}^ni(l_i+1),\oplus_{i=1}^ni(r_i+1)$
+
+```c++
+#include <bits/stdc++.h>
+using namespace std;
+typedef int ll;
+#define MAXN 10000002
+inline ll read()
+{
+    char p = 0;
+    ll r = 0, o = 0;
+    for (; p < '0' || p > '9'; o |= p == '-', p = getchar())
+        ;
+    for (; p >= '0' && p <= '9'; r = (r << 1) + (r << 3) + (p ^ 48), p = getchar())
+        ;
+    return o ? (~r) + 1 : r;
+}
+ll n, a[MAXN], stk[MAXN], ls[MAXN], rs[MAXN], pos, top;
+long long lf, rf;
+signed main()
+{
+    n = read();
+    for (ll i = 1; i <= n; ++i)
+    {
+        a[i] = read();
+        while (pos && a[stk[pos]] > a[i])
+            --pos;
+        if (pos)
+            rs[stk[pos]] = i;
+        if (pos < top)
+            ls[i] = stk[pos + 1];
+        stk[top = ++pos] = i;
+    }
+    for (long long i = 1; i <= n; ++i)
+        lf ^= i * (ls[i] + 1), rf ^= i * (rs[i] + 1);
+    printf("%lld %lld", lf, rf);
+    return 0;
+}
+```
+
+
+
+> ### 树套树
+
+
+
+### 可并堆
+
+左偏树。支持在 $O(\log n)$ 的时间复杂度内进行合并的堆式数据结构
+
+**外结点** ：左儿子或右儿子是空结点的结点。
+
+**距离** ： 一个结点 x 的距离 $dist_x$ 定义为其子树中与结点 x 最近的外结点到 x 的距离。特别地，定义空结点的距离为 -1。
+
+满足小根堆/大根堆性质，且满足左偏：每个节点 $dist_{lc}\ge dist_{rc}$
+
+基本结论：
+
+- 节点 $x$ 的距离 $dist_x=dist_{rc}+1$
+- 距离为 $n$ 的左偏树至少有 $2^{n+1}-1$ 节点且是满二叉树
+
+> 但是向左的链也是左偏树
+
+> 例题洛谷P3377：一开始有 $n(\le10^5)$ 个小根堆，实现 $m(\le10^5)$ 次操作：
+>
+> - `1 x y` 将第 $x$ 个数和第 $y$ 个数所在堆合并(若删掉或已在无视)
+> - `2 x` 输出第 $x$ 个数所在堆最小数，并删掉这个数(多个最小删先输入的)，已删输出 `-1` 并无视
+
+```c++
+#include <bits/stdc++.h>
+using namespace std;
+typedef int ll;
+#define MAXN 100002
+ll n, m, op, x, y, lc[MAXN], rc[MAXN], d[MAXN], rt[MAXN];
+bool tf[MAXN];
+struct node
+{
+    ll i, v;
+    bool operator<(const node &x) const
+    {
+        return v == x.v ? i < x.i : v < x.v;
+    }
+} v[MAXN];
+inline ll finds(ll x)
+{
+    while (x != rt[x])
+        x = rt[x] = rt[rt[x]];
+    return x;
+}
+ll merge(ll x, ll y)
+{
+    if (!x || !y)
+        return x + y;
+    if (v[y] < v[x])
+        swap(x, y);
+    rc[x] = merge(rc[x], y);
+    if (d[lc[x]] < d[rc[x]])
+        swap(lc[x], rc[x]);
+    d[x] = d[rc[x]] + 1;
+    return x;
+}
+signed main()
+{
+    d[0] = -1;
+    scanf("%d%d", &n, &m);
+    for (ll i = 1; i <= n; ++i)
+        scanf("%d", &v[i].v), v[i].i = i, rt[i] = i;
+    while (m--)
+    {
+        scanf("%d%d", &op, &x);
+        if (op == 1)
+        {
+            scanf("%d", &y);
+            if (tf[x] || tf[y])
+                continue;
+            x = finds(x), y = finds(y);
+            if (x != y)
+                rt[x] = rt[y] = merge(x, y);
+        }
+        else
+        {
+            if (tf[x])
+            {
+                printf("-1\n");
+                continue;
+            }
+            x = finds(x);
+            printf("%d\n", v[x].v);
+            tf[x] = true;
+            rt[lc[x]] = rt[rc[x]] = rt[x] = merge(lc[x], rc[x]);
+            lc[x] = rc[x] = d[x] = 0;
+        }
+    }
+    return 0;
+}
+```
+
+
+
+### 珂朵莉树
+
+骗分数据结构。核心操作：把值相同的区间合并成一个结点保存在 set 里面。在数据随机的情况下，复杂度为 $O(n\log\log n)$ ，链表为 $O(n\log n)$
+
+进行求取区间左右端点操作时，必须先 split 右端点，再 split 左端点。若先 split 左端点，返回的迭代器可能在 split 右端点的时候失效，可能会导致 RE
+
+节点：
+
+```c++
+struct Node_t {
+  int l, r;
+  mutable int v;
+
+  Node_t(const int &il, const int &ir, const int &iv) : l(il), r(ir), v(iv) {}
+
+  inline bool operator<(const Node_t &o) const { return l < o.l; }
+};
+auto split(int x) {
+  if (x > n) return odt.end();
+  auto it = --odt.upper_bound(Node_t{x, 0, 0});
+  if (it->l == x) return it;
+  int l = it->l, r = it->r, v = it->v;
+  odt.erase(it);
+  odt.insert(Node_t(l, x - 1, v));
+  return odt.insert(Node_t(x, r, v)).first;
+}
+```
+
+区间赋值：
+
+```c++
+void assign(int l, int r, int v) {
+  auto itr = split(r + 1), itl = split(l);
+  odt.erase(itl, itr);
+  odt.insert(Node_t(l, r, v));
+}
+```
+
+区间遍历：
+
+```c++
+void performance(int l, int r) {
+  auto itr = split(r + 1), itl = split(l);
+  for (; itl != itr; ++itl) {
+    // Perform Operations here
+  }
+}
+```
+
+
+
+
+
+### 并查集
+
+#### 种类并查集
+
+种类并查集就是有多少个种类开多少倍长即可。
+
+> 洛谷P1892：有n个人m条关系，E a b代表a和b是敌人，F a b代表a和b是朋友；敌人的敌人是朋友，朋友的朋友是朋友；朋友间一定会结成同一帮派，求帮派数
+
+使用反集。解法二是照搬二分图。
+
+```c++
+#include<bits/stdc++.h>
+using namespace std;
+int s,n,m,a,b,f[2500];
+char ch;
+int find(int x){
+    if(f[x]!=x)f[x]=find(f[x]);
+    return f[x];
+}
+int main(){
+    cin>>n>>m;
+    for(int i=1;i<=2*n;i++){
+        f[i]=i;
+    }
+    for(int i=1;i<=m;i++){
+        cin>>ch>>a>>b;
+        if(ch=='F'){
+            f[find(a)]=find(b);//合并
+        }else{
+            f[find(a+n)]=find(b);
+            f[find(b+n)]=find(a);//反集合并
+        }
+    }
+    for(int i=1;i<=n;i++){
+        if(f[i]==i)s++;
+    }
+    cout<<s;//祖先数就是团伙数
+}
+```
+
+> 例题洛谷P2024:存在食物环A->B->C->A，有n种动物，m条判断。判断类型为1 i j表示i,j同属A/B/C大类,2 i j表示i->j。先出现的判断在不产生矛盾的情况下变成真理。求m条判断中谬论数。(输入n,m,依次输入判断)
+
+构建三倍并查集，其中i是自身，i+n是匿名猎物，i+2n是匿名天敌
+
+```c++
+#include <bits/stdc++.h>
+using namespace std;
+#define MAXN 150002
+#define ANS       \
+    {             \
+        ++ans;    \
+        continue; \
+    }
+int fa[MAXN], n, k, ans, cmd, x, y, n3;
+inline int finds(int k)
+{
+    while (k != fa[k])
+        k = fa[k] = fa[fa[k]];
+    return k;
+}
+signed main()
+{
+    scanf("%d%d", &n, &k);
+    for (int i = 1; i <= 3 * n; ++i)
+        fa[i] = i;
+    while (k--)
+    {
+        scanf("%d%d%d", &cmd, &x, &y);
+        if (x > n || y > n)
+            ANS;
+        if (cmd == 1)
+        {
+            if (finds(x + n) == finds(y) || finds(x) == finds(y + n))
+                ANS; //或后者改为x+2n与y
+            fa[finds(x)] = finds(y);
+            fa[finds(x + n)] = finds(y + n);
+            fa[finds(x + n + n)] = finds(y + n + n);
+        }
+        else
+        {
+            if (finds(x) == finds(y) || finds(x) == finds(y + n))
+                ANS; //如果同类相食或反向捕食(y+n是天敌)，是谬论
+            fa[finds(x + n)] = finds(y);
+            fa[finds(x + n + n)] = finds(y + n);
+            fa[finds(x)] = finds(y + n + n);
+        }
+    }
+    printf("%d", ans);
     return 0;
 }
 ```
@@ -1514,6 +3504,176 @@ signed main()
     {
         printf(suc[i] ? "AYE\n" : "NAY\n");
     }
+    return 0;
+}
+```
+
+
+
+#### Prufer 序列
+
+常用于解决与度数相关的树上计数问题
+
+将无根代表号树与整数序列一一对应的方法
+
+树转 Prufer 序列：每次选择一个编号最小的叶结点并删掉它，然后在序列中记录下它连接到的那个结点。重复 $n-2$ 次后就只剩下两个结点
+
+Prufer 序列转树：每次选择度为 $1$ 的节点与当前点连接
+
+Prufer 序列性质：剩下的 $2$ 个节点其中一个是编号最大节点；每个节点在序列出现的次数是度数减一
+
+Cayley 公式：完全图 $K_n$ 有 $n^{n-2}$ 棵生成树
+
+> 有 $n$ 点树，给定度数，则树可能的形态数为 $\dfrac{(n-2)!}{\prod_{i=1}^n(d_i-1)!}$
+>
+> 含未知度数时，设已知点数为 $k$ ，已知度数和为 $\sum(d_i-1)=s$ ，则答案为 $\dfrac{C_{n-2}^ss!(n-k)^{n-2-s}}{\prod_{i=1}^k(d_i-1)!}$
+>
+> $n$ 点 $m$ 边带标号无向图有 $k$ 个连通块，添加 $k-1$ 条边使得图连通，方案数为 $n^{k-2}\prod_{i=1}^k s_i$ ， $s_i$ 是每个连通块数量，有 $\sum_{i=1}^ns_i=n$ 
+
+> 例题洛谷P6086：输入 $n,m(2\le n\le5\times10^6,1\le m\le2)$ ，设根为 $n$ ，$m=1$ 时输入 $[1,n-1]$ 的父亲序列，$m=2$ 输入 Prufer 序列，将其转为另一方。设一个序列的值为 $\oplus_{i=1}^{len}i\times a_i$ ，求转换后序列权值
+
+```c++
+#include <bits/stdc++.h>
+using namespace std;
+typedef int ll;
+#define MAXN 5000002
+ll n, m, f[MAXN], p[MAXN], d[MAXN];
+long long ans;
+signed main()
+{
+    scanf("%d%d", &n, &m);
+    if (m == 1) //树转Prufer
+    {
+        for (ll i = 1; i < n; ++i)
+            scanf("%d", f + i), ++d[f[i]];
+        for (ll i = 1, j = 1; i <= n - 1; ++i, ++j)
+        {
+            while (d[j])
+                ++j;
+            p[i] = f[j];
+            while (i <= n - 2 && !--d[p[i]] && p[i] < j)
+                p[i + 1] = f[p[i]], ++i;
+        }
+        for (ll i = 1; i <= n - 2; ++i)
+            ans ^= 1LL * i * p[i];
+    }
+    else // Prufer转树
+    {
+        for (ll i = 1; i <= n - 2; ++i)
+            scanf("%d", p + i), ++d[p[i]];
+        p[n - 1] = n;
+        for (ll i = 1, j = 1; i < n; ++i, ++j)
+        {
+            while (d[j])
+                ++j;
+            f[j] = p[i];
+            while (i < n && !--d[p[i]] && p[i] < j)
+                f[p[i]] = p[i + 1], ++i;
+        }
+        for (ll i = 1; i < n; ++i)
+            ans ^= 1LL * i * f[i];
+    }
+    printf("%lld", ans);
+    return 0;
+}
+```
+
+
+
+#### 二叉树遍历
+
+##### 先中求后
+
+离散化优化，复杂度 $O(n)$ ，以洛谷P1827为例(顶点值不重复)
+
+```c++
+#include <bits/stdc++.h>
+using namespace std;
+string pre, mid, post;
+typedef long long ll;
+ll n, idx, h[256];     // index of pre
+void dfs(ll lf, ll rf) // search in [lf,rf)
+{
+    if (lf >= rf || idx == n)
+        return;
+    char v = pre[idx++];
+    ll cf = h[v];
+    dfs(lf, cf);
+    dfs(cf + 1, rf);
+    post.push_back(v);
+}
+signed main()
+{
+    cin >> mid >> pre;
+    n = mid.size();
+    for (ll i = 0, ie = mid.size(); i < ie; ++i)
+        h[mid[i]] = i;
+    dfs(0, n);
+    cout << post;
+    return 0;
+}
+```
+
+
+
+##### 中后求先
+
+离散化优化，复杂度 $O(n)$ ，洛谷P1030为例
+
+```c++
+//输入中序和后续，返回先序
+#include <bits/stdc++.h>
+using namespace std;
+typedef long long ll;
+ll h[256], n;
+char mid[256], post[256];
+void dfs(ll mlf, ll mrf, ll plf, ll prf) // mid,post
+{
+    if (mlf > mrf || plf > prf)
+        return;
+    char c = post[prf];
+    int cf = h[(ll)c];
+    cout << c;
+    dfs(mlf, cf - 1, plf, plf + cf - mlf - 1);
+    dfs(cf + 1, n - 1, plf + cf - mlf, prf - 1);
+}
+signed main()
+{
+    cin >> mid >> post;
+    n = strlen(mid);
+    for (ll i = 0, ie = n; i < ie; ++i)
+        h[(ll)mid[i]] = i;
+    dfs(0, n - 1, 0, n - 1); //[0,n-1],[0,n-1]
+    return 0;
+}
+```
+
+
+
+##### 先后求中
+
+离散化，答案数为先序中 $AB$ 与后序中 $BA$ 相等数 $x$ 的 $2^x$ ，复杂度 $O(n)$ (SCNUOJ 1423为例)
+
+```c++
+#include <bits/stdc++.h>
+#define mod 1000000007
+#define mn 100002
+typedef long long ll;
+ll n, a[mn], b[mn], c[mn], r = 1;
+signed main()
+{
+    scanf("%lld", &n);
+    for (ll i = 1; i <= n; ++i) //先序
+        scanf("%lld", a + i);
+    for (ll i = 1; i <= n; ++i) //后序
+        scanf("%lld", b + i), c[b[i]] = i;
+    for (ll i = 1; i <= n; ++i)
+    {
+        ll k = c[a[i]];
+        if (i != n && a[i + 1] == b[k - 1])
+            (r *= 2) %= mod;
+    }
+    printf("%lld", r);
     return 0;
 }
 ```
