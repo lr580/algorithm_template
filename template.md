@@ -57,6 +57,8 @@ $$
 $$
 P(n;r_1,r_2,\cdots, r_t)=\dfrac{n!}{r_1!r_2!\cdots r_t!}
 $$
+顺序和 $\le$ 乱序和 $\le$ 逆序和
+
 
 
 推论：
@@ -2271,6 +2273,7 @@ void performance(int l, int r) {
   auto itr = split(r + 1), itl = split(l);
   for (; itl != itr; ++itl) {
     // Perform Operations here
+    //以区间和查询为例：res+=(itl->r-itl->l+1)*(itl->v);
   }
 }
 ```
@@ -3901,7 +3904,7 @@ signed main()
 
 
 
-
+## 计算几何
 
 
 
@@ -4072,6 +4075,112 @@ signed main()
 }
 ```
 
+> 例题蓝桥-小朋友排队:将小朋友从低到高排序，每次只能交换相邻两个，交换使得他们不高兴程度增加，增加幅度是上次他增加的数量+1(一开始的上次是0)，求排序后他们的不高兴程度之和的最小值。
+
+总不高兴程度最小时，一个小朋友被交换次数等于他前边比他高的人数+后边比他低的人数，由此可以套用归并排序求逆序对的公式并加以改变：
+
+```c++
+#include <bits/stdc++.h>
+#define mn 100002
+typedef long long ll;
+struct pupil
+{
+	ll v,m;
+} a[mn],b[mn];
+ll ans,n;
+void merges(ll lf, ll rf)
+{
+	if(lf==rf) return;
+	ll cf=lf+rf>>1;
+	merges(lf,cf);
+	merges(cf+1,rf);
+	ll p=lf,q=cf+1,t=lf;
+	while(p<=cf&&q<=rf)
+	{
+		if(a[p].v>a[q].v) a[q].m+=cf+1-p,b[t++]=a[q++];
+		else a[p].m+=q-1-cf,b[t++]=a[p++];
+	}
+	while(q<=rf) b[t++]=a[q++];//+=写成=暴死
+	while(p<=cf) a[p].m+=q-1-cf,b[t++]=a[p++];
+	for(int i=lf;i<=rf;++i) a[i]=b[i];
+}
+signed main()
+{
+	scanf("%lld",&n);
+	for(int i=0;i<n;++i) scanf("%lld",&a[i].v);
+	merges(0,n-1);
+	for(int i=0;i<n;++i) ans+=(a[i].m+1)*a[i].m>>1;
+	printf("%lld",ans);
+	return 0;
+}
+```
+
+
+
+#### 其他
+
+##### 最小成本排序
+
+> 有n个重量互不重复为wi的货物，每次交换两个货物产生i+j的成本。1<=n<=1000,0<=wi<=10000，需要将货物升序排序，求最小成本
+
+成环交换排序。自环(本身就位)不理，其他环用环内最小元素与环内其他元素一一对换，或者用已知就位的最小元素借过来拿来一一对换
+
+```c++
+#include <iostream>
+#include <algorithm>
+using namespace std;
+static const int MAX = 1000;
+static const int VMAX = 10000;
+int n, A[MAX], s;
+int B[MAX], T[VMAX+1];
+int solve()
+{
+    int ans = 0;
+    bool V[MAX];
+    for(int i=0;i<n;i++)
+    {
+        B[i] = A[i];
+        V[i] = false;//V,B,T的设置是代码实现的关键！
+    }
+    sort(B, B+n);
+    for(int i=0; i<n; i++) T[B[i]] = i;
+    //for(int i=0; i<100; i++) cout << T[i] << " "; cout << endl;
+    for(int i=0; i<n; i++)
+    {
+        if(V[i]) continue;
+        int cur = i;
+        int S = 0;
+        int m = VMAX;
+        int an = 0;
+        while(1)
+        {
+            V[cur] = true;
+            an++;
+            int v = A[cur];
+            m = min(m, v);
+            S += v;
+            cur = T[v];
+            if(V[cur]) break;
+        }
+        ans += min( S+(an-2)*m , S + m + (an+1)*s );
+    }
+    return ans;
+}
+int main()
+{
+    cin>>n;
+    s=VMAX;
+    for(int i=0; i<n; i++)
+    {
+        cin >> A[i];
+        s = min(s, A[i]);
+    }
+    int ans = solve();
+    cout << ans << endl;
+    return 0;
+}
+```
+
 
 
 ### 二分
@@ -4195,6 +4304,193 @@ signed main()
         }
     }
     printf("%lld", m);
+    return 0;
+}
+```
+
+
+
+#### 二分答案
+
+##### 最小中位数子矩阵
+
+> (SCNUOJ1464)有$n\times n$矩阵$a$，找一个$k\times k$子阵，使得在所有$k$阶子阵里，这个子阵的中位数(第$\lfloor\frac{k^2}2+1\rfloor$大数)最小，输出中位数。$1\le k,\le n\le800,0\le a_{i,j}\le10^9$
+
+这题不能暴力枚举(或者用二维双指针法)，无法解决$O(1)$找中位数所以都会TLE。复杂度是$n^3\log n$。
+
+考虑二分，设答案为二分对象，显然这个值越大它的排位越大，所以可以检验排位，从一个方向逐渐逼近中位排位，即$\lfloor\frac{k^2}2+1\rfloor$，每次检验二分值，使得答案逼近于唯一的真实答案。可以证明二分到的一定是存在的最小的中位数。
+
+```c++
+#include <bits/stdc++.h> //https://oj.socoding.cn/p/1464
+using namespace std;
+#define sc(x) scanf("%lld", &x)
+typedef long long ll;
+#define repe(i, a, b) for (ll i = a; i <= b; ++i)
+#define mn 804
+ll n, k, a[mn][mn], s[mn][mn], lf, rf = 1e9, cf, res, t;
+bool check()
+{ //利用前缀和快速检验中位数
+    repe(i, 1, n) repe(j, 1, n) s[i][j] = s[i - 1][j] + s[i][j - 1] - s[i - 1][j - 1] + (a[i][j] >= cf);
+    repe(i, k, n) repe(j, k, n)
+    {
+        t = s[i][j] + s[i - k][j - k] - s[i][j - k] - s[i - k][j];
+        if (t < k * k / 2 + 1)
+            return false;
+    }
+    return true;
+}
+signed main()
+{
+    sc(n), sc(k);
+    repe(i, 1, n) repe(j, 1, n) sc(a[i][j]);
+    while (lf <= rf)
+    {
+        cf = (lf + rf) >> 1;       //假设存在一个子矩阵的中位数是cf
+        if (check())               //如果以cf为中位数不少于k*k/2+1个元素大于它
+            lf = cf + 1, res = cf; //那么中位数大于等于cf
+        else
+            rf = cf - 1; //否则中位数小于cf
+    }
+    printf("%d", res);
+    return 0;
+}
+```
+
+
+
+##### 最大子串平均值
+
+> 例题洛谷P1419-长为n的连续序列，定义平均值为区间和除以区间长度，求长度在[s,t]之间的子序列的最大平均值 $1\le n\le10^5,1\le s\le t\le n,-10^4\le a_i\le10^4$
+
+答案满足单调性,设区间[l,r]，则其平均值x的算式为：
+$$
+\frac{\sum_{i=l}^ra_i}{r-l+1}=x，即\sum_{i=l}^ra_i=x\times(r-l+1)
+$$
+当某个区间平均值优于已算出的平均值x时，有：
+$$
+\frac{\sum_{i=l}^ra_i}{r-l+1}\ge x，即\sum_{i=l}^ra_i\ge x\times(r-l+1)\\即\sum_{i=l}^ra_i\ge\sum_{i=l}^rx，即\sum_{i=l}^r(a_i-x)\ge0
+$$
+
+```c++
+#include <bits/stdc++.h>
+using namespace std;
+typedef int ll;
+#define MAXN 100002
+ll n, s, t, q[MAXN];
+double c[MAXN], lf = -1e4, rf = 1e4, cf, a[MAXN];
+inline bool ck(double &v)
+{
+    int l = 1, r = 0;
+    for (ll i = 1; i <= n; ++i)
+        c[i] = c[i - 1] + a[i] - v;
+    for (ll i = 1; i <= n; ++i)
+    {
+        if (i >= s) //单调队列法
+        {
+            while (r >= l && c[i - s] < c[q[r]])
+                --r;
+            q[++r] = i - s;
+        }
+        if (l <= r && q[l] < i - t)
+            ++l;
+        if (l <= r && c[i] >= c[q[l]])
+            return true;
+    }
+    return false;
+}
+signed main()
+{
+    scanf("%d%d%d", &n, &s, &t);
+    for (ll i = 1; i <= n; ++i)
+        scanf("%lf", &a[i]);
+    while (rf - lf > 1e-5)
+    {
+        cf = (lf + rf) / 2;
+        if (ck(cf))
+            lf = cf;
+        else
+            rf = cf;
+    }
+    printf("%.3lf", lf);
+    return 0;
+}
+```
+
+
+
+##### 其他
+
+点权最小最短路
+
+> 洛谷P1462 无向加权图(可能有自环/重边)，而且点加权，从1走到n，在路径长不超过b的前提下，使得经过点集点权的最大值最小，求这个最小值 $点数n\le10^4,边数m\le5\times10^4,边权、点权、b\le10^9$
+
+二分最小值，把大于最小值的点都删了，然后看看能不能有不超过 $b$ 的最短路
+
+
+
+环转链最短距离最大值
+
+> (SCNUOJ1479)有$n$个点，编号$[1,n]$，第$i$个点和下一个编号的点连第$i$条无向边，成环。有$m$个点对$(a,b)$，现在删掉一条边，求删掉边后这$m$个点对的两两最短路的最大值最少是多少。$2\le n\le2\times10^5,1\le m\le2\times10^5$,$1\le a_i,b_i\le n,1\le i\le m$，有多组测试，保证$\sum n,\sum m\le2\times10^5$
+
+显然对一个点对$(a,b),a\le b$，最短路要么是$b-a,$要么是$n-(b-a)$。二分最小值，然后把所有超过这个值的段区间标记(差分+前缀和)
+
+```c++
+#define sc(x) x = read()
+#define mn 200010
+ll n, m, e[mn][2], u, v, lf, rf, cf, res, s[mn];
+bool check(ll k)
+{
+    memset(s, 0, sizeof s);
+    for (ll i = 0; i < m; ++i)
+    {
+        //只能在[a,b)这一段删，不然会走[a,b)使得答案>k
+        //所以不能走这一段的补集
+        if (e[i][1] - e[i][0] > k)
+        {
+            ++s[1];
+            --s[e[i][0]];
+            ++s[e[i][1]];
+        }
+        if (n - (e[i][1] - e[i][0]) > k)
+        {
+            ++s[e[i][0]];
+            --s[e[i][1]];
+        }
+    }
+    for (ll i = 1; i <= n; ++i)
+    {
+        s[i] += s[i - 1];
+        if (!s[i])
+        {
+            return true;
+        }
+    }
+    return false;
+}
+signed main()
+{
+    while (EOF != scanf("%d%d", &n, &m))
+    {
+        for (ll i = 0; i < m; ++i)
+        {
+            sc(u), sc(v); //输入不保证a<=b所以要这样
+            e[i][0] = min(u, v), e[i][1] = max(u, v);
+        }
+        lf = 0, rf = n - 1;
+        while (lf <= rf) 
+        {
+            cf = (lf + rf) >> 1;
+            if (check(cf)) //如果有答案，那么找一下更小的
+            {
+                rf = cf - 1;
+            }
+            else
+            {
+                lf = cf + 1;
+            }
+        }
+        printf("%d\n", rf + 1);
+    }
     return 0;
 }
 ```
@@ -4561,8 +4857,6 @@ int main()
   }
   ```
 
-  
-
 二维前缀和/差分：
 
 - (SCNUOJ1226守卫农田)矩阵内有若干个子矩形被覆盖，若干次询问某个子矩阵是否都被覆盖
@@ -4607,7 +4901,210 @@ int main()
   }
   ```
 
-  
+
+
+### 搜索
+
+调整 BFS 的顺序，可以达到最短路径字典序最小等要求。对未知有限步数，有时可以设一个大数作为搜索深度边界。遇事不决剪枝记忆化。
+
+一些数字类/字典序/倍数因数的题目也可以搜索每个位数来逐个求解所有可能的值。
+
+#### IDA*
+
+启发式搜索不保证绝对准确性，建立在其基础之上的A\*和IDA\*也不保证绝对的准确性。因为估价函数的估计值并不一定是答案。
+
+其中IDA\*是每次限定搜索深度(逐次增加)的DFS来模拟BFS。好处是空间开销小。不加A\*的该方法为迭代加深搜索
+
+> 洛谷P1379 把 $3\times 3$ 棋盘 $1\sim 8$ 数字 ( $0$ 是空格)转化为 `123804765` 状态，问最小步数
+
+这题也可以BFS+记忆化，双向BFS，康托展开来做
+
+```c++
+#include<iostream>
+#include<string>
+#include<map>
+#include<cmath>
+#include<algorithm>
+#include<queue>
+#include<cstring>
+#include<cstdio>
+using namespace std;
+typedef long long lt;
+int read()
+{
+    int f=1,x=0;
+    char ss=getchar();
+    while(ss<'0'||ss>'9'){if(ss=='-')f=-1;ss=getchar();}
+    while(ss>='0'&&ss<='9'){x=x*10+ss-'0';ss=getchar();}
+    return f*x;
+}
+char ss[15];
+int ans[4][4]=
+{{0,0,0,0},
+ {0,1,2,3},
+ {0,8,0,4},
+ {0,7,6,5}};
+int a[5][5],k,judge;
+int nxtx[]={0,1,-1,0};//特殊构造
+int nxty[]={1,0,0,-1};//pre+i==3时两两互逆，即pre和i互为相反步
+int check()
+{
+    for(int i=1;i<=3;++i)
+    for(int j=1;j<=3;++j)
+    if(ans[i][j]!=a[i][j])return 0;
+    return 1;
+}
+int test(int step)//预测还要走多少步，启发假设有一个不等就走多一步
+{
+    int cnt=0;
+    for(int i=1;i<=3;++i)
+    for(int j=1;j<=3;++j)
+    if(ans[i][j]!=a[i][j]){ if(++cnt+step>k) return 0;}
+    return 1;
+}
+void A_star(int step,int x,int y,int pre)//pre防止下一次走回上一步
+{
+    if(step==k){ if(check())judge=1; return;}//达到当前限制的最大深度
+    if(judge) return;
+    for(int i=0;i<4;++i)
+    {
+        int nx=x+nxtx[i],ny=y+nxty[i];
+        if(nx<1||nx>3||ny<1||ny>3||pre+i==3) continue;//加入了上述最优性剪枝
+        swap(a[x][y],a[nx][ny]);
+        if(test(step)&&!judge) A_star(step+1,nx,ny,i);//A*估价合法再向下搜索
+        swap(a[x][y],a[nx][ny]);
+    }
+}
+int main()
+{
+    int x,y;
+    scanf("%s",&ss);
+    for(int i=0;i<9;++i)
+    {
+        a[i/3+1][i%3+1]=ss[i]-'0';
+        if(ss[i]-'0'==0)x=i/3+1,y=i%3+1;
+    }
+    if(check()){printf("0");return 0;}//特判不用移动
+    while(++k)//枚举最大深度
+    {
+        A_star(0,x,y,-1);
+        if(judge){printf("%d",k);break;}
+    }
+    return 0;
+}
+```
+
+
+
+#### 双向搜索
+
+对BFS而言，将规模$a^n$缩减为$2a^{\frac n2}$
+
+从起点开始和从终点开始的点分别标注为1和2，那么相加为3必然相遇。
+
+while条件为两队列均不为空还是for和dx,dy搜索。代码类似BFS，很好写
+
+
+
+#### 折半搜索
+
+对DFS而言，第一次搜索前半部分，第二次搜索后半部分，最后再组合两部分，将搜索的复杂度指数降低一半，并将空间复杂度提升到时间复杂度等同
+
+> 洛谷P4799-有n场比赛，可用m元，比赛入场需要门票钱x，请问他有多少种参加方案。 $1\le n\le40,1\le m\le10^{18},1\le x\le10^{16}$
+
+第一次搜索前一半比赛并将小于m的全部花费记录。第二次搜索后一半比赛并同样记录，得到的记录数目为$2\times2^{\frac n2}$，时间复杂度也是如此(01背包型搜索)。最后合并，取余额为$m-a_i$，即减去第一次搜索得到的一个花销和，然后在第二次二分搜索(排序后)里寻找大于等于余额的下标，下标即方案数。这里运用了前缀和思维的计数，使用$O(len\log len)$的复杂度完成了合并。总时间时间复杂度为$\Omicron(2^{\frac n2+1}\log2^{\frac n2})=\Omicron(n2^{\frac n2})$，空间复杂度为$\Omicron(2^{\frac n2+1})$
+
+```c++
+#include <bits/stdc++.h>
+typedef long long ll;
+using namespace std;
+#define mn (1<<21)+5
+ll n,m,x[62],ac,bc,as[mn],bs[mn],cf,ans;
+void dfs(ll lf, ll& rf, ll v, ll& cnt, ll* arr)
+{
+    if(v>m) return;
+    if(lf==rf){arr[cnt++]=v; return;}
+    dfs(lf+1,rf,v+x[lf],cnt,arr);
+    dfs(lf+1,rf,v,cnt,arr);
+}
+signed main()
+{
+    scanf("%lld%lld",&n,&m); cf=n>>1;
+    for(int i=0;i<n;++i) scanf("%lld",x+i);
+    dfs(0,cf,0,ac,as);
+    dfs(cf,n,0,bc,bs);
+    sort(bs,bs+bc);
+    for(int i=0;i<ac;++i)
+        ans+=upper_bound(bs,bs+bc,m-as[i])-bs;
+    return printf("%lld",ans),0;
+}
+```
+
+
+
+> 洛谷P3067-给定n个数x，选出一些数划分为两堆和相等的数，求方案数。($2\le n\le20,1\le x\le10^8$)
+
+显然不会爆int。由于划分的两堆数数目不定，所以需要使用搜索，单纯搜索时，有三种分支，即当前数不加入，当前数放左堆，当前数放又堆，是三进制背包DFS，复杂度为$\Omicron(3^n)$不通过。
+
+考虑折半搜索。并考虑利用状态压缩、vis数组去重和map离散化。第一次搜索前面一半的数，设sum为左堆-右堆的差值，第二次设sum为右堆-左堆的差值，如果第二次的sum等于第一次的，证明合起来之后，这两堆的和相等。最后统计有效状态即可。
+
+时间复杂度为$\Omicron(3^{\frac n2})$，空间复杂度为$\Omicron(2^n)$，空间复杂度来自于状态压缩(选了什么数)。
+
+```c++
+#include <bits/stdc++.h>
+using namespace std;
+#define mn (1<<20)+5
+int n,half,mc,ans,a[21];
+bool memo[mn];
+vector<int> d[mn];//有多少种nowstate可以拼出情况mc(mc即nowsum)
+map<int,int> m;//m[v]->mc 求和值与情况mc一一对应
+void dfs1(int i, int nowsum, int nowstate)
+{
+    if(i==half)
+    {
+        if(!m.count(nowsum)) m[nowsum]=++mc;//和为nowsum时对应一个独一无二的mc
+        d[m[nowsum]].push_back(nowstate);
+        return;
+    }
+    dfs1(i+1,nowsum,nowstate); //两边都不选
+    dfs1(i+1,nowsum+a[i],nowstate|(1<<i)); //左边选了
+    dfs1(i+1,nowsum-a[i],nowstate|(1<<i)); //右边选了
+}
+void dfs2(int i, int nowsum, int nowstate)//这次+ -的意义跟上次相反
+{
+    if(i==n)
+    {
+        if(m.count(nowsum))//如果可以拼出nowsum
+        {
+            int x=m[nowsum];
+            for(int i=0,ds=d[x].size();i<ds;++i) memo[d[x][i]|nowstate]=true;//起到了去重
+        }
+        return;
+    }
+    dfs2(i+1,nowsum,nowstate);
+    dfs2(i+1,nowsum+a[i],nowstate|(1<<i));//位运算(状态压缩)里i从0开始
+    dfs2(i+1,nowsum-a[i],nowstate|(1<<i));
+}
+signed main()
+{
+    scanf("%d",&n);
+    half=n>>1;
+    for(int i=0;i<n;++i) scanf("%d",a+i);
+    dfs1(0,0,0);
+    dfs2(half,0,0);
+    for(int i=1,n2=1<<n;i<=n2;++i) ans+=memo[i];
+    return printf("%d",ans),0;
+}
+
+```
+
+
+
+### 随机化
+
+
+
+
 
 ### 高精度
 
