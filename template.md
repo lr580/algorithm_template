@@ -2319,9 +2319,9 @@ int main(){
 }
 ```
 
-> 例题洛谷P2024:存在食物环A->B->C->A，有n种动物，m条判断。判断类型为1 i j表示i,j同属A/B/C大类,2 i j表示i->j。先出现的判断在不产生矛盾的情况下变成真理。求m条判断中谬论数。(输入n,m,依次输入判断)
+> 例题洛谷P2024:存在食物环A->B->C->A，有n种动物，m条判断。判断类型为1 i j表示i,j同属A/B/C大类,2 i j表示i->j。先出现的判断在不产生矛盾的情况下变成真理。求m条判断中谬论数。(输入n,m,依次输入判断) $1\le n\le5\times10^5,1\le k\le10^5$
 
-构建三倍并查集，其中i是自身，i+n是匿名猎物，i+2n是匿名天敌
+构建三倍并查集，其中i是自身，i+n是匿名猎物，i+2n是匿名天敌。另一种解法是加权并查集，三种关系分别是 $0,1,2$ ，用向量加减模 $3$ 得到新关系。加权并查集写法见下文
 
 ```c++
 #include <bits/stdc++.h>
@@ -2372,6 +2372,138 @@ signed main()
 ```
 
 
+
+#### 加权并查集
+
+> 洛谷P1196 有 $30000$ 战舰，每次 `M i j` 将 $i$ 所在编队连在 $j$ 所在编队尾部成链。每次 `C i j` 查询 $i,j$ 链之间有多少个战舰。若 $i,j$ 不同编队输出 `-1` 。 $t\le 5\times10^5$
+
+设前缀和 `cnt` 为离队首的距离，则所求为 $|cnt_i-cnt_j|+1-2$ 
+
+每次合并并查集时， `fa[find(i)]=find(j)` ，在这之前，更新 $cnt_x$ ，距离增加 $num_y$ ，即舰队数。且 $num_y$ 增加 $num_x$ ，并且清零 $num_x$ (否则反复合并会出锅)。`find` 用递归式，每次 `find` 时更新 $cnt_x=cnt_{fa_x}$ ，注意在更新 $fa$ 之前做，不然等于我赋值我自己。
+
+```c++
+#include <bits/stdc++.h>
+using namespace std;
+#define sc(x) scanf("%lld", &x)
+typedef long long ll;
+#define mn 500010
+ll t, fa[mn], cnt[mn], sum[mn];
+char cmd[5];
+ll findf(ll x)
+{
+    if (x == fa[x])
+    {
+        return x;
+    }
+    ll res = findf(fa[x]);
+    cnt[x] += cnt[fa[x]];
+    return fa[x] = res;
+}
+signed main()
+{
+    sc(t);
+    for (ll i = 1; i < mn; ++i)
+    {
+        fa[i] = i, sum[i] = 1;
+    }
+    while (t--)
+    {
+        ll u, v, fu, fv;
+        scanf("%s%lld%lld", cmd, &u, &v);
+        fu = findf(u), fv = findf(v);
+        if (cmd[0] == 'M')
+        {
+            cnt[fu] += sum[fv];
+            fa[fu] = fv;
+            sum[fv] += sum[fu];
+            sum[fu] = 0;
+        }
+        else
+        {
+            if (fu != fv)
+            {
+                printf("-1\n");
+            }
+            else
+            {
+                printf("%lld\n", abs(cnt[u] - cnt[v]) - 1);
+            }
+        }
+    }
+    return 0;
+}
+```
+
+
+
+> 洛谷P2024 题面见上文
+
+构造关系 $u\to v$ ，设为 $ty[u]$ 表示 $u$ 与根 $v$ 的关系，设 $0$ 表示同类， $1$ 表示捕食， $2$ 表示被捕食，显然构造出来的关系模 $3$ 结果符合传递性，即满足性质 $\because u\to v\to w\therefore ty[u\to w]=(ty[u\to v]+ty[v\to w])\bmod 3$ 
+
+那么可以构造加权并查集，使得压缩路径后，若 $u,v$ 同根，则根据向量加法， $u,v$ 见关系可以表示为 $(ty[u]-ty[v])\bmod 3$ 。并且如果要新建 $u,v$ 之间的关系，那么新建的 $fa_u,fa_v$ 之间，若设 $fa[fa_u]=fa_v$ ，则 $ty[fa_u]=(-ty[u]+new+ty[v])\bmod 3$ 
+
+```c++
+#include <bits/stdc++.h>
+using namespace std;
+#define sc(x) scanf("%lld", &x)
+typedef long long ll;
+#define mn 50010
+ll n, k, fa[mn], ty[mn], fake;
+ll findf(ll x)
+{
+    if (x == fa[x])
+    {
+        return x;
+    }
+    ll res = findf(fa[x]);
+    ty[x] = (ty[x] + ty[fa[x]]) % 3;
+    return fa[x] = res;
+}
+signed main()
+{
+    sc(n), sc(k);
+    for (ll i = 1; i <= n; ++i)
+    {
+        fa[i] = i;
+    }
+    while (k--)
+    {
+        ll cmd, u, v, fu, fv;
+        sc(cmd), sc(u), sc(v), fu = findf(u), fv = findf(v);
+        if (u > n || v > n || (u == v && cmd == 2))
+        {
+            ++fake;
+            continue;
+        }
+        if (cmd == 1)
+        {
+            if (fu == fv && ty[u] != ty[v])
+            {
+                ++fake;
+            }
+            else
+            {
+                ty[fu] = (3 - ty[u] + ty[v]) % 3;
+                fa[fu] = fv;
+            }
+        }
+        else
+        {
+            if (fu == fv && (ty[u] - ty[v] + 3) % 3 != 1)
+            {
+                ++fake;
+            }
+            else
+            {
+                ty[fu] = (3 - ty[u] + ty[v] + 1) % 3;
+                fa[fu] = fv;
+            }
+        }
+    }
+    printf("%lld", fake);
+    return 0;
+}
+```
 
 
 
@@ -3022,6 +3154,8 @@ dsu on tree
 根据轻重链剖分的性质可知，经过一条轻边时，子树的大小至少会除以二，所以树上任意一条路径最多包含 $\log n$ 条轻边。如果某点到根节点经过了 $x$ 条轻边，那么它的大小 $y$ 满足： $y <\dfrac n{2^x}$ 
 
 一个节点被遍历的次数等于它到根节点上轻边的数目+1(重节点只被遍历一次)，根据上述性质，即一个节点最多被遍历 $\log n+1$ 次，所以时间复杂度为 $O(n\log n)$
+
+边权问题可以把边权在 DFS1 时叠到点权(`v==fa continue`后)，把 `add(u)` 和 `ans[u]=tot` 顺序对换
 
 > 例题洛谷U41492：$n(n\le 10^5)$ 个节点的树，每个节点有不同的颜色( $10^5$ 种)，问每个节点为根的子树中，所有节点有多少种不同的颜色；$m(m\le 10^5)$ 次询问，每次问一棵子树 
 
