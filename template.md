@@ -1242,7 +1242,7 @@ signed main()
 
 ##### 静态区间第k小
 
-> 洛谷P3824：长为 $n(1\le n\le2\times 10^5)$ 值域的序列，有 $m(1\le m\le2\times 10^5)$ 次询问，问区间 $[l,r]$ 内严格第 $k$ 小(即去重后)的值是什么
+> 洛谷P3824：长为 $n(1\le n\le2\times 10^5)$ 值域的序列，有 $m(1\le m\le2\times 10^5)$ 次询问，问区间 $[l,r]$ 内严格第 $k$ 小(不去重)的值是什么
 
 设去重后长度为 $n'$ ，设主席树，版本为 $i(0\le i\le n)$ 的主席树代表前 $i$ 个数，当前节点维护排名(从小到大)区间 $[l,r]$ ，其值代表在该区间内有多少个数。对叶子节点，表示特定排名数字数目。
 
@@ -4073,6 +4073,541 @@ signed main()
 ```
 
 
+
+### 二分
+
+#### 最长单调序列
+
+LIS (longest increase sequence)
+
+单调栈上二分 复杂度 $O(n\log n)$
+
+Dilworth定理：偏序集的最少反链划分数等于最长链的长度
+
+即：求一个序列最少能分成多少个最长不上升序列，可以求最长上升序列的长度即为答案。其他情况类推。
+
+```c++
+#include <bits/stdc++.h>
+#define MAXN 100002
+#define y1 dy
+using namespace std;
+int n,a[MAXN],uf[MAXN],df[MAXN],ufl,dfl,x[MAXN],y[MAXN],x1,y1;
+int main()
+{
+    while(EOF!=scanf("%d",&a[++n]));//这样的n比真实+1
+    uf[++ufl]=df[++dfl]=a[1];
+    x[++x1]=y[++y1]=a[1];
+    for(int i=2;i<n;i++)
+    {
+        if(uf[ufl]>=a[i])uf[++ufl]=a[i];//最长不上升
+        else *upper_bound(uf+1,uf+1+ufl,a[i],greater<int>())=a[i];
+        
+        if(df[dfl]<a[i])df[++dfl]=a[i];//最长上升,与上面互为定律
+        else *lower_bound(df+1,df+1+dfl,a[i])=a[i];
+        
+        if(x[x1]>a[i])x[++x1]=a[i];//最长下降
+        else *upper_bound(x+1,x+1+x1,a[i],greater<int>())=a[i];
+        
+        if(y[y1]<=a[i])y[++y1]=a[i];//最长不下降,与上面互为定律
+        else *lower_bound(y+1,y+1+y1,a[i])=a[i];
+    }
+    printf("\n%d\n%d\n%d\n%d",ufl,dfl,x1,y1);
+    return 0;
+}
+```
+
+规律：
+
+- 对降的(严格降、非严格降(即不升))，一律用 `upper_bound` + `greater<>()` 求第一个小于它的，将这个位置改成更大，得更优解
+- 对升的，一律用 `lower_bound` 求第一个大于它的，将这个位置改成更小，得更优解
+
+模板题 
+
+> P1020 导弹拦截  输入至多 $10^5$ 个数，求最长不下降序列的长度和可以划分为多少个最长不下降序列(不是不下降子串)
+
+```c++
+#include <bits/stdc++.h>
+using namespace std;
+typedef long long ll;
+#define sc(x) scanf("%lld", &x)
+#define mn 100010
+ll n, a[mn], dpnd[mn], dpu[mn], ans, x, nnd, nu;
+signed main()
+{
+    while (EOF != scanf("%lld", &x)) a[++n] = x;
+    dpnd[++nnd] = dpu[++nu] = a[1];
+    for (ll i = 2; i <= n; ++i)
+    {
+        if (a[i] <= dpnd[nnd])dpnd[++nnd] = a[i];
+        else *upper_bound(dpnd + 1, dpnd + 1 + nnd, a[i], greater<ll>()) = a[i];
+        if (a[i] > dpu[nu]) dpu[++nu] = a[i];
+        else *lower_bound(dpu + 1, dpu + 1 + nu, a[i]) = a[i];
+    }
+    printf("%lld\n%lld", nnd, nu);
+    return 0;
+}
+```
+
+> 例题 P2782 友好城市 南北岸有 $n$ 个不同城市，在不同坐标，北岸每个城市与南岸一个城市相连，连线不能相交，求最多能留多少条连线 $1\le n\le2\times10^5,0\le x\le10^6$ 
+
+以一个岸为基准结构体排序，然后求另一个岸的最长单调上升子序列长度即可
+
+
+
+#### 最长公共排列
+
+LCS(longest common sequence)(见DP)
+
+假设元素互不重复，将一个序列重定义为它的每个元素在另一个序列里出现的位置，即设 $h[a[i]]=i$ ，令 $b[i]=h[b[i]]$ 。那么，只需要求该序列的最长上升子序列即可。
+
+> 模板题 P1439 最长公共子排列 $(n\le10^5)$
+
+```c++
+#include <bits/stdc++.h>
+using namespace std;
+typedef long long ll;
+#define sc(x) scanf("%lld", &x)
+#define mn 100010
+ll a[mn], b[mn], n, dp[mn], m, h[mn];
+signed main()
+{
+    sc(n);
+    for (ll i = 1; i <= n; ++i)
+    {
+        sc(a[i]);
+        h[a[i]] = i;
+    }
+    for (ll i = 1; i <= n; ++i)
+    {
+        sc(b[i]);
+        b[i] = h[b[i]];
+    }
+    dp[++m] = b[1];
+    for (ll i = 2; i <= n; ++i)
+    {
+        if (b[i] > dp[m])
+        {
+            dp[++m] = b[i];
+        }
+        else
+        {
+            *lower_bound(dp + 1, dp + 1 + m, b[i]) = b[i];
+        }
+    }
+    printf("%lld", m);
+    return 0;
+}
+```
+
+
+
+#### 整体二分
+
+主体思路：把多个离线查询一起解决
+
+需要满足以下性质：
+
+1. 询问的答案可以二分
+2. 修改对判定答案的贡献相互独立，修改之间不影响效果
+3. 修改若对判定答案有贡献，则贡献为一个确定的与判定标准无关的值
+4. 贡献满足交换律、结合律、具有可加性
+5. 题目允许离线算法
+
+时间复杂度 $O(T\log n)$ 。当使用别的结构(如树状数组)时，叠加复杂度
+
+> 例题洛谷P1527-给定 $n\times n(1\le n\le500)$ 矩阵，有 $q(1\le q\le6\times10^4)$ 次询问，每次求矩阵左上角 $(x_1,y_1)$ 和右下角 $(x_2,y_2)$ 的子矩阵的第 $k$ 小数(不去重)( $1\le a_{i,j}\le10^9$ )
+
+整体二分+离散化+二维树状数组。复杂度为 $O((n^2+q)\log^3n)$ 
+
+```c++
+#include <bits/stdc++.h>
+using namespace std;
+#define sc(x) scanf("%lld", &x)
+typedef long long ll;
+#define mn 510
+#define mm 60010
+ll n, t, n2, b[mn][mn];
+struct matrix
+{ //结构体排序方便
+    ll i, j, v;
+    bool operator<(const matrix &r) const { return v < r.v; }
+} a[mn * mn];
+struct queries
+{
+    ll ax, ay, bx, by, k;
+} q[mm];
+ll qid[mm], tmp1[mm], tmp2[mm], ans[mm], now[mm];
+ll lowbit(ll x) { return x & -x; }
+void add(ll x, ll y, ll v)
+{
+    for (ll i = x; i <= n; i += lowbit(i))
+        for (ll j = y; j <= n; j += lowbit(j))
+            b[i][j] += v;
+}
+ll get(ll x, ll y)
+{
+    ll res = 0;
+    for (ll i = x; i; i -= lowbit(i))
+        for (ll j = y; j; j -= lowbit(j))
+            res += b[i][j];
+    return res;
+}
+ll gets(queries p)
+{
+    return get(p.bx, p.by) - get(p.ax - 1, p.by) - get(p.bx, p.ay - 1) + get(p.ax - 1, p.ay - 1);
+}
+void solve(ll lf, ll rf, ll lc, ll rc)
+{
+    if (lc > rc)
+        return;
+    if (lf == rf)
+    {
+        for (ll i = lc; i <= rc; ++i)
+            ans[qid[i]] = a[lf].v;
+        return;
+    }
+    ll cf = (lf + rf) >> 1;
+    for (ll i = lf; i <= cf; ++i)
+        add(a[i].i, a[i].j, 1);
+    ll cnt1 = 0, cnt2 = 0;
+    for (ll i = lc, u; i <= rc; ++i)
+    {
+        u = qid[i];
+        ll s = now[u] + gets(q[u]);
+        if (s >= q[u].k)
+            tmp1[++cnt1] = u;
+        else
+            tmp2[++cnt2] = u, now[u] = s; // 本质为u-s
+    }
+    ll j = lc - 1;
+    for (ll i = 1; i <= cnt1; ++i)
+        qid[++j] = tmp1[i];
+    for (ll i = 1; i <= cnt2; ++i)
+        qid[++j] = tmp2[i];
+    for (ll i = lf; i <= cf; ++i)
+        add(a[i].i, a[i].j, -1);
+    solve(lf, cf, lc, lc + cnt1 - 1);
+    solve(cf + 1, rf, lc + cnt1, rc);
+}
+signed main()
+{
+    sc(n), sc(t);
+    for (ll i = 1; i <= n; ++i)
+    {
+        for (ll j = 1, v; j <= n; ++j)
+        {
+            sc(v);
+            a[++n2] = {i, j, v};
+        }
+    }
+    sort(a + 1, a + 1 + n2);
+    for (ll i = 1; i <= t; ++i)
+    {
+        sc(q[i].ax), sc(q[i].ay), sc(q[i].bx), sc(q[i].by), sc(q[i].k);
+        qid[i] = i;
+    }
+    solve(1, n2, 1, t);
+    for (ll i = 1; i <= t; ++i)
+        printf("%lld\n", ans[i]);
+    return 0;
+}
+```
+
+
+
+> 洛谷P2617例题-给定长为 $n$ 的数列 $a$ ，支持 $m$ 次两种操作：$1\le n,m\le10^5,0\le a_i,y\le10^9$
+>
+> - `Q l r k` 查询区间第 $k$ 小
+> - `C x y` 将 $a_x$ 改为 $y$
+
+因为涉及修改，所以不要重排序操作。那么在修改前的询问是不受后续修改的影响的。初始修改放在操作的最前面。下面代码没有使用到离散化。
+
+还有一个小要点，就是对于脏数据的处理。脏数据也就是会对计算结果产生影响的数据。对于本题而言，值大于等于mb的操作在[lb,mb)中是没有影响的，但是在[mb,ub)的操作中，值小于mb的操作会产生影响，但是显然如果减去一个k，那么就可以消除这个影响。
+
+```c++
+#include <iostream>
+#include <cstdio>
+#include <vector>
+using namespace std;
+struct op
+{
+    int type;
+    // type==0 Change i means position; j means ispositive; k means the number after change
+    // type==1 Query i means left; r means right; k means kth-number
+    int i, j, k,id;
+};
+int n, m, a[10050], ans[10050], f[50050];
+vector<op> q;
+int lowbit(int x)
+{
+    return x & -x;
+}
+void add(int x, int k)
+{
+    while (x <= n)
+    {
+        f[x] += k;
+        x += lowbit(x);
+    }
+}
+int query(int k)
+{
+    int ans = 0;
+    while (k > 0)
+    {
+        ans += f[k];
+        k -= lowbit(k);
+    }
+    return ans;
+}
+void solve(int lb, int ub, vector<op> &q)
+{
+    vector<op> Left, Right;
+    int mb = (lb + ub) >> 1;
+    if (ub - lb == 1)
+    {
+        for (int i = 0; i < q.size(); i++)
+        {
+            if (q[i].type == 1)
+                ans[q[i].id] = lb;
+        }
+        return;
+    }
+    else if (q.empty())
+        return;
+    for (int i = 0; i < q.size(); i++)
+    {
+        op tmp = q[i];
+        if (tmp.type == 0)
+        {
+            if (tmp.k < mb)
+            {
+                add(tmp.i, tmp.j); // i:pos j:num
+                Left.push_back(tmp);
+            }
+            else
+                Right.push_back(tmp);
+        }
+        else
+        {
+            int kth = query(tmp.j) - query(tmp.i - 1);
+            if (kth >= tmp.k)
+                Left.push_back(tmp);
+            else
+            {
+                tmp.k -= kth;
+                Right.push_back(tmp);
+            }
+        }
+    }
+    for (int x = 0; x < Left.size(); x++)
+        if (Left[x].type == 0)
+            add(Left[x].i, -Left[x].j);
+    solve(lb, mb, Left);
+    solve(mb, ub, Right);
+}
+int main()
+{
+    scanf("%d%d", &n, &m);
+    for (int i = 1; i <= n; i++)
+    {
+        scanf("%d", &a[i]);
+        op tmp = {0, i, 1, a[i]};
+        q.push_back(tmp);
+    }
+    for (int x = 0; x < m; x++)
+    {
+        char cmd;
+        int i;
+        scanf("%s%d", &cmd, &i);
+        if (cmd == 'C')
+        {
+            int t;
+            scanf("%d", &t);
+            op tmp = {0, i, -1, a[i], 0};
+            q.push_back(tmp);
+            a[i] = t;
+            tmp = {0, i, 1, t, 0};
+            q.push_back(tmp);
+        }
+        else
+        {
+            int j, k;
+            scanf("%d%d", &j, &k);
+            op tmp = {1, i, j, k, x};
+            q.push_back(tmp);
+        }
+    }
+    for (int i = 0; i < m; i++)
+        ans[i] = -1;
+    solve(0, 1e9, q);
+    for (int i = 0; i < m; i++)
+        if (ans[i] != -1)
+            printf("%d\n", ans[i]);
+    return 0;
+}
+```
+
+
+
+### 前缀和/差分
+
+> 树上前缀和/差分及其例题见图论-树-LCA应用。
+
+高维前缀和可以考虑压缩数组，叠前缀和时可以容斥原理，也可以逐维叠加，即以每个维度进行一次一维前缀和，其他维度不变。
+
+**常见应用：**
+
+一维前缀和/差分：
+
+- (SCNUOJ1410猜数)有一个目标数字，猜了若干次，反馈结果为比目标大/小/相等，问结果里最多多少个是对的
+
+  把每个猜的结果转化为坐标轴的一段猜对目标数字取值区间，用差分累加所有区间，然后离散化枚举每个区间边界，被多少个区间覆盖猜对了多少次， $O(n\log n)$
+
+- (蓝桥-最大子阵)求矩阵的最大非空子矩阵的元素和
+
+  先计算每列一维前缀和，然后枚举子矩阵最下行 $i$ ，枚举行跨度 $j(\le i)$ ，枚举列 $k$ ，逐列累加跨 $j$ 行后的新元素和，如果更大加入答案，如果当前和小于 $0$ 舍弃全部，否则继续累加 ，复杂度 $O(n^2 m)$
+
+  ```c++
+  for(int i=1;i<=n;++i) for(int j=1;j<=m;++j) 
+  		scanf("%d",&v),s[i][j]=s[i-1][j]+v;//当前行前缀和 
+  for(int i=1;i<=n;++i) for(int j=1;j<=i;++j) //矩阵右下角为(i,j) 
+      for(int k=1,v=0;k<=m;++k) //使用O(m)计算二维前缀和 
+      {
+          v+=s[i][k]-s[j-1][k];//当前矩阵前缀和 
+          mx=max(mx,v);
+          v=max(v,0); //负数特判 
+      }
+  ```
+
+- (蓝桥-k倍区间) 求有多少个连续子序列的和是 $k$ 的倍数
+
+  是 $k$ 的倍数 $\to$ 前缀和模 $k$ 得 $0$ $\to s[r]\equiv s[l-1]\bmod k$ ，即求多少个相等前缀和对，即(解法一) $\sum_{i=1}^k C_2^{s[i]}$ ( $O(n+k)$ ) 或(解法二)每次求得新相等时与原本相等数累加。注意特判本有 $s[0]=1$ 。若 $k$ 过大，可以选择离散化
+
+  ```c++
+  scanf("%d%d",&n,&k);
+  for(int i=1;i<=n;++i)
+      scanf("%d",&v),(cnt+=v)%=k,sum+=vis[cnt]++;
+  printf("%lld",sum+vis[0]);
+  ```
+
+- (SCNUOJ1193子段异或) 求异或和为 $0$ 的连续子段数
+
+  异或为 $0\to$ 前缀异或满足 $s[r]=s[l-1]$ ，与上题类似，$O(n\log a)$ (离散化) 
+
+  ```c++
+  for(scanf("%lld",&n),++m[0];n;--n) //m:map
+      scanf("%lld",&v),ans+=m[c^=v]++;
+  return printf("%lld",ans)&0;
+  ```
+
+- (SCNUOJ1433周游山区) $n$ 个加油站成环，离顺时针下一个加油站距离 $d_i$ ，可加油 $p_i$ ，问从每个加油站出发(本站油量为起始油量)能否顺或逆时针走完一圈
+
+  走完一圈后油量可以为0，但没走完之前不可以为0；但是如果考虑子问题，那么只需要考虑大于等于0，在顺时针时，从$i$出发，可以走回 $i$ 的条件为同时满足以下等式：(需要注意 $d_0=0$ ) , $O(n)$
+  $$
+  \begin{cases}
+  (p_i-d_{i})\ge0\\
+  (p_i-d_{i})+(p_{i+1}-d_{i+1})\ge0\\
+  \dots\\
+  (p_i-d_{i})+(p_{i+1}-d_{i+1})+\dots+(p_{i+n-1}-d_{i+n-1})\ge0
+  \end{cases}
+  $$
+  设前缀和 $s_n=\sum_{i=1}^n p_i-d_i$ ，即需要同时满足：
+  $$
+  \begin{cases}
+  s_i-s_{i-1}\ge0\\
+  s_{i+1}-s_{i-1}\ge0\\
+  \dots\\
+  s_{i+n-1}-s_{i-1}\ge0
+  \end{cases}
+  $$
+  即在 $[i,i+n-1]$ 内， $s_\min-s_{i-1}\ge0$  ，逆时针同理：
+  $$
+  (s_i-s_j)_\min\ge0\quad j\in[i-n+1,i]\Rightarrow s_i-s_{\max}\ge0
+  $$
+  可以用单调队列维护一个最小值(逆则最大)。注意单调区间长度不可以大于等于 $n$
+
+  ```c++
+  #include <bits/stdc++.h>
+  using namespace std;
+  typedef long long ll;
+  #define mn 2000002
+  #define nemp hd<=ed
+  ll q[mn],hd,ed=-1,s[mn],p[mn],d[mn],n,n2;
+  bool ok[mn];
+  signed main()
+  {
+      scanf("%lld",&n); n2=n<<1;
+      for(ll i=1;i<=n;++i) scanf("%lld%lld",p+i,d+i),s[i]=s[i+n]=p[i]-d[i];
+      for(ll i=1;i<=n2;++i) s[i]+=s[i-1];
+      for(ll i=n2;i;--i)
+      {
+          while(nemp&&q[hd]-i>=n) ++hd;
+          while(nemp&&s[q[ed]]>=s[i]) --ed;
+          q[++ed]=i;
+          if(i<=n&&s[q[hd]]-s[i-1]>=0) ok[i]=true;
+      } hd=0,ed=-1;  d[0]=d[n];
+      for(ll i=1;i<=n;++i) s[i]=s[i+n]=p[i]-d[i-1];
+      for(ll i=1;i<=n2;++i) s[i]+=s[i-1];
+      for(ll i=1;i<=n2;++i)
+      {
+          while(nemp&&i-q[hd]>=n) ++hd;
+          if(i>n&&s[i]-s[q[hd]]>=0) ok[i-n]=true;
+          while(nemp&&s[q[ed]]<=s[i]) --ed;
+          q[++ed]=i;
+      }
+      for(ll i=1;i<=n;++i) printf(ok[i]?"YES\n":"NO\n");
+      return 0;
+  }
+  ```
+
+  
+
+二维前缀和/差分：
+
+- (SCNUOJ1226守卫农田)矩阵内有若干个子矩形被覆盖，若干次询问某个子矩阵是否都被覆盖
+
+  覆盖过程可以二维差分；得出布尔值化的原数组后再求一个二维前缀和，查询时就能 $O(1)$ 比较子矩阵面积与被覆盖大小 $O(n^2)$ 
+
+高维前缀和/差分：
+
+- (蓝桥-三体攻击)有立方体舰队阵列，每次攻击使一个子立方体全员受到定值伤害，求首次出现死亡时是第几次攻击
+
+  二分答案+三维差分。把攻击做成差分数组，二分攻击次数，判断是否出现负数即可 $O(n^3\log t)$
+
+前缀和/差分思想：
+
+- (洛谷P2926)给定 $n$ 个值域在 $w$ 的可重复数，求每个数有多少数能被它整除
+
+  先计数每个数出现了几次，然后对每个因子其所有倍数叠加一遍， $O(n\log n)$
+
+  ```c++
+  #include <bits/stdc++.h>
+  using namespace std;
+  typedef int ll;
+  #define MAXN 1000002
+  ll ans[MAXN], n, a[MAXN], mx, vis[MAXN];
+  signed main()
+  {
+      scanf("%d", &n);
+      for (ll i = 1; i <= n; ++i)
+          scanf("%d", &a[i]), ++vis[a[i]], mx = max(a[i], mx);
+      for (ll i = 1; i <= mx; ++i)
+      {
+          if (!vis[i])
+              continue;
+          for (ll j = 1; j * i <= mx; ++j)
+              if (vis[i * j])
+                  ans[i * j] += vis[i];
+          --ans[i];
+      }
+      for (ll i = 1; i <= n; ++i)
+          printf("%d\n", ans[a[i]]);
+      return 0;
+  }
+  ```
+
+  
 
 ### 高精度
 
