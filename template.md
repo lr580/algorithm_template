@@ -6,7 +6,7 @@
 
 ![image-20220325120131181](img/image-20220325120131181.png)
 
-<div align="center" style="font-size:18px">Last built at Mar. 26, 2022</div>
+<div align="center" style="font-size:18px">Last built at Mar. 30, 2022</div>
 
 <div STYLE="page-break-after: always;"></div>
 
@@ -287,6 +287,12 @@ $$
 
 
 
+#### 数位
+
+尾 $0$ 数目可以将大数质因数分解，求 $\min(num_2,num_5)$ 即可。其他质因数都不能乘出 $0$ 
+
+
+
 ### 数论
 
 #### 拓展欧几里得定理
@@ -337,7 +343,7 @@ ll gcd(ll a, ll b, ll &x, ll &y)
 
 
 
-
+### 组合数学
 
 
 
@@ -349,7 +355,7 @@ ll gcd(ll a, ll b, ll &x, ll &y)
 
 ### ST表
 
-以区间 gcd 为例(时间复杂没有两个 $\log$ 乘积)
+以区间 gcd 为例(时间复杂没有两个 $\log$ 乘积，具体为 $O(n(\log w+\log n))$ ) 
 
 ```c++
 #include <bits/stdc++.h>
@@ -388,6 +394,146 @@ signed main()
     return 0;
 }
 ```
+
+笛卡尔树 LCA $\pm1$ RMQ 问题，预处理、查询复杂度是 $O(n), O(1)$ 。空间复杂度 $O(n)$ 。(以区间max为例洛谷P3865,$n\le10^5,m\le2\times10^6$ )
+
+```c++
+#include<iostream>
+#include<cstdio>
+#include<cstring>
+using namespace std;
+const int inf=1e9;
+int n,m,w[2000000],lg2[1500000];
+int pos[1500000],lst[1500000],dep[1500000],id,mm,S,ch[1500000][2],stack[1500000];
+struct LIM_RMQ
+{
+	int w[1500000],bl[1500000],blo,L[150000],R[150000],pos[10000],val[150000],minn[150000],minpos[150000],t[1000],n_st;
+	struct ST_node{int f,id;bool operator <(const ST_node &tmp)const{return f<tmp.f;}};
+	struct STable
+	{
+		ST_node a[4][12];//n=1e6的话logn/2只有9...所以放心开
+		void make(int w[],int n)
+		{
+			for(int i=1;i<=n;i++)a[0][i]=(ST_node){w[i],i};
+			for(int i=1;(1<<i)<=n;i++)//st表，不过要同时处理出最小值所在的位置
+				for(int j=1;j+(1<<i)-1<=n;j++)
+					a[i][j]=min(a[i-1][j],a[i-1][j+(1<<(i-1))]);
+		}
+		ST_node query(int l,int r)
+		{
+			int len=lg2[r-l+1];
+			return min(a[len][l],a[len][r-(1<<len)+1]);
+		}
+	}st[10000];//这里只有sqrt(n)个，也不用开这么大
+	struct STable_block
+	{
+		ST_node a[20][150000];//这个占空间最大了吧...不过也只是O(n)的
+		void make(int w[],int n)
+		{
+			for(int i=1;i<=n;i++)a[0][i]=(ST_node){w[i],i};
+			for(int i=1;(1<<i)<=n;i++)
+				for(int j=1;j+(1<<i)-1<=n;j++)
+					a[i][j]=min(a[i-1][j],a[i-1][j+(1<<(i-1))]);
+		}
+		ST_node query(int l,int r)
+		{
+			int len=lg2[r-l+1];//细节，math库的log2函数不能看做O(1)的，要提前处理
+			return min(a[len][l],a[len][r-(1<<len)+1]);
+		}
+	}st_block;
+	void make(int a[],int n)
+	{
+		for(int i=1;i<=n;i++)w[i]=a[i];
+		lg2[1]=0;for(int i=2;i<=n;i++)lg2[i]=lg2[i>>1]+1;//处理log2
+		blo=max(lg2[n]>>1,1);//分块
+		for(int i=1;i<=n;i++)bl[i]=(i-1)/blo+1;
+		for(int i=1;i<=bl[n];i++)L[i]=(i-1)*blo+1,R[i]=min(i*blo,n),minn[i]=inf;
+		w[0]=w[1]-1;
+		for(int i=1;i<=bl[n];i++)
+		{
+			int tmp=0,nn=0;
+			for(int j=L[i];j<=R[i];j++)
+			{
+				t[++nn]=w[j],tmp=tmp<<1|(w[j]-w[j-1]==1?1:0);
+				if(w[j]<minn[i])minn[i]=w[j],minpos[i]=j;
+                //可以用一个状压来表示本质
+			}
+			if(!pos[tmp])st[pos[tmp]=++n_st].make(t,nn);
+			val[i]=pos[tmp];//记下每个块属于哪一个本质
+		}
+		st_block.make(minn,bl[n]);//块间rmq
+	}
+	ST_node query_block(int id,int l,int r){ST_node t=st[val[id]].query(l-L[id]+1,r-L[id]+1);return (ST_node){t.f,t.id+L[id]-1};}
+    //实际位置=块左端点+块内查询位置-1，如果你把块内查询从0开始写就可以省略-1
+	int query(int l,int r)
+	{
+		int bll=bl[l],blr=bl[r];
+		if(bll==blr)return query_block(bll,l,r).id;//一个块
+		int ml=query_block(bll,l,R[bll]).id,mr=query_block(blr,L[blr],r).id,mm;
+		if(w[ml]<w[mr])mm=ml;else mm=mr;//两端零散块
+		if(bll+1<=blr-1)//整块
+		{
+			int mmid=minpos[st_block.query(bll+1,blr-1).id];
+			if(w[mmid]<w[mm])mm=mmid;
+		}
+		return mm;
+	}
+}a;
+void dfs(int u,int depth)
+{
+	lst[u]=++id,pos[id]=u;dep[id]=depth;//处理欧拉序列
+	for(int i=0;i<=1;i++)
+		if(ch[u][i])
+		{
+			dfs(ch[u][i],depth+1);
+			pos[++id]=u,dep[id]=depth;
+		}
+}
+int getin()
+{
+	int x=0;char ch=getchar();
+	while(ch<'0'||ch>'9')ch=getchar();
+	while(ch>='0'&&ch<='9')x=x*10+ch-48,ch=getchar();
+	return x;
+}
+int wt[30];
+void putout(int x)
+{
+	if(!x){putchar('0');return;}
+	int l=0;
+	while(x)wt[++l]=x%10,x/=10;
+	while(l)putchar(wt[l--]+48);
+	puts("");
+}
+void build_tree()//笛卡尔树
+{
+	int top=1;stack[1]=S=1;//开始根为1
+	for(int i=2;i<=n;i++)
+	{
+		int lst=0;
+		while(top&&w[i]>w[stack[top]])lst=stack[top--];
+		if(lst)ch[i][0]=lst;
+		if(top)ch[stack[top]][1]=i;else S=i;
+		stack[++top]=i;
+	}
+	dfs(S,1);
+}
+int main()
+{
+	n=getin(),m=getin();
+	for(int i=1;i<=n;i++)w[i]=getin();
+	build_tree();
+	a.make(dep,id);
+	for(int i=1;i<=m;i++)
+	{
+		int l=lst[getin()],r=lst[getin()];
+		if(l>r)swap(l,r);//可能第一次出现的位置是反过来的
+		putout(w[pos[a.query(l,r)]]);
+	}
+} 
+```
+
+
 
 
 
@@ -1130,7 +1276,215 @@ int main()
 
 #### zkw线段树
 
+##### 单点修改
 
+单点增加修改，区间求和模板(洛谷P3374)
+
+```c++
+#include <bits/stdc++.h>
+using namespace std;
+typedef long long ll;
+#define sc(x) scanf("%lld", &x)
+#define mn 500010
+ll t[mn << 2], n, N, m, c, x, y;
+signed main()
+{
+    sc(n), sc(m);
+    for (N = 1; N <= n + 1; N <<= 1)
+        ;
+    for (ll i = N + 1; i <= N + n; ++i)
+    {
+        sc(t[i]);
+    }
+    for (ll i = N - 1; i >= 1; --i)
+    {
+        t[i] = t[i << 1] + t[i << 1 | 1];
+    }
+    while (m--)
+    {
+        sc(c), sc(x), sc(y);
+        if (c == 1)
+        {
+            for (ll i = x + N; i; i >>= 1)
+            {
+                t[i] += y;
+            }
+        }
+        else
+        {
+            ll ans = 0;
+            for (ll s = N + x - 1, r = N + y + 1; s ^ r ^ 1; s >>= 1, r >>= 1)
+            {
+                if (~s & 1)
+                {
+                    ans += t[s ^ 1];
+                }
+                if (r & 1)
+                {
+                    ans += t[r ^ 1];
+                }
+            }
+            printf("%lld\n", ans);
+        }
+    }
+    return 0;
+}
+```
+
+##### 区间修改
+
+区间增加修改，区间求和模板 (洛谷P3372)
+
+```c++
+#include <bits/stdc++.h>
+using namespace std;
+typedef long long ll;
+#define mn 400010
+#define sc(x) scanf("%lld", &x)
+ll n, m, a[mn], dt, laz[mn], c, x, y, k;
+signed main()
+{
+    sc(n), sc(m);
+    for (dt = 1; dt <= n + 1; dt <<= 1)
+        ;
+    for (ll i = dt + 1; i <= dt + n; ++i)
+    {
+        sc(a[i]);
+    }
+    for (ll i = dt - 1; i >= 1; --i)
+    {
+        a[i] = a[i << 1] + a[i << 1 | 1];
+    }
+    while (m--)
+    {
+        sc(c), sc(x), sc(y);
+        if (c == 1)
+        {
+            sc(k);
+            ll lf = 0, rf = 0, layer = 1, s = dt + x - 1, t = dt + y + 1;
+            for (; s ^ t ^ 1; s >>= 1, t >>= 1, layer <<= 1)
+            {
+                a[s] += k * lf, a[t] += k * rf;
+                if (~s & 1)
+                {
+                    laz[s ^ 1] += k, a[s ^ 1] += k * layer, lf += layer;
+                }
+                if (t & 1)
+                {
+                    laz[t ^ 1] += k, a[t ^ 1] += k * layer, rf += layer;
+                }
+            }
+            for (; s; s >>= 1, t >>= 1)
+            {
+                a[s] += k * lf, a[t] += k * rf;
+            }
+        }
+        else
+        {
+            ll lf = 0, rf = 0, layer = 1, s = dt + x - 1, t = dt + y + 1;
+            ll ans = 0;
+            for (; s ^ t ^ 1; s >>= 1, t >>= 1, layer <<= 1)
+            {
+                if (laz[s])
+                {
+                    ans += laz[s] * lf;
+                }
+                if (laz[t])
+                {
+                    ans += laz[t] * rf;
+                }
+                if (~s & 1)
+                {
+                    ans += a[s ^ 1], lf += layer;
+                }
+                if (t & 1)
+                {
+                    ans += a[t ^ 1], rf += layer;
+                }
+            }
+            for (; s; s >>= 1, t >>= 1)
+            {
+                ans += laz[s] * lf + laz[t] * rf;
+            }
+            printf("%lld\n", ans);
+        }
+    }
+    return 0;
+}
+```
+
+
+
+#### 猫树
+
+> 洛谷P3865-求区间 max , $1\le n\le10^5,1\le m\le2\times10^6,a)i\in[0,10^9 ]$
+
+###### 猫树
+
+```c++
+#include <bits/stdc++.h>
+using namespace std;
+#define sc(x) scanf("%lld", &x)
+typedef long long ll;
+#define mn 131082 // 1<<log(1e5,2)+10
+#define ml 20
+ll n, m, a[mn], n2, lg[mn * 2], l, r;
+ll pos[mn], gcd[mn][ml];
+#define lfs p << 1
+#define rfs p << 1 | 1
+#define mkcf ll cf = (lf + rf) >> 1
+void build(ll p, ll lf, ll rf, ll dep)
+{
+    if (lf == rf)
+    {
+        pos[lf] = p;
+        return;
+    }
+    mkcf;
+    build(lfs, lf, cf, dep + 1);
+    build(rfs, cf + 1, rf, dep + 1);
+    gcd[cf][dep] = a[cf];
+    for (ll i = cf - 1; i >= lf; --i)
+    {
+        gcd[i][dep] = max(gcd[i + 1][dep], a[i]);
+    }
+    for (ll i = cf + 1; i <= rf; ++i)
+    {
+        gcd[i][dep] = max(gcd[i - 1][dep], a[i]);
+    }
+}
+signed main()
+{
+    sc(n), sc(m);
+    for (ll i = 1; i <= n; ++i)
+    {
+        sc(a[i]);
+    }
+    for (n2 = 1; n2 < n; n2 <<= 1) //满二叉树下节点有n2个
+        ;
+    for (ll i = 2; i <= n2 * 2; ++i)
+    {
+        lg[i] = lg[i / 2] + 1;
+    }
+    build(1, 1, n2, 1);
+    while (m--)
+    {
+        sc(l), sc(r);
+        if (l == r) //猫树不存叶子节点
+        {
+            printf("%lld\n", a[l]);
+            continue;
+        }
+        ll k = lg[pos[r]] - lg[pos[l] ^ pos[r]];
+        printf("%lld\n", max(gcd[l][k], gcd[r][k]));
+    }
+    return 0;
+}
+```
+
+
+
+#### 李超线段树
 
 
 
@@ -2085,11 +2439,221 @@ signed main()
 
 
 
-#### 笛卡尔树
+### K-D Tree
+
+> 洛谷P4475-有 $n$ 人和 $m$ 巧克力，每个人有参数 $a,b,c$ ，巧克力有参数 $x,y,h$ ，每人只要对他自己 $ax+by\le c$ 的巧克力，求每人这样的巧克力的 $h$ 值之和 $1\le n,m\le5\times10^4,-10^9\le$ 参数 $\le10^9$ 
+
+对二元函数 $f(x,y)=ax+by$ ，满足 $x,y$ 上单调性，所以节点维护的超长方体若边界都在肯定全部点都在，所以可以进行二分下去。
+
+```c++
+#include<cstdio>
+#include<algorithm>
+#define ll long long
+using namespace std;
+const int N=5e5+50;
+int n,now,m,rt;
+ll a,b,c;
+struct data
+{
+	int d[2],mx[2],mn[2],lc,rc,val;
+	ll sum;
+	friend bool operator < (data a,data b)
+		{return a.d[now]<b.d[now];}
+}dat[N],t[N];
+void getmax(int&a,int b){if(a<b)a=b;}
+void getmin(int&a,int b){if(a>b)a=b;}
+void pushup(int x)
+{
+	int lc=t[x].lc,rc=t[x].rc;
+	for(int i=0;i<2;i++)
+	{
+		t[x].mn[i]=t[x].mx[i]=t[x].d[i];
+		if(lc)  getmin(t[x].mn[i],t[lc].mn[i]),
+			getmax(t[x].mx[i],t[lc].mx[i]);
+		if(rc)  getmin(t[x].mn[i],t[rc].mn[i]),
+			getmax(t[x].mx[i],t[rc].mx[i]);
+	}
+	t[x].sum=t[lc].sum+t[rc].sum+t[x].val;
+}
+
+int build(int l,int r,int pl)
+{
+	now=pl; int mid=(l+r)>>1;
+	nth_element(dat+l,dat+mid,dat+r+1);
+	t[mid]=dat[mid];
+	if(l<mid) t[mid].lc=build(l,mid-1,!pl);
+	if(r>mid) t[mid].rc=build(mid+1,r,!pl);
+	pushup(mid); return mid;
+}
+bool check(ll x,ll y) {return x*a+y*b<c;}
+ll query(int x)
+{
+	int tot=0;
+	tot+=check(t[x].mx[0],t[x].mx[1]);
+	tot+=check(t[x].mn[0],t[x].mx[1]);
+	tot+=check(t[x].mx[0],t[x].mn[1]);
+	tot+=check(t[x].mn[0],t[x].mn[1]);
+	if(tot==4) return t[x].sum; // 都满足
+	if(tot==0) return 0; // 都不满足
+	ll res=0;
+	if(check(t[x].d[0],t[x].d[1])) res+=t[x].val;
+	if(t[x].lc) res+=query(t[x].lc);
+	if(t[x].rc) res+=query(t[x].rc);
+	return res;
+}
+int main()
+{
+	scanf("%d%d",&n,&m);
+	for(int i=1;i<=n;i++) 
+		scanf("%d%d%d",&dat[i].d[0],&dat[i].d[1],&dat[i].val);
+	rt=build(1,n,0); while(m--)
+	{
+		scanf("%lld%lld%lld",&a,&b,&c);
+		printf("%lld\n",query(rt));
+	}
+	return 0;
+}
+```
+
+
+
+> 洛谷P4148-对 $n\times n(n\le5\times 10^5)$ 矩阵进行强制在线维护(每个值异或 $lastans$ )：
+>
+> 1. `1 x y A` 单点加 $A$ (下标值在 $[1,n]$)
+> 2. `2 x1 y1 x2 y2` 区间求和
+> 3. `3` EOF (操作数不大于 $2\times10^5$)
+
+```c++
+#include <algorithm>
+#include <cstdio>
+#include <cstring>
+using namespace std;
+const int maxn = 200010;
+int n, op, xl, xr, yl, yr, lstans;
+
+struct node {
+  int x, y, v;
+} s[maxn];
+
+bool cmp1(int a, int b) { return s[a].x < s[b].x; }
+
+bool cmp2(int a, int b) { return s[a].y < s[b].y; }
+
+double a = 0.725;
+int rt, cur, d[maxn], lc[maxn], rc[maxn], L[maxn], R[maxn], D[maxn], U[maxn],
+    siz[maxn], sum[maxn];
+int g[maxn], t;
+
+void print(int x) {
+  if (!x) return;
+  print(lc[x]);
+  g[++t] = x;
+  print(rc[x]);
+}
+
+void maintain(int x) {
+  siz[x] = siz[lc[x]] + siz[rc[x]] + 1;
+  sum[x] = sum[lc[x]] + sum[rc[x]] + s[x].v;
+  L[x] = R[x] = s[x].x;
+  D[x] = U[x] = s[x].y;
+  if (lc[x])
+    L[x] = min(L[x], L[lc[x]]), R[x] = max(R[x], R[lc[x]]),
+    D[x] = min(D[x], D[lc[x]]), U[x] = max(U[x], U[lc[x]]);
+  if (rc[x])
+    L[x] = min(L[x], L[rc[x]]), R[x] = max(R[x], R[rc[x]]),
+    D[x] = min(D[x], D[rc[x]]), U[x] = max(U[x], U[rc[x]]);
+}
+
+int build(int l, int r) {
+  if (l > r) return 0;
+  int mid = (l + r) >> 1;
+  double av1 = 0, av2 = 0, va1 = 0, va2 = 0;
+  for (int i = l; i <= r; i++) av1 += s[g[i]].x, av2 += s[g[i]].y;
+  av1 /= (r - l + 1);
+  av2 /= (r - l + 1);
+  for (int i = l; i <= r; i++)
+    va1 += (av1 - s[g[i]].x) * (av1 - s[g[i]].x),
+        va2 += (av2 - s[g[i]].y) * (av2 - s[g[i]].y);
+  if (va1 > va2)
+    nth_element(g + l, g + mid, g + r + 1, cmp1), d[g[mid]] = 1;
+  else
+    nth_element(g + l, g + mid, g + r + 1, cmp2), d[g[mid]] = 2;
+  lc[g[mid]] = build(l, mid - 1);
+  rc[g[mid]] = build(mid + 1, r);
+  maintain(g[mid]);
+  return g[mid];
+}
+
+void rebuild(int& x) {
+  t = 0;
+  print(x);
+  x = build(1, t);
+}
+
+bool bad(int x) { return a * siz[x] <= (double)max(siz[lc[x]], siz[rc[x]]); }
+
+void insert(int& x, int v) {
+  if (!x) {
+    x = v;
+    maintain(x);
+    return;
+  }
+  if (d[x] == 1) {
+    if (s[v].x <= s[x].x)
+      insert(lc[x], v);
+    else
+      insert(rc[x], v);
+  } else {
+    if (s[v].y <= s[x].y)
+      insert(lc[x], v);
+    else
+      insert(rc[x], v);
+  }
+  maintain(x);
+  if (bad(x)) rebuild(x);
+}
+
+int query(int x) {
+  if (!x || xr < L[x] || xl > R[x] || yr < D[x] || yl > U[x]) return 0;
+  if (xl <= L[x] && R[x] <= xr && yl <= D[x] && U[x] <= yr) return sum[x];
+  int ret = 0;
+  if (xl <= s[x].x && s[x].x <= xr && yl <= s[x].y && s[x].y <= yr)
+    ret += s[x].v;
+  return query(lc[x]) + query(rc[x]) + ret;
+}
+
+int main() {
+  scanf("%d", &n);
+  while (~scanf("%d", &op)) {
+    if (op == 1) {
+      cur++, scanf("%d%d%d", &s[cur].x, &s[cur].y, &s[cur].v);
+      s[cur].x ^= lstans;
+      s[cur].y ^= lstans;
+      s[cur].v ^= lstans;
+      insert(rt, cur);
+    }
+    if (op == 2) {
+      scanf("%d%d%d%d", &xl, &yl, &xr, &yr);
+      xl ^= lstans;
+      yl ^= lstans;
+      xr ^= lstans;
+      yr ^= lstans;
+      printf("%d\n", lstans = query(rt));
+    }
+    if (op == 3) return 0;
+  }
+}
+```
+
+
+
+### 笛卡尔树
 
 节点由 $(k,w)$ 组成， $k$ 满足二叉搜索树， $w$ 满足堆，若 $(k,w)$ 分别互不相同，那么结构唯一
 
-可以 $O(n)$ 构建。 例题P5854：给定排列，构建笛卡尔树，输出me给节点 $i$ 的左右儿子(不存在为 $0$ )的 $\oplus_{i=1}^ni(l_i+1),\oplus_{i=1}^ni(r_i+1)$
+可以 $O(n)$ 构建。 例题P5854：给定排列，构建(满足小根堆的)笛卡尔树，输出me给节点 $i$ 的左右儿子(不存在为 $0$ )的 $\oplus_{i=1}^ni(l_i+1),\oplus_{i=1}^ni(r_i+1)$
+
+笛卡尔树不平衡，单调序列可以卡单次查询到 $O(n)$
 
 ```c++
 #include <bits/stdc++.h>
@@ -3897,6 +4461,686 @@ signed main()
 ```
 
 
+
+### 基本概念
+
+> 这一章节主要用作英文题面阅读理解和单词/符号翻译，并提供简单图论性质(下划线)
+
+**起点** (tail) ，**终点** (head) 是有向边 (又称**弧** arc )  $u\to v$ 。点数是**阶** (order) 。无向图里，边 $e$ 和点 $v$ **关联** (incident)是 $e$ 的一个**端点** (endpoint) 为 $v$ ，点的领域记作 $N(v)$ ，即相邻点
+
+度为 $d(v)=1$ 的节点称为**叶节点**或**悬挂点** (leaf/pandant vertex) , 按度数奇偶称**奇/偶点** (odd/even vertex)，<u>奇点个数一定是偶数</u> ，**支配点** (universial vertex) 是度为 $|V|-1$ 的点。最小度记作 $\delta(G)$ ，最大度记作 $\Delta(G)$ ，**入度** (in-degree) 记作 $\delta^-(v)$ ，**出度** (out-degree) 记作 $\delta^+(v)$ 
+
+无 **自环** (loop)、 **重边** (multiple edge) 的图是**简单图** (simple graph) ，否则是**多重图** (multigraph) 。<u>具有至少两顶点的简单无向图一定存在度相同的节点</u>(抽屉原理) 。有向图 $u\to v,v\to u$ 不是重边。序列能作为图/简单图的度数列称为序列是可图化/可简单图化的。
+
+**途径**(walk)是若干点连接起来的边的集合， **迹**(trail)是边互不相同的途径。**路径**(path)/**简单路径**(simple path)，**回路**(circuit)是除首尾点，其余点互不相同的迹。边的数量(或边权和)是长度(该段落定义视具体题目题面)
+
+若点集和边集都是某图子集，那么是**子图** (subgraph) $H\subseteq G$ 。**真子图**称为 proper-subgraph 。若子图只删点( $\forall u,v\in V_H,(u,v)\in E_G\to(u,v)\in E_H$ )，是**导出子图/诱导子图** (induced subgraph)，只由点集决定，记作 $G[V']$ 。若顶点与母图一样，那么称为**生成子图/支撑子图** (spanning subgraph) 。原图或空图称为**平凡子图** (trivial subgraph)。$k-$ **正则图** (k-regular graph) 是每个点度均为 $k$ 的无向图。若无向图生成子图 $F$ 是 $k-$ 正则图，那么 $F$ 是原图的 $k-$ 因子 (k-factor)。若有向图导出子图的每个点 $v$ 满足 $(v,u)\in E$ (在原图边集)且 $u$ 在导出子图，那么称为**闭合子图** (closed subgraph)。从图删去 $V'$ 的点记作 $G[V\backslash V']$ 。删边同理。删点可记作 $G-V$ 。
+
+**连通**(connected) 是无向图任两点可达。 **强连通**是任意两点连通的有向图，**弱连通**是有向图转无向图后成为连通图的图。有**连通块(连通分量)**概念及其强/弱连通分量概念。**点割集** (vertex cut/separating set)大小为 $1$ 叫做**割点** (cut vertex) 。若 $|V|\ge k+1$ 且不存在 $k-1$ 大小点割集，图是 $k-$ **点连通的** (k-vertex-connected) , 其最大 $k$ 叫**点连通度**(vertex connectivity) 记作 $\kappa(G)$ (非完全图是最小点割集大小，完全图是 $n-1$ )。使得本可达的 $u,v$ 不连通的最小点割集(不考虑其他点连通性)大小是局部点连通度 (local connectivity) 记作 $\kappa(u,v)$ 。同理可以定义边割集和桥， $k-$ 边连通的，边连通度 $\lambda(G)$ 和局部边连通度 $\lambda(u,v)$ 。点双连通 (binoeected) 是除单边双点图外的 $2-$ 点连通(是没有割点的连通图)。边双连通等于 $2-$ 边连通。类似有(极大)点/边双连通分量。 <u>Whitney 定理：任意图 $G$ $\kappa(G)\le \lambda(G)\le\delta(G)$</u> 
+
+ 一般边数接近点数平方叫稀疏图 (sparse graph)，否则稠密图 (dense graph)。**补图** (complement graph) $\overline G$ 是 $(u,v)\in E(\overline G)$ 当且仅当 $(u,v)\notin E(G)$ 补图是无向简单图。**反图** (transpose graph) 是有向图每条边反向。**完全图** (complete graph) 是无向简单图，任两点有边，记作 $K_n$ 。有向图任两点有两条互为反向的边记作**有向完全图** (complete digraph)。有向简单图两点间有一条单向边是**竞赛图** (tournament graph) 。边集是空叫**零图** (null graph)，记作 $N_n$ 。无向简单图所有边构成一个圈称为**环图/圈图** (cycle graph) , $n\ge 3$ 记作 $C_n$ ，<u>充要条件是为 2-正则连通图</u>。若无向简单图满足一个点是支配点，其他点无边相连，称为**星图/菊花图** (star graph), $n\ge1,n+1$ 阶星图记作 $S_n$ 。无向简单图满足一个点是支配点，其他点构成一个圈是轮图 (wheel graph) $n+1(n\ge 3)$ 阶轮图是 $W_n$ 。无向简单图所有边构成简单路径，称为**链** (chain/path graph)，记作 $P_n$ 。无向连通无环图是**树**。无向连通、恰含一环是**基环树** (pseudotree)。有向弱连通，入度均 $1$ 图是基环外向树，出度均为 $1$ 是基环内向树。多棵树组成**森林**(基环同理)。基环内向森林：functional graph。无向连通图每条边最多在一个环内是**仙人掌** cactus ，仙人掌组成沙漠。**二分图** bipartite graph，任何两个不在同一部分的点都有连边是**完全二分图** (complete bipartite graph/biclique) 记作 $K_{n,m}$ 。
+
+若 $E'\in E$ 且 $E'$ 任两条不同的边没有公共端点，且不是自环，那么 $E'$  是一个**匹配** (matching)/**边独立集** (independent edge set)。若一个点是匹配中某边的端点，称为**被匹配的**(matched)/**饱和的**(saturated)，否则是**不被匹配的**(unmatched)。边数最多的匹配是一张图的**最大匹配**(maximum-cardinality matching)，记作 $v(G)$ 。权重和最大的匹配是**最大权匹配**(maximum-weight matching)。匹配加入任意边后不再是匹配，称为**极大匹配**(maximal matching)。最大的极大匹配就是最大匹配，任何最大匹配都是极大匹配。极大匹配一定是边支配集，但边支配集不一定是匹配。最小极大匹配和最小边支配集大小相等，但最小边支配集不一定是匹配。若一个匹配里所有点都是被匹配的，称为**完美匹配** (perfect matching)。只有一个点不被匹配是准完美匹配(near-perfect matching)。对匹配 $M$ ，若一条路径以非匹配点为起点，每相邻两条边的一条在匹配中另一条不在，称为**交替路径**(alternating path)，在非匹配点终止的交替路径称为**增广路经**(augmenting path)。<u>托特定理： $n$ 阶无向图 $G$ 有完美匹配当且仅当 $\forall V'\subset V(G),p_奇(G-V')\le |V'|$  (奇数阶连通分支数)，任何无桥3-正则图都有完美匹配。</u>
+
+若 $V'\subseteq V$ 且 $\forall e\in E$ 满足 $e$ 至少一个端点在 $V'$ 中，称 $V'$ 为一个**点覆盖**(vertex cover)。<u>点覆盖集必为支配集，但极小点覆盖集不一定是极小支配集。一个点集是点覆盖的充要条件是其补集是独立集，因此最小点覆盖的补集是最大独立集。一张图的任何一个匹配的大小都不超过其任何一个点覆盖的大小。完全二分图 $K_{n,m}$ 的最大匹配和最小点覆盖大小都为 $\min(n,m)$ 。</u>
+
+若 $E'\subseteq E$ 且 $\forall v\in V$ 满足 $v$ 与 $E'$ 至少一条边相邻，称为**边覆盖**(edge cover)，最小边覆盖的大小记作 $\rho(G)$ 。<u>对于所有非匹配点，将其一条邻边加入最大匹配中，即得到了一个最小边覆盖。也可以由最小边覆盖求得：对于最小边覆盖中每对有公共点的边删去其中一条。满足 $\rho(G)+v(G)=|V(G)|$ 且 $v(G)\le \rho(G)$ 特别地，完美匹配一定是一个最小边覆盖，这也是上式取到等号的唯一情况。一张图的任何一个独立集的大小都不超过其任何一个边覆盖的大小。完全二分图 $K_{n,m}$ 的最大独立集和最小边覆盖大小都为 $\max(n,m)$ 。</u>
+
+> 一张图可以画在一个平面内，无两条边在非端点处相交，是**平面图** (planar graph)，任何子图都不是 ${K_5}$ 或 ${k_{3,3}}$ 是为平面图的充要条件。 简单连通平面图若 $V\ge 3$ 则 $|E|\le 3|V|-6$ 。
+>
+> 若存在双射 $f:V(G)\to V(H)$ ，满足 $(u,v)\in E(G)$ ，当且仅当 $(f(u),f(v))\in E(H)$ 称 $f$ 为 $G$ 到 $H$ 的一个**同构**(isomorphism)，图是同构的(isomorphic)，记作 $G\cong H$ ，必须满足点数边数相同，结点度非增序列相同且存在同构导出子图。
+>
+> 图的交、并是点集、边集分别作交、并。图的和/直和 (sum/direct sum)是任意构造 $H'\cong H$ 使得 $V(H')\cap V_1=\emptyset$ ($H'$ 可以等于 $H$) ，此时与 $G\cup H'$ 同构的任何图叫做 $G$ 和 $H$ 的和/直和/不交并，记作 $G+H$ 或 $G\oplus H$ 。若点集本身不交，则 $G\cup H=G+H$ 。如森林是各树的和。可以理解为，“并”会让两张图中“名字相同”的点、边合并，而“和”则不会。
+>
+> 若 $E'\subseteq E$ 且 $\forall e\in(E\backslash E')$ 存在 $E'$ 中的边与其有公共点，称 $E'$ 是图 $G$ 的一个边支配集(edge dominating set)。若 $V'\subseteq V$ 且 $V'$ 中任意两点都不相邻，则 $V'$ 是一个独立集(independent set)。大小记作 $\alpha(G)$ 。若 $V'\subseteq V$ 且 $V'$ 任意两个不同顶点都相邻，则 $V'$ 是一个团(clique)，团的导出子图是完全图。如果一个团在加入任何一个顶点后都不再是一个团，则这个团是一个极大团 (Maximal clique)。最大团大小是 $w(G)$ ，满足 $w(G)=\alpha(\overline G)$ 。
+>
+> 求最大团、最小点覆盖、最大独立集、最小边支配、最小支配集是 NP 困难的，求完美匹配个数是 #P 完全的。
+
+
+
+### 最短路
+
+最短路存在的条件为无负环。
+
+#### floyd
+
+全源最短路，适用于任何无负环的图。记得初始化为半倍max/极大值
+
+```c++
+for (k = 1; k <= n; k++) 
+  for (i = 1; i <= n; i++)
+    for (j = 1; j <= n; j++) 
+      f[i][j] = min(f[i][j], f[i][k] + f[k][j]);
+```
+
+第 $k$ 次循环时，表示只经过前 $k$ 个节点时，最短路的大小。记录路径可以获得更小时设 `pre[i][j]=k` 。
+
+应用：
+
+> hdu1599-给定 $n(\le100)$ 点和 $m(\le10^3)$ 双向带权路，从任一点出发经过共至少 $3$ 个不同点然后回到该点成一个环，求最小带权环，无环输出 `It's impossible.`
+
+环长等于 $d(a,b)+e(b,c)+e(c,a)$ ，枚举起点 $k$ ，跑 floyd 最短路。
+
+```c++
+#include <bits/stdc++.h>
+using namespace std;
+#define sc(x) scanf("%lld", &x)
+typedef long long ll;
+#define mn 101
+ll n, m, f[mn][mn], e[mn][mn], ans, big = 1e9, u, v, w;
+signed main()
+{
+    while (EOF != scanf("%lld%lld", &n, &m))
+    {
+        for (ll i = 1; i <= n; ++i)
+            for (ll j = 1; j <= n; ++j)
+                f[i][j] = e[i][j] = big;
+        while (m--)
+        {
+            sc(u), sc(v), sc(w); //防重边
+            e[u][v] = e[v][u] = f[u][v] = f[v][u] = min(e[u][v], w);
+        }
+        ans = big;
+        for (ll k = 1; k <= n; ++k)
+        {
+            for (ll i = 1; i < k; ++i)
+                for (ll j = i + 1; j < k; ++j)
+                    ans = min(ans, f[i][j] + e[j][k] + e[k][i]);
+            for (ll i = 1; i <= n; ++i)
+                for (ll j = 1; j <= n; ++j)
+                    f[i][j] = min(f[i][j], f[i][k] + f[k][j]);
+        }
+        ans == big ? printf("It's impossible.\n") : printf("%lld\n", ans);
+    }
+    return 0;
+}
+```
+
+
+
+> poj3660-给定 $n(1\le n\le100)$ 点和 $m(1\le m\le4500)$ 关系，每个关系表示点 $u$ 优于点 $v$ ，问根据这些关系能确定多少个点的排名(保证无自环和环，无矛盾)
+
+floyd跑传递闭包，得到可达矩阵。如果一个点同时被 $n-1$ 个点可达(无论是自己大于这些点还是这些点小于它)，就表明它的位置唯一确定， floyd 更新代码用：
+
+```c++
+f[i][j] |= (f[i][k] & f[k][j]);
+```
+
+如果用 bitset 优化，复杂度还可以达到 $O(\dfrac{n^3}w)$ ：
+
+```c++
+#include <cstdio>
+#include <bitset>
+using namespace std;
+#define sc(x) scanf("%lld", &x)
+typedef long long ll;
+#define mn 105
+ll n, m, ans, u, v;
+bitset<mn> f[mn];
+signed main()
+{
+    sc(n), sc(m);
+    while (m--)
+        sc(u), sc(v), f[v][u] = 1;
+    for (ll k = 1; k <= n; ++k)
+        for (ll i = 1; i <= n; ++i)
+            if (f[i][k])
+                f[i] |= f[k];
+    for (ll i = 1; i <= n; ++i)
+    {
+        ll cnt = 0;
+        for (ll j = 1; j <= n; ++j)
+            cnt += (f[i][j] | f[j][i]);
+        ans += cnt == n - 1;
+    }
+    printf("%lld", ans);
+    return 0;
+}
+```
+
+
+
+#### Bellman-Ford
+
+不断尝试对图上每一条边进行松弛。我们每进行一轮循环，就对图上所有的边都尝试进行一次松弛操作，当一次循环中没有成功的松弛操作时，算法停止。复杂度 $O(nm)$ 。
+
+可以求出有负权的图的最短路，并可以对最短路不存在的情况进行判断。最严谨的做法是建立一个超级源点，向图上每个节点连一条权值为 0 的边，然后以超级源点为起点执行 Bellman-Ford 算法。若第 n 轮迭代仍有结点的最短路能被更新，则图中有负环
+
+> 洛谷P3385-多组样例，输入 $w$ 为正是无向边，负是有向边 ( $u\to v$ )，问是否存在从顶点 $1$ 出发可达的负环 $T\le10,1\le n\le2\times10^3,1\le m\le3\times10^3$ 
+
+```c++
+#include <bits/stdc++.h>
+using namespace std;
+const int N = 10010, big = 0x7fffffff;
+int cnt = 0;
+struct node
+{
+    int x, y, v;
+} e[N];
+void add(int x, int y, int v) { e[++cnt] = {x, y, v}; }
+int n;
+bool bellman()
+{
+    static int d[N];
+    d[1] = 0;
+    for (int i = 2; i <= n; i++)
+        d[i] = big;
+    for (int i = 1; i <= n - 1; i++)
+        for (int j = 1; j <= cnt; j++)
+        {
+            if (d[e[j].x] != big &&
+                d[e[j].x] + e[j].v < d[e[j].y])
+                d[e[j].y] = d[e[j].x] + e[j].v;
+        }
+    for (int i = 1; i <= cnt; i++)
+    {
+        if (d[e[i].x] == big || d[e[i].y] == big)
+            continue;
+        if (d[e[i].x] + e[i].v < d[e[i].y])
+            return true; // 负权回路
+    }
+    return false;
+}
+signed main()
+{
+    int t;
+    scanf("%d", &t);
+    while (t--)
+    {
+        memset(e, 0, sizeof(e));
+        cnt = 0;
+        int m;
+        scanf("%d%d", &n, &m);
+        for (int i = 1; i <= m; i++)
+        {
+            int x, y, v;
+            scanf("%d%d%d", &x, &y, &v);
+            if (v < 0)
+                add(x, y, v);
+            if (v >= 0)
+                add(x, y, v), add(y, x, v);
+        }
+        if (bellman())
+            printf("YES\n");
+        else
+            printf("NO\n");
+    }
+    return 0;
+}
+```
+
+若求最长路，可以设初始值为 $-1$ (或负无穷)，松弛反号(起点不为 $-1$ 可以继续)。
+
+
+
+#### SPFA
+
+~~(已死算法)~~队列优化的 SPFA ，用途是判负环。最坏情况仍然是 $O(nm)$ (堆/栈优化可以被卡指数级复杂度)。记录最短路经过了多少条边，当经过了至少 n 条边时，说明 s 点可以抵达一个负环。在没有负权边时最好使用 Dijkstra 算法。下面是负环模板：
+
+```c++
+#include <bits/stdc++.h>
+using namespace std;
+#define MAXN 2002
+#define MAXM 6002
+#define BIG (1 << 31) - 1
+#define inita(a, n, v) for (int i = 0; i <= n; i++) a[i] = v
+int n, m, hd[MAXN], cnt, d[MAXN], cnts[MAXN], ui, vi, wi, ttn;
+bool vis[MAXN];
+queue<int> q;
+struct edege
+{
+    int to, d, nx;
+} e[MAXM];
+inline void adde(int u, int v, int w)
+{
+    e[++cnt].d = w;
+    e[cnt].to = v;
+    e[cnt].nx = hd[u];
+    hd[u] = cnt;
+}
+void spfa()
+{
+    inita(d, n, BIG);
+    inita(cnts, n, 0);
+    inita(vis, n, false);
+    while (!q.empty())
+        q.pop();
+    d[1] = 0;
+    vis[1] = true;
+    q.push(1);
+    int u;
+    while (!q.empty())
+    {
+        u = q.front();
+        vis[u] = false;
+        q.pop();
+        for (int i = hd[u]; i != -1; i = e[i].nx)
+        {
+            if (d[u] + e[i].d < d[e[i].to])
+            {
+                d[e[i].to] = d[u] + e[i].d;
+                if (!vis[e[i].to])
+                {
+                    if (++cnts[e[i].to] >= n)
+                    {
+                        printf("YES\n");
+                        return;
+                    }
+                    vis[e[i].to] = true;
+                    q.push(e[i].to);
+                }
+            }
+        }
+    }
+    printf("NO\n");
+    return;
+}
+int main()
+{
+    scanf("%d", &ttn);
+    while (ttn--)
+    {
+        scanf("%d%d", &n, &m);
+        cnt = -1;
+        inita(hd, n, -1);
+        while (m--)
+        {
+            scanf("%d%d%d", &ui, &vi, &wi);
+            adde(ui, vi, wi);
+            if (wi >= 0)
+                adde(vi, ui, wi);
+        }
+        spfa();
+    }
+    return 0;
+}
+```
+
+
+
+#### Dijkstra
+
+非负权图适用。从未确定最短路点集里选最短路最小节点移到已知点集里，把已知点集节点出边松弛。稀疏图二叉堆更优，稠密图暴力做法更优。
+
+暴力：(洛谷P3371) $O(n^2+m)$
+
+```c++
+#include <bits/stdc++.h>
+#define MAXN 100002
+#define MAXM 200002
+#define BIG (1 << 31) - 1
+using namespace std;
+int n, m, s, ui, vi, wi, p[MAXN], d[MAXN];
+vector<pair<int, int>> g[MAXN];
+bool vis[MAXN];
+void dijkstra()
+{
+    for (int i = 1; i <= n; i++)
+        d[i] = BIG;
+    d[s] = 0;
+    int minv, minu;
+    for (int h = 0; h + 1 < n; h++)
+    {
+        minv = BIG;
+        for (int i = 1; i <= n; i++)
+        {
+            if (!vis[i] && d[i] < minv)
+            {
+                minv = d[i];
+                minu = i;
+            }
+        }
+        minv = BIG;
+        vis[minu] = true;
+        for (auto i : g[minu])
+        {
+            if (!vis[i.first] && d[minu] + i.second < d[i.first])
+            {
+                d[i.first] = d[minu] + i.second;
+            }
+        }
+    }
+}
+signed main()
+{
+    scanf("%d%d%d", &n, &m, &s);
+    while (m--)
+    {
+        scanf("%d%d%d", &ui, &vi, &wi);
+        g[ui].push_back({vi, wi});
+    }
+    dijkstra();
+    for (int i = 1; i <= n; i++)
+        printf("%d ", d[i]);
+    return 0;
+}
+
+```
+
+优先级队列优化：(洛谷P4771) $O(m\log m)$
+
+```c++
+#include <bits/stdc++.h>
+using namespace std;
+typedef int ll;
+#define big 0x3ffffffa
+#define mn 100010
+ll read() {ll r; scanf("%d", &r); return r; }
+struct edge
+{
+    ll to, nx, w;
+} e[mn << 1];
+ll hd[mn], cnt, n, m, u, v, w, d[mn], s, vis[mn];
+void adde(ll &u, ll &v, ll &w)
+{
+    e[++cnt] = {v, hd[u], w};
+    hd[u] = cnt;
+}
+struct node
+{
+    ll i, d;
+    bool operator<(const node &x) const { return d > x.d; }
+};
+priority_queue<node> q;
+signed main()
+{
+    n = read(), m = read(), s = read();
+    for (ll i = 1; i <= m; ++i)
+        u = read(), v = read(), w = read(), adde(u, v, w);
+    memset(d, 127, sizeof d);
+    d[s] = 0;
+    q.push({s, 0});
+    while (!q.empty())
+    {
+        node p = q.top();
+        q.pop();
+        if (vis[p.i])
+            continue;
+        vis[p.i] = true;
+        for (ll i = hd[p.i]; i; i = e[i].nx)
+        {
+            ll toi = e[i].to;
+            if (d[toi] > d[p.i] + e[i].w)
+            {
+                d[toi] = d[p.i] + e[i].w;
+                q.push({toi, d[toi]});
+            }
+        }
+    }
+    for (ll i = 1; i <= n; ++i)
+        printf("%d ", d[i]);
+    return 0;
+}
+```
+
+如果要输出路径本身，那么每次松弛时让 $v$ 指向起点 $u$ ；然后从终点倒序遍历这个指向数组，然后再顺着输出。如果要计数最短路数目，或求最短时点权最值最大的路径等，也在松弛时修改。
+
+可以修改松弛条件，来求别的最短路，如路径最大边权最小最短路：(也可以最小生成树上DFS)(SCNUOJ1458)
+$$
+dis[j]=\min(dis[j],\max(dis[mink],ma[mink][j]))
+$$
+非负权图跑 $n$ 次可以实现全源最短路，复杂度 $O(nm\log m)$ 。不能求单源最长路。
+
+
+
+#### Johnson
+
+复杂度 $O(nm\log m)$ ，适用于所有图，能判负环
+
+> 洛谷P5905-有向，可能负边权、自环重边、卡SPFA $n(1\le n\le3\times10^3),m(1\le n\le6\times10^3,|w|\le3\times10^5)$ ，若负环输出 $-1$ ，否则输出 $n$ 行，设最短路为 $dis_{i,j}$ ，输出 $\sum_{j=1}^nj\times dis_{i,j}$ 。不存在路径设 $dis_{i,j}=10^9$  ，$dis_{i,i}=0$ 
+
+```c++
+#include <bits/stdc++.h>
+using namespace std;
+typedef long long ll;
+#define repe(i,a,b) for(ll i=a;i<=b;++i)
+#define MAXN 5006
+#define BIG 1000000000
+struct edge { ll to, nx, w; } e[MAXN<<1];
+struct node
+{
+	ll d, i;
+	bool operator<(const node& x)const { return d > x.d; }
+	node(ll x, ll y) { d = x, i = y; }
+};
+ll hd[MAXN], t[MAXN], cnt, n, m, h[MAXN], dis[MAXN], ui, vi, wi, ans;
+bool vis[MAXN];
+inline void adde(ll& u, ll& v, ll& w)
+{
+	e[++cnt] = { v,hd[u],w };
+	hd[u] = cnt;
+}
+inline bool spfa(ll x)
+{
+	queue<ll> q;
+	memset(h, 63, sizeof h);
+	h[x] = 0, vis[x] = true; q.push(x);
+	while (!q.empty())
+	{
+		ll y = q.front(); q.pop();
+		vis[y] = false;
+		for (ll i = hd[y]; i; i = e[i].nx)
+		{
+			ll z = e[i].to;
+			if (h[z] > h[y] + e[i].w)
+			{
+				h[z] = h[y] + e[i].w;
+				if (!vis[z])
+				{
+					vis[z] = true, ++t[z];
+					q.push(z);
+					if (t[z] > n) return false;
+				}
+			}
+		}
+	}
+	return true;
+}
+inline void dijkstra(ll x)
+{
+	priority_queue<node> q;
+	repe(i, 1, n) dis[i] = BIG;
+	memset(vis, 0, sizeof vis);
+	dis[x] = 0;
+	q.push(node(0, x));
+	while (!q.empty())
+	{
+		ll u = q.top().i; q.pop();
+		if (vis[u]) continue;
+		vis[u] = true;
+		for (ll i = hd[u]; i; i = e[i].nx)
+		{
+			ll v = e[i].to;
+			if (dis[v] > dis[u] + e[i].w)
+			{
+				dis[v] = dis[u] + e[i].w;
+				if (!vis[v]) q.push(node(dis[v], v));
+			}
+		}
+	}
+}
+signed main()
+{
+	scanf("%lld%lld", &n, &m);
+	repe(i, 1, m) scanf("%lld%lld%lld", &ui, &vi, &wi), adde(ui, vi, wi);
+	repe(i, 1, n) adde(ans, i, ans);
+	if (!spfa(0)) return !printf("-1");
+	repe(u, 1, n) for (ll i = hd[u]; i; i = e[i].nx)
+		e[i].w += h[u] - h[e[i].to];
+	repe(i,1,n)
+	{
+		dijkstra(i);
+		ans = 0;
+		repe(j, 1, n)
+		{
+			if (dis[j] == BIG) ans += j * BIG;
+			else ans += j * (dis[j] + h[j] - h[i]);
+		}
+		printf("%lld\n", ans);
+	}
+	return 0;
+}
+```
+
+
+
+
+
+### 拓扑排序
+
+
+
+### 最小生成树
+
+
+
+### 连通性
+
+
+
+### 二分图
+
+
+
+### 网络流
+
+
+
+### 其他
+
+#### 欧拉路
+
+欧拉路径：经过每条边一次且仅一次的路径(起点不为终点)
+
+欧拉回路：经过每条边一次且仅一次的回路
+
+有向图欧拉路径：恰好存在一个点出度比入度多一(起点)，一个点入度比出度多一(终点)，其他点入度与出度相同
+
+有向图欧拉回路：所有点入度=出度，起点和终点任选
+
+无向图欧拉路径：恰好存在 $2$ 点度数是奇数(分别是起点终点)，其他点度数是偶数
+
+无向图欧拉回路：所有点度数是偶数(起点终点任选)
+
+若存在欧拉回路也一定存在欧拉路径
+
+此外，还应该判定图是否是连通图(满足上面条件也有非连通图)显然可以用并查集来做。
+
+具有欧拉回路的无向或有向图是欧拉图；具有欧拉通路而不具有回路的是半欧拉图。(直观理解回路即任意点开始可以一笔画完图；通路只有特定点开始可以)
+
+> 洛谷 P7771 输出 $n,m$ 有向图的最小字典序欧拉路径，若不存在输出 `No` $1\le n\le10^5,1\le m\le2\times10^5$ 
+
+下面代码模板没有判定联通，要判并查集/tarjan即可
+
+```c++
+#include <bits/stdc++.h>
+using namespace std;
+#define mn 100010
+typedef long long ll;
+ll n, m, ru[mn], cu[mn], s = 1, fail, vis[mn], bgs, eds;
+vector<ll> e[mn];
+stack<ll> ans;
+void dfs(ll u)
+{
+    for (ll i = vis[u]; i < e[u].size(); i = vis[u])
+    { //不i++是可能被后续dfs更新过
+        vis[u] = i + 1;
+        dfs(e[u][i]);
+    }
+    ans.push(u);
+}
+signed main()
+{
+    scanf("%lld%lld", &n, &m);
+    for (ll i = 0, u, v; i < m; ++i)
+    {
+        scanf("%lld%lld", &u, &v);
+        ++cu[u], ++ru[v];
+        e[u].emplace_back(v);
+    }
+    for (ll i = 1; i <= n; ++i)
+    {
+        if (cu[i] == ru[i] + 1)
+        {
+            s = i;
+            ++bgs;
+        }
+        else if (ru[i] == cu[i] + 1)
+        {
+            ++eds;
+        }
+        if (ru[i] != cu[i])
+        {
+            ++fail;
+        }
+        sort(e[i].begin(), e[i].end());
+    }
+    if (!(fail == 0 || (fail == 2 && bgs == 1 && eds == 1)))
+    {
+        printf("No");
+        return 0;
+    }
+    dfs(s);
+    while (!ans.empty())
+    {
+        printf("%lld ", ans.top());
+        ans.pop();
+    }
+    return 0;
+}
+```
+
+> P2731洛谷-给定无向图边数 $m$ ，点在 $[1,500]$ 编号，必然有解且联通，输出字典序最小欧拉路
+
+```c++
+#include <bits/stdc++.h>
+using namespace std;
+typedef long long ll;
+#define mn 512
+ll m, s = 1, g[mn][mn], du[mn], n;
+stack<ll> ans;
+void dfs(ll u)
+{
+    for (ll v = 1; v <= n; ++v)
+    {
+        if (g[u][v] > 0)
+        {
+            --g[u][v], --g[v][u];
+            dfs(v);
+        }
+    }
+    ans.push(u);
+}
+signed main()
+{
+    scanf("%lld", &m);
+    for (ll i = 0, u, v; i < m; ++i)
+    {
+        scanf("%lld%lld", &u, &v);
+        ++du[u], ++du[v], ++g[u][v], ++g[v][u];
+        n = max(n, max(u, v));
+    }
+    for (ll i = 1; i <= n; ++i)
+    {
+        if (du[i] & 1)
+        {
+            s = i;
+            break;
+        }
+    }
+    dfs(s);
+    while (!ans.empty())
+    {
+        printf("%lld\n", ans.top());
+        ans.pop();
+    }
+    return 0;
+}
+```
+
+
+
+## 动态规划
 
 
 
@@ -5833,7 +7077,7 @@ int main()
 ll m = unique(a + 1, a + 6) - (a + 1);
 ```
 
-**nth\_element** : (a,a+k,a+n); 使容器a+k所在元素左边都小于它，右边都大于它(a+k通常移位)
+**nth\_element** : (a,a+k,a+n,cmp); 使容器a+k所在元素左边都小于它，右边都大于它(a+k通常移位)
 
 **partial\_sort** : 保证\[lf,cf)有序，\[cf,rf\]按本来的相对顺序。
 
@@ -5993,7 +7237,7 @@ bitset<d> s2(str);
 //如果是整型，那么填充时会自动转换为二进制，如果是字符串，但是其中出现了 0/1 以外的字符，就会爆炸
 ```
 
-方法：
+可以直接当 bool 数组来用。也有方法：
 
 1. 基本的位操作，如：$s|=s<<w[i];$
 2. .count()计算1的个数
@@ -6237,3 +7481,6 @@ Java:
 #pragma GCC optimize(2)
 ```
 
+
+
+### 常用术语表
