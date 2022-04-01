@@ -6,7 +6,7 @@
 
 ![image-20220325120131181](img/image-20220325120131181.png)
 
-<div align="center" style="font-size:18px">Last built at Mar. 30, 2022</div>
+<div align="center" style="font-size:18px">Last built at Apr. 1, 2022</div>
 
 <div STYLE="page-break-after: always;"></div>
 
@@ -53,10 +53,41 @@ $$
 (x+y)^n=\sum_{k=0}^n\begin{pmatrix}n\\k\end{pmatrix}x^ky^{n-k}
 $$
 
-多重全排列公式：
+
+
+多重组合数(即多重集的全排列)公式：
 $$
-P(n;r_1,r_2,\cdots, r_t)=\dfrac{n!}{r_1!r_2!\cdots r_t!}
+\begin{pmatrix}n\\n_1,n_2,\cdots n_r\end{pmatrix}=\dfrac{n!}{n_1!n_2!\cdots n_t!}
 $$
+二项式定理的多项式形式：
+$$
+(x_1+\cdots+x_t)^n=\sum_{满足n_1+\cdots+n_t=n的非负整数解}
+\begin{pmatrix}n\\n_1,n_2,\cdots n_t\end{pmatrix}
+x_1^{n_1}x_2^{n_2}\cdots x_t^{n_t}
+$$
+从多重集 $S=\{n_1\cdot a_1,\cdots n_k\cdot a_k\}$ 选 $r$ 个元素的多重集组合数，为 $x_1+\cdots +x_k=r$ 的非负整数解数目，插板法知为 $\begin{pmatrix}r+k-1\\k-1\end{pmatrix}$ (条件： $r < \min n_i$ )，任意条件为：
+$$
+\sum_{p=0}^k(-1)^p\sum_{A}
+\begin{pmatrix}
+k+r-1-\sum_An_{A_i}-p\\k-1
+\end{pmatrix}
+$$
+$A$ 是枚举子集，满足 $|A|=p,A_i < A_{i+1}$ 
+
+
+
+$n$ 个自然数选 $k$ 个，任两个数都不相邻： $\begin{pmatrix}n-k+1\\k\end{pmatrix}$
+
+$i$ 数错位排列数公式： $d[0]=d[1]=0,d[2]=1$
+$$
+d[n]=(n-1)(d[n-1]+d[n-2])=n!(1-\dfrac{1}{1!}+-\dfrac{1}{2!}+\cdots+(-1)^n\dfrac1{n!})
+$$
+$n$ 个数有 $m$ 个乱的情况数： $C_n^md[m]$ 
+
+$n$ 人围圈排列数 $Q_n^n=(n-1)!$ ，部分圆排列公式 $Q_n^r=\dfrac{A_n^r}r$
+
+
+
 顺序和 $\le$ 乱序和 $\le$ 逆序和
 
 
@@ -66,53 +97,72 @@ $$
 - $\sum_{k=0}^n\begin{pmatrix}n\\k\end{pmatrix}=2^n,n\in N$
 - $\sum_{k=0}^n(-1)^k\begin{pmatrix}n\\k\end{pmatrix}=0,n\in N$
 - $\sum_{l=0}^n\begin{pmatrix}l\\k\end{pmatrix}=\begin{pmatrix}n+1\\k+1\end{pmatrix},n,k\in N$
+- $\sum_{i=0}^m\begin{pmatrix}n\\i\end{pmatrix}\begin{pmatrix}m\\m-i\end{pmatrix}=\begin{pmatrix}m+n\\m\end{pmatrix},n\ge m$
+- $\sum_{i=0}^n\begin{pmatrix}n\\i\end{pmatrix}^2=\begin{pmatrix}2n\\n\end{pmatrix}$
 - $\begin{pmatrix}n\\r\end{pmatrix}\begin{pmatrix}r\\k\end{pmatrix}=\begin{pmatrix}n\\k\end{pmatrix}\begin{pmatrix}n-k\\r-k\end{pmatrix},n\ge r\ge k,n,r,k\in N$
 - $\sum_{k=0}^r\begin{pmatrix}m\\k\end{pmatrix}\begin{pmatrix}n\\r-k\end{pmatrix}=\begin{pmatrix}n+m\\r\end{pmatrix},n,m,r\in N,r\le\min(m,n)$
 - $\sum_{k=0}^n\begin{pmatrix}m\\k\end{pmatrix}\begin{pmatrix}n\\k\end{pmatrix}=\begin{pmatrix}m+n\\m\end{pmatrix},m,n\in N$
+- $\sum_{i=0}^ni\begin{pmatrix}n\\i\end{pmatrix}=n2^{n-1}$
+- $\sum_{i=0}^n\begin{pmatrix}n-i\\i\end{pmatrix}=fib_{n+1}$
 
 > 某些时候可以两边求导再求
 
 **容斥原理：**
+
+$U$ 中元素有 $n$ 种不同属性 $p_i$ ，拥有属性 $p_i$ 的元素构成集合 $S_i$
 $$
 |\bigcup_{i=1}^nS_i|=\sum_{m=1}^n(-1)^{m-1}\sum_{a_i<a_{i+1}}|\bigcap_{i=1}^mS_{a_i}|
+\\
+|\bigcap_{i=1}^nS_i|=|U|-|\bigcup_{i=1}^n\overline{S_i}|
 $$
+
+
 **抽屉原理：**
 
 把 $mn+1$ 个物体放到 $n$ 个抽屉里，至少有一个抽屉至少有 $m+1$ 个物体
 
 把 $mn-1$ 个物体放到 $n$ 个抽屉里，至少有一个抽屉至少有 $m-1$ 个物体
 
+将 $n$ 物放到 $k$ 抽屉，至少一个有不少于 $\lceil\dfrac nk\rceil$ 个物体
+
+> 应用：选 $n$ 个正整数的若干个数， $n\ge m$ 时选出的数必然存在可以被 $m$ 整除
+
 
 
 ##### 卡特兰数
 
 $$
-c[0]=1\\
-c[n+1]=\sum_{i=0}^nc[i]\cdot c[n-i-1]
+H[0]=1\\
+H[n+1]=\sum_{i=0}^nH[i]\cdot H[n-i-1]
 $$
 
-从 $0$ 到 $5$ 分别是 $1,1,2,5,14,42$ ，`c[35]`  为 19 位长度，`c[36]` 爆long long 
+从 $0$ 到 $5$ 分别是 $1,1,2,5,14,42$ ，`H[35]`  为 19 位长度，`H[36]` 爆long long 
 $$
-c[n]=c[n-1]\times\dfrac{4n-2}{n+1}\\
-c[n]=\dfrac{C(2n,n)}{n+1}\\
-c[n]=C(2n,n)-C(2n,n-1)
+H[n]=H[n-1]\times\dfrac{4n-2}{n+1}\\
+H[n]=\dfrac{C(2n,n)}{n+1}\\
+H[n]=C(2n,n)-C(2n,n-1)
 $$
-意义：
+常见应用：
 
 - 矩阵连乘： P=a1×a2×a3×……×an，依据乘法结合律，不改变其顺序，只用括号表示成对的乘积，试问有几种括号化的方案。h(n) 种
 - 一个栈(无穷大)的进栈序列为1，2，3，…，n，有多少个不同的出栈序列
-- 在一个凸多边形中，通过若干条互不相交的对角线，把这个多边形划分成了若干个三角形。任务是键盘上输入凸多边形的边数n，求不同划分的方案数 f（n）。比如当n=6时，f（6）=14。
-- 给定N个节点，能构成多少种不同的二叉搜索树
+- 在一个凸多边形中，通过若干条互不相交的对角线，把这个多边形划分成若干个三角形方案数如n=6,f(6)=14
+- 给定n个节点，能构成多少不同的二叉搜索树
 - 给定n对括号，求括号正确配对的字符串数
 - $2n$ 个黑白，使得前缀黑色小于白色的方案数
 - 圆上 $2n$ 点用 $n$ 条不相交线段连接的方案数
 - $n$ 人有 $50$ 元，$n$ 人有 $100$ 元买 $50$ 元物品，排队方案数使得 $2n$ 人都可找零
+- $2n$ 人交 $5$ 元， $n$ 人只有 $5$ 元一张，另 $n$ 人 $10$ 元一张，问多少种方案只要有 $10$ 元人交钱就有 $5$ 元找零
+- $n$ 个 $+1$ 和 $n$ 个 $-1$ 构成 $2n$ 项 $a_1,\cdots a_{2n}$ 满足前缀和 $a_1+\cdots+a_k\ge0(k=1,2,\cdots2 n)$ 的数列方案数
+- 从 $(0,0)$ 到 $(m,n)$ 的非降路径数 $\begin{pmatrix}n+m\\m\end{pmatrix}$
+- 从 $(0,0)$ 到 $(n,n)$ 除端点不接触 $y=x$ 非降路径数 $2\begin{pmatrix}2n-2\\n-1\end{pmatrix}-2\begin{pmatrix}2n-2\\n\end{pmatrix}$
+- 从 $(0,0)$ 到 $(n,n)$ 除端点不穿过 $y=x$ 非降路径数 $\dfrac2{n+1}\begin{pmatrix}2n\\n\end{pmatrix}$
 
 
 
 ##### 斯特林数
 
-第一类：(无符号:)将n个不同元素构成m个圆排列的数目。无符号为 $s_u(n,m)$ 或$\left[\matrix{n\\m}\right]$ ，有符号为 $s_s(n,m)$ ，分别表现升阶函数和降阶函数的各项系数。
+**第一类**：(无符号:)将n个不同元素构成m个非空圆排列的数目( $[A,B,C]\neq[C,B,A]$ 为不同圆排列(轮换) )。(斯特林轮换数)无符号为 $s_u(n,m),s(n,m)$ 或$\left[\matrix{n\\m}\right]$ ，有符号为 $s_s(n,m)$ ，分别表现升阶函数和降阶函数的各项系数。
 $$
 \begin{align}
 x^{n\downarrow}&=x(x-1)(x-2)\dots(x-n+1)=\sum_{k=0}^ns_s(n,k)x^k\\
@@ -129,17 +179,37 @@ $$
 >
 > 而第二问就对应的将n个元素分成m个圆排列，方案数就是第一类无符号Stirling数$s_u(n,m)$。如要要考虑官员的情况，只需再乘上$n!$即可。
 
-第二类：把n+1个元素分成m个集合，记为$S(n,m)$或$\left\{\matrix{n\\m}\right\}$。
+
+
+**第二类**：(斯特林子集数)把n个互异元素分成m个互不区分非空集合，记为$S(n,m)$或$\left\{\matrix{n\\m}\right\}$ 
 $$
 \begin{align}
-S(n,m)&=\frac{1}{m!}\sum_{k=0}^m(-1)^k\left(\matrix{m\\k}\right)(m-k)^n\\
+S(n,m)&=\frac{1}{m!}\sum_{k=0}^m(-1)^k\left(\matrix{m\\k}\right)(m-k)^n=\sum_{i=0}^m\dfrac{(-1)^{m-i}i^n}{i!(m-i)!}\\
 S(n+1,m)&=S(n,m-1)+m\cdot S(n,m)
 \end{align}
 $$
 
 递推上与第一类的区别在于$m$还是$n$作系数和正负问题。
 
-求斯特林数，可以套用公式二，使用 $dp$ 。注意到初始状态是$S(n,1)=S(n,n)=1$ 。
+求斯特林数，可以套用公式二，使用 $dp$ 。注意到初始状态是$S(n,1)=S(n,n)=1$ 。$S(n,0)=0^n$ 。求同一行( $n$ 相同)斯特林数可以用通项卷积，复杂度 $O(n\log n)$
+
+
+
+##### 生成函数
+
+可以解决组合问题(排列则乘一个阶乘变成组合)
+$$
+\begin{align}
+e^x&=\sum_{n=0}^\infty\frac{x^n}{n!}=1+\dfrac x{1!}+\dfrac{x^2}{2!}+\cdots,x\in\mathbf{R}
+\\
+e^{-x}&=1-\dfrac{x}{1!}+\dfrac{x^2}{2!}-\cdots
+\\
+\dfrac{e^x+e^{-x}}2&=(1+\dfrac{x^2}{2!}+\dfrac {x^4}{4!}\cdots)
+\\
+\dfrac1{1-x^a}&=1+x^a+x^{2a}+\cdots
+\end{align}
+$$
+
 
 
 
@@ -155,6 +225,28 @@ $$
 | 无     | 有     | 无   | 不定方程   | $C_{n-1}^{m-1}$                                 |
 | 无     | 无     | 有   | 正整数拆分 | $G(x)=\frac1{\prod_{i=1}^m(1-x^i)},x^n$系数     |
 | 无     | 无     | 无   | 正整数拆分 | $G(x)=\frac{x^m}{\prod_{i=1}^m(1-x^i)},x^n$系数 |
+
+不定方程 $\sum_{i=1}^mx_i=n$ 非负整数解个数是 $C_{n+m-1}^{m-1}=C_{n+m-1}^n$
+
+正整数 $n$ 拆分为 $m$ 个正整数即 $a_1x_1+a_2x_2+\cdots+a_mx_m=n$ ，若不允许重复，生成函数为 $\prod_{i=1}^m(1+x^{a_i})$ ，若允许重复，为 $\prod_{i=1}^m\dfrac1{1-x^i}$ 。均取系数 $x^n$ 。不允许就先每个至少取 $1$ 所以乘 $x^m$ 
+
+
+
+##### 其他
+
+**贝尔数**：$n$ 元素集合划分方法数(开首是 $B_0=B_1=1,B_2=2,B_3=5,B_4=15$ )
+$$
+B_{n+1}=\sum_{k=0}^n\begin{pmatrix}n\\k\end{pmatrix}B_k,\quad B_n=\sum_{k=0}^nS(n,k)
+$$
+可以用贝尔三角形 $a_{1,1}=1,a_{n,1}=a_{n-1,n-1},a_{n,m}=a_{n,m-1}+a_{n-1,m-1}$ 求 $B_i=a_{i,i}$
+
+
+
+**欧拉数**：$n$ 元素排列有 $m$ 个元素大于上一个元素 $A(n,m)$ ，如 $A(3,1)=4$ 。
+
+$A(n,m)=0(m\ge n), A(0,m)=0, A(n,0)=1$ 
+
+否则 $A(n,m)=(n-m)A(n-1,m-1)+(m+1)A(n-1,m)$
 
 
 
@@ -287,9 +379,44 @@ $$
 
 
 
-#### 数位
+#### 高等数学
+
+
+
+#### 其他
+
+**阶乘** 极限值：13!刚好爆int , 21!刚好爆long long
+
+
+
+**斐波那契数列**：f(47)刚好爆int, f(93)刚好爆long long
+
+- $\sum_{i=1}^nf(n)=f(n+2)-1$
+- $\sum_{i=1}^nf^2(i)=f(n)\times f(n+1)$
+- $f(n+m)=f(n+1)f(m)+f(n)f(m-1)$
+- $f(n)^2=(-1)^{n+1}+f(n-1)f(n+1)$
+
+
+
+牛顿法求函数零点：$x_{i+1}=x_i-\dfrac{f(x_i)}{f'(x_i)}$
+
+
 
 尾 $0$ 数目可以将大数质因数分解，求 $\min(num_2,num_5)$ 即可。其他质因数都不能乘出 $0$ 
+
+
+
+任意整数转 Excel 列名：
+
+```c++
+#include <bits/stdc++.h>
+int n; std::string x;
+signed main()
+{   for(scanf("%d",&n);n;n=(n-1)/26) x=(char)('A'+(n-1)%26 )+x;
+    return std::cout<<x,0;  }
+```
+
+
 
 
 
@@ -323,31 +450,239 @@ ll exgcd(ll a, ll b, ll &x, ll &y)
 } // 或 exgcd(b, a % b, y, x); y -= a / b * x;
 ```
 
-循环：
+
+
+
+
+
+
+### 计算几何
+
+
+
+### 杂项
+
+#### 高斯消元
+
+优化的Gauss-Jordan消元法，复杂度 $O(n^3)$ 
+
+> 洛谷P3389-求实数线性方程组的唯一解或 `No solution` ，值域 $|a|\le10^4$ 
 
 ```c++
-ll gcd(ll a, ll b, ll &x, ll &y)
+#include <bits/stdc++.h>
+using namespace std;
+typedef long long ll;
+typedef double db;
+#define repe(i,a,b) for(ll i=a;i<=b;++i)
+#define limn 102
+db a[limn][limn];
+ll n;
+signed main()
 {
-    x = 1, y = 0;
-    ll x1 = 0, y1 = 1, a1 = a, b1 = b;
-    while (b1)
-    {
-        ll q = a1 / b1;
-        tie(x, x1) = make_tuple(x1, x - q * x1);
-        tie(y, y1) = make_tuple(y1, y - q * y1);
-        tie(a1, b1) = make_tuple(b1, a1 - q * b1);
-    }
-    return a1;
+	scanf("%d", &n);
+	repe(i, 1, n) repe(j, 1, n + 1) scanf("%lf", &a[i][j]);
+	repe(i, 1, n)
+	{
+		ll mx = i;
+		repe(j, i + 1, n) if (fabs(a[j][i]) > fabs(a[mx][i])) mx = j;
+		repe(j, 1, n + 1) swap(a[i][j], a[mx][j]);
+		if (!a[i][i]) return !printf("No Solution");
+		repe(j, 1, n) if(j!=i)
+		{
+			db tmp = a[j][i] / a[i][i];
+			repe(k, i + 1, n + 1) a[j][k] -= a[i][k] * tmp;
+		}
+	}
+	repe(i, 1, n) printf("%.2lf\n", a[i][n + 1] / a[i][i]);
+	return 0;
+}
+```
+
+> 洛谷P4783-求逆矩阵对 $10^9+7$ 取模或输出 `No Solution`
+
+```c++
+#include <bits/stdc++.h>
+using namespace std;
+typedef long long ll;
+#define repe(i,a,b) for(ll i=a;i<=b;++i)
+#define MAXN 402
+#define MOD 1000000007
+ll n, m, f[MAXN][MAXN << 1], r, ret;
+ll inv(ll u, ll v)
+{
+	for (ret = 1; v; u = u * u % MOD, v >>= 1) if (v & 1)
+		ret = ret * u % MOD;
+	return ret;
+}
+signed main()
+{
+	scanf("%lld", &n), m = n << 1;
+	repe(i, 1, n)
+	{
+		repe(j, 1, n) scanf("%lld", &f[i][j]);
+		f[i][n + i] = 1;
+	}
+	repe(i, 1, n)
+	{
+		repe(j, i, n) if (f[j][i])
+		{
+			repe(k, 1, m) swap(f[i][k], f[j][k]);
+			break;
+		}
+		if (!f[i][i]) return !printf("No Solution");
+		r = inv(f[i][i], MOD - 2);
+		repe(j, i, m) f[i][j] = f[i][j] * r % MOD;
+		repe(j,1,n) if (j != i)
+		{
+			r = f[j][i];
+			repe(k, i, m) f[j][k] = (f[j][k] - r * f[i][k] % MOD + MOD) % MOD;
+		}
+	}
+	repe(i, 1, n)
+	{
+		repe(j, n + 1, m) printf("%lld ", f[i][j]);
+		printf("\n");
+	}
+	return 0;
 }
 ```
 
 
 
-### 组合数学
+#### 康托展开
+
+树状数组优化后 $O(n\log n)$ 求 $[1,n]$ 的任意排列的排名(字典序排序序号)，公式：
+$$
+1+\sum_{i=1}^n(n-i)!\times(\sum_{j=i}^n[a[j]<a[i]])
+$$
+
+```c++
+#include <bits/stdc++.h>
+using namespace std;
+typedef long long ll;
+#define MAXN 10000002
+#define MOD 998244353
+ll a, c[MAXN], f[MAXN], ans, v, n, lb[MAXN], k;
+ll sum(ll p)
+{
+	ll res = 0;
+	while (p) res += c[p], p -= lb[p];
+	return res;
+}
+void add(ll x, ll&& k)
+{
+	while (x <= n) c[x] += k, x += lb[x];
+}
+signed main()
+{
+	scanf("%lld", &n);
+	f[0] = 1;
+	for(ll i = 1; i <= n; ++i) f[i] = f[i - 1] * i % MOD;
+	for(ll i = 1; i <= n; ++i) lb[i] = i & -i;
+	for(ll i = 1; i <= n; ++i) add(i, 1);
+	for(ll i = 1; i <= n; ++i)
+	{
+		scanf("%lld", &a);
+		(ans += (sum(a) - 1) * f[n - i] % MOD) %= MOD;
+		add(a, -1);
+	}
+	printf("%lld", (++ans)%MOD);
+	return 0;
+}
+```
+
+逆康托展开(UVA11525)-给定每个 $\sum_{j=i}^n[a[j]<a[i]]$ ，求排列：
+
+```c++
+#include<iostream>
+#include<cstdio>
+#define N (500000+21)
+//define一定一定要记得加括号
+using namespace std;
+struct SegmentTree{int l,r,cnt;}t[N*4];//线段树数组要开四倍
+int T,n,x;
+//下面是线段树模板，基本和区间加差不多，就是注意查询操作类似于平衡树找第k名
+void build(int p,int l,int r){
+	t[p].l=l,t[p].r=r;
+	if(l==r){
+		t[p].cnt=1;
+		return;
+	}
+	int mid=(l+r)>>1;
+	build(p*2,l,mid);
+	build(p*2+1,mid+1,r);
+	t[p].cnt=t[p*2].cnt+t[p*2+1].cnt;
+}
+int modify(int p,int v){
+	if(t[p].l==t[p].r){
+		t[p].cnt=0;//这里随着查询也改变了数值
+		return t[p].l;
+	}
+	int res=0;
+	if(v<=t[p*2].cnt) res=modify(p*2,v);
+	else res=modify(p*2+1,v-t[p*2].cnt);
+	t[p].cnt=t[p*2].cnt+t[p*2+1].cnt;
+	return res;
+}
+int main(){
+	scanf("%d",&T);
+	while(T--){
+		scanf("%d",&n);
+		build(1,1,n);
+		for(int i=1;i<=n;i++){
+			scanf("%d",&x);
+			printf("%d",modify(1,x+1));//因为从0开始所以要把x加1
+			if(i!=n) printf(" ");
+		}
+		printf("\n");
+	}
+	return 0;
+}
+```
 
 
 
-### 计算几何
+#### 自适应辛普森法
+
+> 洛谷P4525-求 $\int_L^R\dfrac{cx+d}{ax+b}dx$ ，输入 $a,b,c,d,L,R$
+
+$$
+\int_a^bf(x)dx\approx\dfrac{(b-a)(f(a)+f(b)+4f(\dfrac{a+b}2))}6
+$$
+
+```c++
+#include <bits/stdc++.h>
+using namespace std;
+typedef double db;
+#define sc(x) scanf("%lf", &x)
+db a, b, c, d, l, r, eps = 1e-8; // eps可以比题目要求的细一两位
+db f(db x)                       //这里根据题目不同输写不同的f
+{
+    return (c * x + d) / (a * x + b);
+}
+db simpson(db lf, db rf)
+{
+    return (rf - lf) * (f(lf) + f(rf) + 4 * f((lf + rf) / 2)) / 6;
+}
+db solve(db lf, db rf, db now) //当前区间估计值为now
+{
+    db cf = (lf + rf) / 2;
+    db lfans = simpson(lf, cf), rfans = simpson(cf, rf);
+    if (abs(lfans + rfans - now) <= eps) //二分后也是now
+    {                                    //那就不需要细分了
+        return lfans + rfans;
+    }
+    return solve(lf, cf, lfans) + solve(cf, rf, rfans);
+}
+signed main()
+{
+    sc(a), sc(b), sc(c), sc(d), sc(l), sc(r);
+    printf("%lf", solve(l, r, 0)); //估计值随便填一个值
+    return 0;
+}
+```
+
+
 
 
 
@@ -4672,7 +5007,7 @@ signed main()
 
 若点集和边集都是某图子集，那么是**子图** (subgraph) $H\subseteq G$ 。**真子图**称为 proper-subgraph 。若子图只删点( $\forall u,v\in V_H,(u,v)\in E_G\to(u,v)\in E_H$ )，是**导出子图/诱导子图** (induced subgraph)，只由点集决定，记作 $G[V']$ 。若顶点与母图一样，那么称为**生成子图/支撑子图** (spanning subgraph) 。原图或空图称为**平凡子图** (trivial subgraph)。$k-$ **正则图** (k-regular graph) 是每个点度均为 $k$ 的无向图。若无向图生成子图 $F$ 是 $k-$ 正则图，那么 $F$ 是原图的 $k-$ 因子 (k-factor)。若有向图导出子图的每个点 $v$ 满足 $(v,u)\in E$ (在原图边集)且 $u$ 在导出子图，那么称为**闭合子图** (closed subgraph)。从图删去 $V'$ 的点记作 $G[V\backslash V']$ 。删边同理。删点可记作 $G-V$ 。
 
-**连通**(connected) 是无向图任两点可达。 **强连通**是任意两点连通的有向图，**弱连通**是有向图转无向图后成为连通图的图。有**连通块(连通分量)**概念及其强/弱连通分量概念。**点割集** (vertex cut/separating set)大小为 $1$ 叫做**割点** (cut vertex) 。若 $|V|\ge k+1$ 且不存在 $k-1$ 大小点割集，图是 $k-$ **点连通的** (k-vertex-connected) , 其最大 $k$ 叫**点连通度**(vertex connectivity) 记作 $\kappa(G)$ (非完全图是最小点割集大小，完全图是 $n-1$ )。使得本可达的 $u,v$ 不连通的最小点割集(不考虑其他点连通性)大小是局部点连通度 (local connectivity) 记作 $\kappa(u,v)$ 。同理可以定义边割集和桥， $k-$ 边连通的，边连通度 $\lambda(G)$ 和局部边连通度 $\lambda(u,v)$ 。点双连通 (binoeected) 是除单边双点图外的 $2-$ 点连通(是没有割点的连通图)。边双连通等于 $2-$ 边连通。类似有(极大)点/边双连通分量。 <u>Whitney 定理：任意图 $G$ $\kappa(G)\le \lambda(G)\le\delta(G)$</u> 
+**连通**(connected) 是无向图任两点可达。 **强连通**是任意两点连通的有向图，**弱连通**是有向图转无向图后成为连通图的图。有**连通块(连通分量)**概念及其强/弱连通分量 (SCC)概念。连通图**点割集** (vertex cut/separating set)大小为 $1$ 叫做**割点** / 割顶 (cut vertex) 。若 $|V|\ge k+1$ 且不存在 $k-1$ 大小点割集，图是 $k-$ **点连通的** (k-vertex-connected) , 其最大 $k$ 叫**点连通度**(vertex connectivity) 记作 $\kappa(G)$ (非完全图是最小点割集大小，完全图是 $n-1$ )。使得本可达的 $u,v$ 不连通的最小点割集(不考虑其他点连通性)大小是局部点连通度 (local connectivity) 记作 $\kappa(u,v)$ 。同理可以定义边割集和桥， $k-$ 边连通的，边连通度 $\lambda(G)$ 和局部边连通度 $\lambda(u,v)$ 。点双连通 (binoeected) 是除单边双点图外的 $2-$ 点连通(是没有割点的连通图)。边双连通等于 $2-$ 边连通。类似有(极大)点/边双连通分量。 <u>Whitney 定理：任意图 $G$ $\kappa(G)\le \lambda(G)\le\delta(G)$</u> 
 
  一般边数接近点数平方叫稀疏图 (sparse graph)，否则稠密图 (dense graph)。**补图** (complement graph) $\overline G$ 是 $(u,v)\in E(\overline G)$ 当且仅当 $(u,v)\notin E(G)$ 补图是无向简单图。**反图** (transpose graph) 是有向图每条边反向。**完全图** (complete graph) 是无向简单图，任两点有边，记作 $K_n$ 。有向图任两点有两条互为反向的边记作**有向完全图** (complete digraph)。有向简单图两点间有一条单向边是**竞赛图** (tournament graph) 。边集是空叫**零图** (null graph)，记作 $N_n$ 。无向简单图所有边构成一个圈称为**环图/圈图** (cycle graph) , $n\ge 3$ 记作 $C_n$ ，<u>充要条件是为 2-正则连通图</u>。若无向简单图满足一个点是支配点，其他点无边相连，称为**星图/菊花图** (star graph), $n\ge1,n+1$ 阶星图记作 $S_n$ 。无向简单图满足一个点是支配点，其他点构成一个圈是轮图 (wheel graph) $n+1(n\ge 3)$ 阶轮图是 $W_n$ 。无向简单图所有边构成简单路径，称为**链** (chain/path graph)，记作 $P_n$ 。无向连通无环图是**树**。无向连通、恰含一环是**基环树** (pseudotree)。有向弱连通，入度均 $1$ 图是基环外向树，出度均为 $1$ 是基环内向树。多棵树组成**森林**(基环同理)。基环内向森林：functional graph。无向连通图每条边最多在一个环内是**仙人掌** cactus ，仙人掌组成沙漠。**二分图** bipartite graph，任何两个不在同一部分的点都有连边是**完全二分图** (complete bipartite graph/biclique) 记作 $K_{n,m}$ 。
 
@@ -5720,6 +6055,212 @@ signed main()
 
 ### 连通性
 
+无向图求连通分量：并查集 / DFS $O(n+m)$
+
+有向图求强联通分量：Tarjan 算法  $O(n+m)$
+
+求无向图割点：$u$ 为割点当① $u$ 非根节点且 $\exists low_v\ge dfn_u$ ② $u$ 为根节点且儿子不少于 $2$ 个
+
+求无向图桥：修改 low ，限定非树边不能是子到父的反向边时，如果 p 是 q 的父节点，并且  $low_q\ge dfn_p$ ，那么 $p\leftrightarrow q$ 是桥
+
+有向图环缩点重建图：枚举边，不在同一强连通分量的连新边
+
+> 可以解决：求有向图可重复走边/点的最长路 (缩点图跑拓扑排序求最长路)
+
+
+
+> 洛谷P2863-给定有向图，求点数大于 $1$ 的强连通分量的个数
+
+```c++
+#include <bits/stdc++.h>
+using namespace std;
+typedef int ll;
+#define MAXN 20002
+#define MAXM 200002
+struct edge
+{
+    ll to, nx;
+} e[MAXM];
+ll hd[MAXN], cnt, n, m, dfn[MAXN], low[MAXN], co[MAXN], num[MAXN], conum, st;
+bool ud[MAXN], vis[MAXN];
+stack<ll> s;
+void adde(ll &u, ll &v)
+{
+    e[++cnt] = {v, hd[u]};
+    hd[u] = cnt;
+}
+void paint(ll &x)
+{
+    s.pop();
+    co[x] = conum;  //点x属于第conum个分量
+    ++num[conum];   //该分量有多少点
+    vis[x] = false; //出栈
+}
+void tarjan(ll x)
+{
+    dfn[x] = low[x] = ++st;
+    s.push(x);
+    vis[x] = ud[x] = true;
+    for (ll i = hd[x]; i; i = e[i].nx)
+    {
+        ll toi = e[i].to;
+        if (!dfn[toi]) //小心别写成x
+        {
+            tarjan(toi); //小心别写成x
+            low[x] = min(low[x], low[toi]);
+        }
+        else if (vis[toi])
+            low[x] = min(low[x], dfn[toi]);
+    }
+    if (low[x] == dfn[x])
+    {
+        ++conum;
+        while (s.top() != x)
+            paint(s.top());
+        paint(x);
+    }
+}
+signed main()
+{
+    ll ui, vi, ans = 0;
+    scanf("%d%d", &n, &m);
+    while (m--)
+        scanf("%d%d", &ui, &vi), adde(ui, vi);
+    for (ll i = 1; i <= n; ++i)
+        if (!ud[i])
+            tarjan(i);
+    for (ll i = 1; i <= conum; ++i)
+        if (num[i] > 1)
+            ++ans;
+    printf("%d", ans);
+    return 0;
+}
+```
+
+
+
+> 洛谷P3388-无向图(不保证连通)求割点数和按编号顺序输出每个割点
+
+```c++
+#include <bits/stdc++.h>
+using namespace std;
+typedef int ll;
+#define MAXN 20002
+#define MAXM 100002
+struct edge
+{
+    ll to, nx;
+} e[MAXM << 1];
+ll n, m, idx, cnt, tot, hd[MAXN], dfn[MAXN], low[MAXN], ui, vi;
+bool cut[MAXN];
+inline void adde(ll &x, ll &y)
+{
+    e[++cnt] = {y, hd[x]};
+    hd[x] = cnt;
+}
+void tarjan(ll u, ll fa)
+{
+    dfn[u] = low[u] = ++idx;
+    ll child = 0;
+    for (ll i = hd[u]; i; i = e[i].nx)
+    {
+        ll toi = e[i].to;
+        if (!dfn[toi]) //尚未访问
+        {
+            tarjan(toi, fa);
+            low[u] = min(low[u], low[toi]);
+            if (low[toi] >= dfn[u] && u != fa)
+                cut[u] = true;
+            if (u == fa)
+                ++child;
+        }
+        low[u] = min(low[u], dfn[toi]);
+    }
+    if (child >= 2 && u == fa)
+        cut[u] = true;
+}
+signed main()
+{
+    scanf("%d%d", &n, &m);
+    while(m--)
+        scanf("%d%d", &ui, &vi), adde(ui, vi), adde(vi, ui);
+    for(ll i = 1; i <= n; ++i) if (!dfn[i]) tarjan(i, i);
+    for(ll i = 1; i <= n; ++i) if (cut[i]) ++tot;
+    printf("%d\n", tot);
+    for(ll i = 1; i <= n; ++i) if (cut[i]) printf("%d ", i);
+    return 0;
+}
+```
+
+
+
+> UVA796-求有向图桥数量并按字典序输出每个桥的端点
+
+```c++
+#include <bits/stdc++.h>
+using namespace std;
+#define sc(x) scanf("%lld", &x)
+typedef long long ll;
+#define mn 100010
+#define mm 2000010
+struct edge
+{
+    ll to, nx;
+} e[mm * 2];
+ll hd[mn], cnt, n, ans, dfn[mn], low[mn], st;
+vector<pair<ll, ll>> res;
+void adde(ll u, ll v)
+{
+    e[++cnt] = {v, hd[u]};
+    hd[u] = cnt;
+}
+void tarjan(ll u, ll fa)
+{
+    dfn[u] = low[u] = ++st;
+    for (ll i = hd[u], v; i; i = e[i].nx)
+    {
+        v = e[i].to;
+        if (v != fa)
+        {
+            if (!dfn[v])
+            {
+                tarjan(v, u);
+                low[u] = min(low[u], low[v]);
+                if (low[v] > dfn[u])
+                    ++ans, res.emplace_back(min(u, v), max(u, v));
+            }
+            else
+                low[u] = min(low[u], dfn[v]);
+        }
+    }
+}
+signed main()
+{
+    while (EOF != scanf("%lld", &n))
+    {
+        cnt = ans = st = 0, res.clear();
+        for (ll i = 1, m, u, v; i <= n; ++i)
+        {
+            hd[i] = 0, dfn[i] = low[i] = 0;
+            scanf("%lld (%lld)", &u, &m), ++u;
+            while (m--)
+                scanf("%lld", &v), ++v, adde(u, v);
+        }
+        for (ll i = 1; i <= n; ++i)
+            if (!dfn[i])
+                tarjan(i, i);
+        sort(res.begin(), res.end());
+        printf("%lld critical links\n", ans);
+        for (auto &i : res)
+            printf("%lld - %lld\n", i.first - 1, i.second - 1);
+        putchar('\n');
+    }
+    return 0;
+}
+```
+
+
+
 
 
 ### 匹配问题
@@ -6199,130 +6740,6 @@ signed main()
         tot += dfs(s, 1e18);
     printf("%lld", tot);
     return 0;
-}
-```
-
-
-
-##### HLPP
-
-以洛谷P4722为例，复杂度 $O(n^2\sqrt m)$ ~~(能用性未知)~~
-
-```c++
-#include<cstdio>
-#include<cstring>
-#include<algorithm>
-#include<queue>
-using std::min;
-using std::vector;
-using std::queue;
-using std::priority_queue;
-const int N=2e4+5,M=2e5+5,inf=0x3f3f3f3f;
-int n,s,t,tot;
-int v[M<<1],w[M<<1],first[N],next[M<<1];
-int h[N],e[N],gap[N<<1],inq[N];//节点高度是可以到达2n-1的
-struct cmp
-{
-	inline bool operator()(int a,int b) const
-	{
-		return h[a]<h[b];//因为在优先队列中的节点高度不会改变，所以可以直接比较
-	}
-};
-queue<int> Q;
-priority_queue<int,vector<int>,cmp> pQ;
-inline void add_edge(int from,int to,int flow)
-{
-	tot+=2;
-	v[tot+1]=from;v[tot]=to;w[tot]=flow;w[tot+1]=0;
-	next[tot]=first[from];first[from]=tot;
-	next[tot+1]=first[to];first[to]=tot+1;
-	return;
-}
-inline bool bfs()
-{
-	int now;
-	register int go;
-	memset(h+1,0x3f,sizeof(int)*n);
-	h[t]=0;Q.push(t);
-	while(!Q.empty())
-	{
-		now=Q.front();Q.pop();
-		for(go=first[now];go;go=next[go])
-			if(w[go^1]&&h[v[go]]>h[now]+1)
-				h[v[go]]=h[now]+1,Q.push(v[go]);
-	}
-	return h[s]!=inf;
-}
-inline void push(int now)//推送
-{
-	int d;
-	register int go;
-	for(go=first[now];go;go=next[go])
-		if(w[go]&&h[v[go]]+1==h[now])
-		{
-			d=min(e[now],w[go]);
-			w[go]-=d;w[go^1]+=d;e[now]-=d;e[v[go]]+=d;
-			if(v[go]!=s&&v[go]!=t&&!inq[v[go]])
-				pQ.push(v[go]),inq[v[go]]=1;
-			if(!e[now])//已经推送完毕可以直接退出
-				break;
-		}
-	return;
-}
-inline void relabel(int now)//重贴标签
-{
-	register int go;
-	h[now]=inf;
-	for(go=first[now];go;go=next[go])
-		if(w[go]&&h[v[go]]+1<h[now])
-			h[now]=h[v[go]]+1;
-	return;
-}
-inline int hlpp()
-{
-	int now,d;
-	register int i,go;
-	if(!bfs())//s和t不连通
-		return 0;
-	h[s]=n;
-	memset(gap,0,sizeof(int)*(n<<1));
-	for(i=1;i<=n;i++)
-		if(h[i]<inf)
-			++gap[h[i]];
-	for(go=first[s];go;go=next[go])
-		if(d=w[go])
-		{
-			w[go]-=d;w[go^1]+=d;e[s]-=d;e[v[go]]+=d;
-			if(v[go]!=s&&v[go]!=t&&!inq[v[go]])
-				pQ.push(v[go]),inq[v[go]]=1;
-		}
-	while(!pQ.empty())
-	{
-		inq[now=pQ.top()]=0;pQ.pop();push(now);
-		if(e[now])
-		{
-			if(!--gap[h[now]])//gap优化，因为当前节点是最高的所以修改的节点一定不在优先队列中，不必担心修改对优先队列会造成影响
-				for(i=1;i<=n;i++)
-					if(i!=s&&i!=t&&h[i]>h[now]&&h[i]<n+1)
-						h[i]=n+1;
-			relabel(now);++gap[h[now]];
-			pQ.push(now);inq[now]=1;
-		}
-	}
-	return e[t];
-}
-int m;
-signed main()
-{
-	int u,v,w;
-	scanf("%d%d%d%d",&n,&m,&s,&t);
-	while(m--)
-	{
-		scanf("%d%d%d",&u,&v,&w);
-		add_edge(u,v,w);
-	}
-	printf("%d\n",hlpp());
-	return 0;
 }
 ```
 
@@ -8145,6 +8562,25 @@ BigDecimal b = new BigDecimal(sc.next());
 System.out.println(a.divide(b, 2, BigDecimal.ROUND_HALF_DOWN));
 ```
 
+求高精度整数平方根：范围约为 $10^{1000}$ 
+
+```c++
+public static BigInteger isqrtNewton(BigInteger n) {
+  BigInteger a = BigInteger.ONE.shiftLeft(n.bitLength() / 2);
+  boolean p_dec = false;
+  for (;;) {
+    BigInteger b = n.divide(a).add(a).shiftRight(1);
+    if (a.compareTo(b) == 0 || a.compareTo(b) < 0 && p_dec)
+      break;
+    p_dec = a.compareTo(b) > 0;
+    a = b;
+  }
+  return a;
+}
+```
+
+
+
 
 
 #### python 高精度
@@ -8351,6 +8787,17 @@ dt var1;
 ```
 
 使用了万能头时，不允许使用这些变量名：`y1` , `y0` , `yn` , `prev` , `tm` 等 
+
+
+
+Python日期函数举例：
+
+```python
+from datetime import *
+d1, d2 = datetime(2022,5,8), datetime(2002,5,8)
+print((d1-d2).days) # 天数差
+print((datetime.today()+timedelta(days=1)).weekday()) #星期[0,6]一-日
+```
 
 
 
@@ -8896,6 +9343,16 @@ Java:
 ```c++
 #pragma GCC optimize(2)
 ```
+
+
+
+快速乘：($a\times b\bmod p$)
+
+```c++
+return ((ull)a*b-(ull)((ull)a/k*b)*k+k)%k; 
+```
+
+
 
 
 
