@@ -24,7 +24,7 @@
 
 #### 常用符号
 
-1. $x|y$ 表示 $x$ 整除 $y$ ，例如 $2|8$
+1. $x|y$ 表示 $x$ 整除 $y$ ，例如 $2|8$ ，
 2. $x\bot y$ 表示 $x,y$ 互质
 3. $gcd(x,y)=(x,y)$ 最大公约数
 4. $lcm(x,y)=[x,y]$ 最小公倍数
@@ -273,8 +273,7 @@ $$
 
 #### 数列
 
-> A.P.   Arithmetic progression
-
+**等差数列** A.P.   Arithmetic progression 
 $$
 a_n=a_1+(n-1)d=a_m+(n-m)d
 $$
@@ -307,9 +306,7 @@ $$
 
 
 
-
-> G.P.    Geometric progression
-
+**等比数列**  G.P.    Geometric progression 
 $$
 a_n=a_1q^{n-1}=a_mq^{n-m}
 $$
@@ -381,6 +378,198 @@ $$
 
 #### 高等数学
 
+> 含部分初等数学
+
+$$
+\tan\frac{x}{2}=\frac{1-\cos x}{\sin x}
+=\frac{\sin x}{1+\cos x}
+$$
+
+$$
+\sin a=\frac{2\tan\frac{a}{2}}{1+\tan^2\frac{a}{2}}\\
+\cos a=\frac{1-\tan^2\frac{a}{2}}{1+\tan^2\frac{a}{2}}\\
+\tan a=\frac{2\tan\frac{a}{2}}{1-\tan^2\frac{a}{2}}
+$$
+
+$$
+\begin{align}
+\sin\alpha+\sin\beta&=2\sin\frac{\alpha+\beta}{2}\cos\frac{\alpha-\beta}{2}\\
+\sin\alpha-\sin\beta&=2\cos\frac{\alpha+\beta}{2}\sin\frac{\alpha-\beta}{2}\\
+\cos\alpha+\cos\beta&=2\cos\frac{\alpha+\beta}{2}\cos\frac{\alpha-\beta}{2}\\
+\cos\alpha-\cos\beta&=-2\sin\frac{\alpha+\beta}{2}\sin\frac{\alpha-\beta}{2}\\
+\sin\alpha\cos\beta&=\frac{1}{2}\Bigl(\sin(\alpha+\beta)+\sin(\alpha-\beta)\Bigr)\\
+\cos\alpha\sin\beta&=\frac{1}{2}\Bigl(\sin(\alpha+\beta)-sin(\alpha-\beta)\Bigr)\\
+\cos\alpha\cos\beta&=\frac{1}{2}\Bigl(\cos(\alpha+\beta)+\cos(\alpha-\beta)\Bigr)\\
+\sin\alpha\sin\beta&=-\frac{1}{2}\Bigl(\cos(\alpha+\beta)-\cos(\alpha-\beta)\Bigr)\\
+\end{align}
+$$
+
+
+
+等价无穷小： -
+
+泰勒展开： - 
+
+
+$$
+\ln(x+\sqrt{a^2+x^2})'=\frac 1{\sqrt{a^2+x^2}}
+$$
+
+$$
+\begin{align}
+(x^a)^{(n)}&=\begin{cases}A_a^nx^{a-n}&(n\le a)\\0&(n>a)\end{cases},a\in Z_+\\
+(\sin x)^{(n)}&=\sin\bigl(x+\frac {n\pi}2\bigr),n\in Z_+\\
+(\cos x)^{(n)}&=\cos\bigl(x+\frac {n\pi}2\bigr),n\in Z_+\\
+\bigl(\ln(1+x)\bigr)^{(n)}&=(-1)^{n-1}\frac{(n-1)!}{(1+x)^n},n\in Z_+\\
+(a^x)^{(n)}&=a^x\ln^na,n\in Z_+
+\end{align}
+$$
+
+
+$$
+\begin{align}
+\int\tan xdx=&-\ln|\cos x|+C\\
+\int\cot xdx=&\ \ln|\sin x|+C\\
+\int\sec xdx=&\ \ln|\sec x+\tan x|+C=\ln|\tan(\frac x2+\frac\pi4)|\\
+\int\csc xdx=&\ \ln|\csc x-\cot x|+C=\ln|\tan\frac x2|\\
+\int\frac{dx}{\sqrt{a^2-x^2}}=&\ \arcsin\frac{x}{a}+C\\
+\int\frac{dx}{x^2+a^2}=&\ \frac{1}{a}\arctan\frac{x}{a}+C\\
+\int\frac{dx}{x^2-a^2}=&\ \frac{1}{2a}\ln\biggl|\frac{x-a}{x+a}\biggr|+C\\
+\int\frac{xdx}{\sqrt{x^2\pm a^2}}=&\ \sqrt{x^2\pm a^2}+C\\
+\int\frac{dx}{\sqrt{x^2\pm a^2}}=&\ \ln \Bigl|x+\sqrt{x^2\pm a^2}\Bigr|+C\\
+\int\sqrt{a^2-x^2}dx=&\ \frac{x}{2}\sqrt{a^2-x^2}+\frac{a^2}{2}\arcsin\frac{x}{a}+C\\
+\int\sqrt{x^2\pm a^2}dx=&\ \frac{x}{2}\sqrt{x^2\pm a^2}\pm\frac{a^2}{2}\ln\Bigl|x+\sqrt{x^2\pm a^2}\Bigr|+C
+\end{align}
+$$
+
+$$
+\begin{align}
+\int\frac A{x-a}dx&=A\ln|x-a|+C\\
+\int\frac A{(x-a)^n}dx&=-\frac A{(n-1)(x-a)^{n-1}}+C\\
+\int\frac{Bx+C}{x^2+px+q}dx&\quad(p^2-4q<0)\\
+=\frac B2\ln(x^2+px+q)&+\frac{2C-Bp}{\sqrt{4q-p^2}}\arctan\frac{2x+p}{\sqrt{4q-p^2}}+C\\
+\end{align}
+$$
+
+$$
+\int\frac{Bx+C}{(x^2+px+q)^n}dx\quad(p^2-4q<0)\\
+=\frac B{2(1-n)(x^2+px+q)^{n-1}}
++(C-\frac{Bp}2)\int\frac{dx}{\Bigl(\bigl(x+\frac p2\bigr)^2+\bigl(\sqrt{q-\frac{p^2}4}\bigr)^2\Bigr)^n}
+$$
+
+> 分部积分技巧：
+>
+> - 不动：反三角函数、对数函数、幂函数(幂不动性差些)
+> - 动：三角函数、常数函数、指数函数
+
+
+
+
+$$
+\vec a\times\vec b=\left|\matrix{\vec i&\vec j&\vec k\\a_x&a_y&a_z\\b_x&b_y&b_z}\right|=(a_zb_x-a_xb_z)\vec i+(a_xb_y-a_yb_x)\vec j+(a_yb_z-a_zb_y)\vec k
+$$
+非零向量平行的充要条件：$a_zb_x-a_xb_z=a_xb_y-a_yb_x=a_yb_z-a_zb_y=0$
+
+点到平面距离公式：$d=\dfrac{|Ax+By+Cz+D|}{\sqrt{A^2+B^2+C^2}}$
+
+###### 
+
+球面一般方程：$x^2+y^2+z^2+Ax+By+Cz+D=0$ 若$A^2+B^2+C^2-4D>0$，是球面
+
+圆锥面方程：$z^2=k^2(x^2+y^2)$ , $z=\pm k\sqrt{x^2+y^2}$
+
+椭球面方程： $\frac{x^2}{a^2}+\frac{y^2}{b^2}+\frac{z^2}{c^2}=1$
+
+单叶双曲面(沿着 $z$ 延展的曲线)方程： $\frac{x^2}{a^2}+\frac{y^2}{b^2}-\frac{z^2}{c^2}=1$ ，双叶： $\frac{x^2}{a^2}+\frac{y^2}{b^2}-\frac{z^2}{c^2}=-1$
+
+抛物面(沿着 $z$ 正向)方程： $\frac{x^2}p+\frac{y^2}q=2z$ 
+
+双曲面方程： $\frac{x^2}p-\frac{y^2}q=2z$
+
+
+
+偏导数定义： $\lim_{\Delta x\to0}\frac{f(x_0+\Delta x,y_0)-f(x_0,y_0)}{\Delta x}$
+
+全微分： $\Delta z=f(x+\Delta x,y+\Delta y)-f(x,y)$
+
+多元函数极值：$u$在开区域$G\subset\R^2$内有二阶连续偏导数，且$P_0(x_0,y_0)\in G$是$f$的驻点，令：
+$$
+f''_{xx}(x_0,y_0)=A,f''_{xy}(x_0,y_0)=B,f''_{yy}(x_0,y_0)=C
+$$
+则：
+
+1. 若$AC-B^2>0$，则在点$P_0$取得极值，$A<0$极大值，$A>0$极小值
+2. 若$AC-B^2<0$，则在点$P_0$不取极值
+3. 若$AC-B^2=0$，则无法判断
+
+拉格朗日乘数法：$n$元函数在开区域内有一阶连续偏导数，且不全为$0$，则在条件下的极值点一定是拉格朗日函数($n+1$元函数，新元是$\lambda$)$f+\lambda\varphi$的驻点
+
+
+
+三元积分变换：
+
+柱坐标：是仅变换$x,y$为极坐标(和$x,y$区域)的变换公式。
+$$
+\iiint_\Omega f(x,y,z)dv=\iiint_{\Omega'}f(r\cos\theta,r\sin\theta,z)rdrd\theta dz
+$$
+球坐标：$\theta$同柱坐标，$\varphi$是与$z$轴正向的夹角
+$$
+\iiint_\Omega f(x,y,z)dv=f(r\sin\varphi\cos\theta,r\sin\varphi\sin\theta,r\cos\varphi)r^2\sin\varphi drd\varphi d\theta
+$$
+
+设曲线$L$由参数方程$x=x(t),y=y(t)(\alpha\ge t\ge\beta)$表示，$x=x(t),y=y(t)$在$[\alpha,\beta]$上有一阶连续偏导数，且$x'^2(t)+y'^(2)\neq0$(即曲线$L$是光滑简单曲线)，函数$f(x,y)$在曲线上连续，则：
+$$
+\int_Lf(x,y)ds=\int_\alpha^\beta f(x(t),y(t))\sqrt{x'^2(t)+y'^2(t)}dt
+$$
+显然如果是显函数$y=f(x)$，则直接化为$f(x)dx$，$x=f(y)$同理。
+
+
+$$
+\iint_\Sigma f(x,y,z)dS=\iint_D f(x,y,z(x,y))\sqrt{1+\left(\cfrac{\partial z}{\partial x}\right)^2+\left(\cfrac{\partial z}{\partial y}\right)^2}dxdy
+$$
+计算时需要满足投影面面积$S\neq0$，如果不为零，需要更换投影面，换元投影。
+
+设有界闭区域$D$由分段光滑曲线$L$所围，函数$P(x,y),Q(x,y)$在$D$上具有一阶连续偏导数，$L$是$D$取正向的边界曲线：
+$$
+\iint_D\left|\matrix{\cfrac{\partial}{\partial x}&\cfrac{\partial}{\partial y}\\P&Q}\right|dxdy=\iint_D\left(\cfrac{\partial Q}{\partial x}-\cfrac{\partial P}{\partial y}\right)dxdy=\oint_LPdx+Qdy
+$$
+对于多连通区域，格林公式右端应包括沿区域$D$的全部边界正向曲线积分
+
+有向曲线弧$x=\varphi(t),y=\psi(t)$，起点和终点对应参数$\alpha,\beta(\alpha<\beta)$，在$[\alpha,\beta]$上具有一阶连续导数，且$\varphi'^2(t)+\psi'^2(t)\neq0$，切向量是$\vec t=(\varphi'(t),\psi'(t))$，指向$t$增大的方向，那么显然方向余弦是：
+$$
+\cos\alpha=\cfrac{\varphi'(t)}{\sqrt{\varphi'^2(t)+\psi'^2(t)}}\quad\cos\beta=\cfrac{\psi'(t)}{\sqrt{\varphi'^2(t)+\psi'^2(t)}}
+$$
+则两类积分的转换公式为：
+$$
+\int_LPdx+Qdy=\int_L(P\cos\alpha+Q\cos\beta)ds
+$$
+
+$$
+ds=\sqrt{\varphi'^2(t)+\psi'^2(t)}dt,dx=\varphi'(t)dt,dy=\psi'(t)dt
+$$
+
+高斯公式：设空间闭区域$\Omega$是由分片光滑的闭曲线$\Sigma$所围成，函数$P(x,y,z),Q(x,y,z),R(x,y,z)$在$\Omega$以及$\Sigma$上具有关于$x,y,z$的连续偏导数，$\Sigma$是$\Omega$整个边界曲面的外侧，则有：
+$$
+\iint_\Omega(\cfrac{\partial P}{\partial x}+\cfrac{\partial Q}{\partial y}+\cfrac{\partial R}{\partial z})dxdydz=\oiint_\Sigma Pdydz+Qdzdx+Pdxdy
+\\=\iint_{\partial\Omega}P\cos\alpha+Q\cos\beta+R\cos\gamma dS
+$$
+注：$P=0,Q=0,R=0$也是函数，所以也就是说缺少了一部分也是可用的
+
+$z=z(x,y)$表示有向曲面$\Sigma$，在$xOy$的投影区域是$D_{xy}$，函数$z=z(x,y)$在$D_{xy}$上具有一阶连续偏导数，$R(x,y,z)$在$\Sigma$连续且$\Sigma$取上侧，曲面$\Sigma$上一点的法向量方向余弦是：
+$$
+\cos\alpha=\cfrac{-z_x}{\sqrt{1+z^2_x+z^2_y}},
+\cos\beta=\cfrac{-z_x}{\sqrt{1+z^2_x+z^2_y}},
+\cos\gamma=\cfrac{1}{\sqrt{1+z^2_x+z^2_y}}
+$$
+
+$$
+\iint_\Sigma Pdydz+Qdzdx+Rdxdy=\iint_\Sigma P\cos\alpha+Q\cos\beta+R\cos\gamma dS
+$$
+
+
+
+
+
 
 
 #### 其他
@@ -406,7 +595,7 @@ $$
 
 
 
-任意整数转 Excel 列名：
+任意整数转 Excel 列名：(列名本质是从 $1('A')$ 计数的 $27$ 进制)
 
 ```c++
 #include <bits/stdc++.h>
@@ -418,9 +607,419 @@ signed main()
 
 
 
-
-
 ### 数论
+
+#### 基础性质
+
+**整除**的性质：( $x|y$ 那么 $x$ 是 $y$ 倍数，$y$ 是 $x$ 因数(约数)， $x,y\in Z,x\neq 0$ )
+
+- $a|b\Leftrightarrow-a|b\Leftrightarrow a|-b\Leftrightarrow|a|\ |\ |b|$
+- $a|b$ 且 $b|c$ $\Rightarrow a|c$
+- $a|b$ 且 $a|c\Leftrightarrow \forall x,y\in Z,a|\gcd(xb+yc)$  (字面理解： $a$ 是 $b,c$ 公因数)
+- $a|b$ 且 $b|a$ $\Rightarrow b=\pm a$
+- $m\neq 0$ 且 $a|b\Leftrightarrow ma|mb$
+- $b\neq 0$ 且 $a|b\Leftrightarrow |a|\le |b|$
+- $a\neq 0,b=qa+c,a|b\Leftrightarrow a|c$ 
+- $0$ 是所有非零整数的倍数，即 $0|x,x\neq 0$  
+
+> 真因数是对 $b\neq 0$ 时除去 $\pm 1,\pm b$ 外的全部因数。
+
+**素数**的性质：
+
+- 对合数 $a$ ，一定存在素数 $p\le\sqrt a$ 使得 $p|a$ 
+- 所有大于 $3$ 的素数都可以表示为 $6n\pm 1$ 的形式
+- 素数定理： $\pi(x)$ 为不超过 $x$ 的素数个数，则 $\pi(x)\approx \dfrac{x}{\ln x}$ ( $\pi(x)$ 一般大于后者，误差率约为 $10\%$ )
+
+**同余**($a\equiv b(\bmod m)$ 是 $m\neq 0,m|(a-b)$ ,称 $a$ 同余于 $b$ 模 $m,b$ 是 $a$ 对模 $m$ 的剩余)的性质：
+
+- 传递性：若 $a\equiv b(\bmod m),b\equiv c(\bmod m)$ 则 $a\equiv c(\bmod m)$
+
+- 线性运算：若 $a,b,c,d\in Z,m\in N^*,a\equiv b(\bmod m),c\equiv d(\bmod m)$ 则：
+
+  $a\pm c\equiv b\pm d(\bmod m),ac\equiv bd(\equiv m)$
+
+- 若 $a,b\in Z,k,m\in N^*,a\equiv b(\bmod m)$ 则 $ak\equiv bk(\bmod mk)$
+
+- 若 $a,b\in Z,d,m\in N^*,d|a,d|b,d|m,a\equiv b(\bmod m)$ 则 $\dfrac ad\equiv\dfrac bc(\bmod \dfrac md)$
+
+- 若 $a,b\in Z,d,m\in N^*,d|m,a\equiv b(\bmod m)$ 则 $a\equiv b(\bmod d)$ 
+
+- 若 $a,b\in Z,d,m\in N^*,a\equiv b(\bmod m)$ 则 $\gcd(a,m)=\gcd(b,m)$ ,若 $m|d$ 且 $a|d,b|d$ 成立其一，那么 $a|d,b|d$ 均成立
+
+定义域是正整数的函数称为数论函数。
+
+**积性函数**是 $f(1)=1,\forall x,y\in N^*,\gcd(x,y)=1\Rightarrow f(xy)=f(x)f(y)$ 
+
+**完全积性函数**是  $f(1)=1,\forall x,y\in N^*\Rightarrow f(xy)=f(x)f(y)$ 
+
+若 $f,g$ 是积性函数，则 $f(x^p),f^p(x),f(x)g(x),\sum_{d|x}f(d)g(\dfrac xd)$ 都是积性函数。
+
+设 $x=\prod p_i^{k_i}$ ，积性函数满足 $f(x)=\prod f(p_i^{k_i})$ ，完全积性函数满足 $f(x)=\prod f(p_i)^{k_i}$ 
+
+> 单位函数 $\epsilon(n)=[n=1]$ ,除数函数 $\sigma_k(n)=\sum_{d|n}d^k,\sigma_0(n)=d(n)=\tau(n),\sigma_1(n)=\sigma(n)$ 
+>
+> 莫比乌斯函数 $\mu(n)=\begin{cases}1&n=1\\0&\exists d > 1,d^2|n\\(-1)^{\omega(n)}&otherwise\end{cases}$ , $\omega(n)$ 是 $n$ 的本质不同因子个数, $\omega$ 是加性函数
+
+
+
+> 利用唯一分解定理质因数分解的复杂度为 $O(\sqrt n)$ ，最坏复杂度在质数时取得 (也可以枚举素数，复杂度为 $O(\dfrac{n}{\ln n})$ ，但是需要素数筛预处理)
+
+设 $x=\prod p_i^{k_i}$ ，则 $x$ 因子数、因子和分别为 $\prod(a_i+1),\prod(\sum_{j=0}^{a_i}p_i^j)=\prod\dfrac{p_i^{a_i+1}-1}{p_i-1}$
+
+> 根据上式可知完全平方数(1,4,9,...)有奇数个因数，其他数有偶数个因数。因子和是积性函数，设 $x$ 分解出一个素数 $p$ ，则 $f(x)=f(\dfrac xp)f(p)$ ，其中显然 $f(p)=p+1$
+
+
+
+最大公因数/最小公倍数的性质：
+
+- (辗转相除法) `gcd(a,b)=b?gcd(b,a%b):a` 复杂度 $O(\log n)$ ; $[a,b]=\dfrac{ab}{(a,b)}$
+- 若 $a,b\in N^*,(a,b)=k$ 则 $(\dfrac ak,\dfrac bk)=1$ ；若 $[a,b]=k$ 则 $(\dfrac ka,\dfrac kb)=1$
+- 若 $p\bot q$ ，则 $(p^n,q^m)=1$
+- 若 $x(a,b)=a,y(a,b)=b$ 则 $(x,y)=1$ 即 $(\dfrac{a}{(a,b)},\dfrac{b}{(a,b)})=1$ 
+
+> 应用：从长为 $n$ 的环任意位置开始循环每次跳 $m$ 格走，能遍历全部位置充要条件是 $(n,m)=1$ 
+
+
+
+> 四平方和定理：所有自然数至多只要用四个数的平方和就可以表示
+
+
+
+#### 素数筛
+
+##### 素性测试
+
+判断单个数是否是素数模板 ( $O(n)$ )：
+
+```c++
+bool isprime(ll p)
+{
+    if(p==2||p==3) return true;
+    if(p<2||(p%6!=1&&p%6!=5)) return false;
+    for(ll i=5;i*i<=p;i+=6) if(p%i==0||p%(i+2)==0) return false;
+    return true;
+}
+```
+
+**Miller Rabin算法**，复杂度 $O(k\log^3 n)$ ，$k$ 是设定参数，能够以较高准确率判定是否为素数：
+
+```c++
+#include <bits/stdc++.h>
+using namespace std;
+#define sc(x) scanf("%lld", &x)
+typedef long long ll;
+#define test_time 9
+ll qpow(ll a, ll b, ll p)
+{
+    ll r = 1;
+    for (; b; b >>= 1)
+    {
+        if (b & 1)
+            r = r * a % p;
+        a = a * a % p;
+    }
+    return r;
+}
+bool millerRabin(int n)
+{
+    if (n < 3 || n % 2 == 0)
+        return n == 2;
+    ll a = n - 1, b = 0;
+    while (a % 2 == 0)
+        a /= 2, ++b;
+    // test_time 为测试次数,建议设为不小于 8
+    // 的整数以保证正确率,但也不宜过大,否则会影响效率
+    for (ll i = 1, j; i <= test_time; ++i)
+    {
+        ll x = rand() % (n - 2) + 2, v = qpow(x, a, n);
+        if (v == 1)
+            continue;
+        for (j = 0; j < b; ++j)
+        {
+            if (v == n - 1)
+                break;
+            v = v * v % n;
+        }
+        if (j >= b)
+            return 0; //不是素数
+    }
+    return 1; //是素数
+}
+signed main()
+{
+    ll x;
+    while (EOF != scanf("%lld", &x))
+        printf("%d\n", millerRabin(x));
+}
+```
+
+
+
+##### 埃氏筛
+
+埃氏筛(复杂度 $O(n\log\log n)$ )
+
+```c++
+// C++ Version
+int Eratosthenes(int n) {
+  int p = 0;
+  for (int i = 0; i <= n; ++i) is_prime[i] = 1;
+  is_prime[0] = is_prime[1] = 0;
+  for (int i = 2; i <= n; ++i) {
+    if (is_prime[i]) {
+      prime[p++] = i;  // prime[p]是i,后置自增运算代表当前素数数量
+      if ((long long)i * i <= n)
+        for (int j = i * i; j <= n; j += i)
+          // 因为从 2 到 i - 1 的倍数我们之前筛过了，这里直接从 i
+          // 的倍数开始，提高了运行速度
+          is_prime[j] = 0;  // 是i的倍数的均不是素数
+    }
+  }
+  return p;
+}
+```
+
+
+
+##### 欧拉筛
+
+欧拉筛：(洛谷P3383)
+
+```c++
+#include <bits/stdc++.h>
+#define MAXN 100000002
+#define MAXP 6000002
+using namespace std;
+bool vis[MAXN]; //vis[0] = vis[1] = 1;
+int Prime[MAXP], k, n, q, c;
+void euler(int n)
+{
+    for(int i=2;i<=n;i++)
+    {
+        if(!vis[i]) Prime[++k]=i;
+        for(int j=1;j<=k;j++)
+        {
+            if(Prime[j]*i>n) break;
+            vis[Prime[j]*i]=true;
+            if(i%Prime[j]==0) break;
+        }
+    }
+}
+int main()
+{
+    scanf("%d%d", &n, &q);
+    euler(n);
+    while(q--)
+    {
+        scanf("%d", &c);
+        printf("%d\n", Prime[c]);
+    }
+    return 0;
+}
+```
+
+求任意连续区间素数：(洛谷P1835-求素数个数 $1\le l\le r < 2^{31},r-l\le10^6$ )
+
+```c++
+#include <bits/stdc++.h>
+using namespace std;
+typedef long long ll;
+#define MAXN 1000002
+#define SQRTR 50000
+ll prime[MAXN], k, ans, lf, rf, p, bg;
+bool vis[MAXN];
+inline void euler()
+{
+	for(ll i = 2; i <= SQRTR; ++i)
+	{
+		if (!vis[i]) prime[++k] = i;
+		for (ll j = 1; i * prime[j] <= SQRTR; ++j)
+		{
+			vis[i * prime[j]] = true;
+			if (i % prime[j] == 0) break;
+		}
+	}
+}
+signed main()
+{
+	scanf("%lld%lld", &lf, &rf);
+	lf = (lf == 1) ? 2 : lf;
+	euler();
+	memset(vis,0,sizeof vis);
+	for(ll i = 1; i <= k; ++i)
+	{
+		p = prime[i];
+		bg = (lf + p - 1) / p * p > 2 * p ? (lf + p - 1) / p * p : 2 * p;
+		for (ll j = bg; j <= rf; j += p) vis[j - lf + 1] = true;
+	}
+	for(ll i = 1; i <= rf - lf + 1; ++i) if (!vis[i]) ++ans;
+	printf("%lld", ans);
+	return 0;
+}
+```
+
+筛法求因数数 (d) 、因数和 (f) ( $g_i$ 表示 $i$ 的最小值因子的 $p^0+p^1+\cdots+p^k$ )：
+
+```c++
+// C++ Version
+void pre() {
+  d[1] = 1, g[1] = f[1] = 1;
+  for (int i = 2; i <= n; ++i) {
+    if (!v[i]) v[i] = 1, p[++tot] = i, d[i] = 2, num[i] = 1, g[i] = i + 1, f[i] = i + 1;
+    for (int j = 1; j <= tot && i <= n / p[j]; ++j) {
+      v[p[j] * i] = 1;
+      if (i % p[j] == 0) {
+        num[i * p[j]] = num[i] + 1;
+        d[i * p[j]] = d[i] / num[i * p[j]] * (num[i * p[j]] + 1);
+        g[i * p[j]] = g[i] * p[j] + 1;
+        f[i * p[j]] = f[i] / g[i] * g[i * p[j]];
+        break;
+      } else {
+        num[i * p[j]] = 1;
+        d[i * p[j]] = d[i] * 2;
+        f[i * p[j]] = f[i] * f[p[j]];
+        g[i * p[j]] = 1 + p[j];
+      }
+    }
+  }
+}
+```
+
+$O(n)$ 求积性函数 $f$ ，条件：任意质数 $p$ 和正整数 $k$ ，可以 $O(1)$ 求出 $f(p^k)$ ，那么设合数 $n=\prod_{i=1}^kp_i^{\alpha_i}$ ，线性筛记录 $g_n=p_1^{\alpha_1}$ (即 $n$ 的第一个质数幂)，若 $n$ 被 $x\cdot p$ 筛掉( $p$ 是质数)，那么：
+$$
+g_n=\begin{cases}g_x\cdot p&x\bmod p=0\\p&otherwise\end{cases}
+$$
+若 $n=g_n$ ，直接算 $f(n)$ ，否则 $f(n)=f(\dfrac n{g_n})f(g_n)$ 
+
+
+
+> 用欧拉筛可以在筛的时候求一些其他值，如例题：求 $\sum_{i=1}^nf(i^k)\bmod10^9+7,f$ 是因子和
+
+```c++
+#include <bits/stdc++.h>
+using namespace std;
+typedef long long ln;
+typedef int ll;
+#define mn  10000002
+#define mod 1000000007
+ll n, k, p[mn], pri[mn], e[mn], pe[mn], g[mn], cnt; ln ans = 1;
+void euler(ll n)
+{//e[i]是i质因数分解得到的最大的幂a_i,pe[i]是对应最大的(p^e[i])
+	for(ll i=2;i<=n;++i)
+	{
+		if (!p[i]) p[i] = i, pri[++cnt] = i, pe[i] = i, e[i] = 1;
+		for (ll j = 1; i * pri[j] <= n; ++j)
+		{
+			p[i * pri[j]] = pri[j];
+			if (pri[j] == p[i])
+			{
+				e[i * pri[j]] = e[i] + 1;
+				pe[i * pri[j]] = pe[i] * pri[j];
+				break;
+			}
+			e[i * pri[j]] = 1;
+			pe[i * pri[j]] = pri[j];		
+        }
+	}
+}
+ln qpow(ln a, ln b)
+{
+	ln res = 1;
+	for (; b; b >>= 1, (a *= a) %= mod) if (b & 1) (res *= a) %= mod;
+	return res;
+}
+signed main()
+{
+    euler(100); g[1] = 1;
+	scanf("%d%d",&n,&k);
+	for(ll i=1;i<=n;++i)
+	{
+		if (pe[i] == i) g[i] = (qpow(p[i], 1LL * e[i] * k + 1) - 1 + mod) % mod * qpow(p[i] - 1, mod - 2) % mod;
+		else g[i] = 1LL * g[i / pe[i]] * g[pe[i]] % mod;
+		(ans += g[i]) %= mod;
+	}
+	return printf("%lld", ans) & 0;
+}
+```
+
+
+
+##### Meissel-Lehmer算法
+
+作用：准确地求出 $\pi(x)$ 值和 $[1,x]$ 内各素数，时间复杂度为 $O(\dfrac{x^{\frac23}}{\log^2x})$ ，空间复杂度为 $O(x^\frac13\log^3x\log\log x)$
+
+```c++
+#include<bits/stdc++.h>
+#define N 216000
+#define ll long long
+using namespace std;
+int mn[N],pri[N/10],fl[N];
+int tot,cnt,num,n;
+int f[20005][55];
+int inf=2e9;
+int dp(int x,int y){
+    if (x<=20000&&y<=50) return f[x][y];
+    if (x==0||y==0) return x;
+    if (1ll*pri[y]*pri[y]>=x&&x<N) return max(0,mn[x]-y);
+    return dp(x,y-1)-dp(x/pri[y],y-1);
+}
+void pre(){
+    for (int i=2;i<N;i++){
+        if (!fl[i]) pri[++tot]=i;
+        for (int j=1;i*pri[j]<N&&j<=tot;j++){
+            fl[i*pri[j]]=1;
+            if (i%pri[j]==0) break;
+        }
+    }
+    for (int i=1;i<N;i++)
+        mn[i]=(cnt+=1-fl[i]);
+    for (int i=1;i<=20000;i++) f[i][0]=i;
+    for (int i=1;i<=20000;i++)
+        for (int j=1;j<=50;j++)
+            f[i][j]=f[i][j-1]-f[i/pri[j]][j-1];
+}
+int power(int x,int y){
+    int s=1;
+    while (y!=0){
+        if (y&1){
+            if (s>=inf/x) s=inf;
+            else s=s*x;
+        }
+        y/=2;
+        if (x>=inf/x) x=inf;
+        else x=x*x;
+    }
+    return s;
+}
+int yroot(ll x,int y){
+    int l=2,r=6666,ans=1;
+    while (l<=r){
+        int mid=(l+r)/2;
+        if (power(mid,y)<=x) ans=mid,l=mid+1;
+        else r=mid-1;
+    }
+    return ans;
+}
+int work(int m){
+    if (m<N) return mn[m]-1;
+    int y=yroot(m,3),n=mn[y];
+    int ans=dp(m,n)+n-1;
+    for (n++;pri[n]*pri[n]<=m;n++)
+        ans-=mn[m/pri[n]]-mn[pri[n]]+1;
+    return ans;
+}
+int main(){
+    pre();
+    scanf("%d",&n);
+    int an=work(n);
+    printf("%d\n",an);
+    for(int i=1;i<=an;++i) printf("%d ",pri[i]);
+}
+```
+
+
+
+
 
 #### 拓展欧几里得定理
 
@@ -450,7 +1049,265 @@ ll exgcd(ll a, ll b, ll &x, ll &y)
 } // 或 exgcd(b, a % b, y, x); y -= a / b * x;
 ```
 
+若要求 $ax+by=c$ 的一组整数解，需要先求出 $ax_0+by_0=(a,b)$ 的一组解，然后得到 $ax_0\times\dfrac{c}{(a,b)}+by_0\times\dfrac{c}{(a,b)}=(a,b)\times\dfrac{c}{(a,b)}$ ，若 $\dfrac{c}{(a,b)}$ 非整数，无解。
 
+显然有恒等式 $a(x+db)+b(y-da)=c$ ，令 $d=\dfrac1{(a,b)}$ ，可以得到最小非负数解 $x'=(x\bmod \dfrac b{(a,b)}+\dfrac b{(a,b)})\bmod \dfrac b{(a,b)}$ 。特别地若 $a<0$ 可以两边同时取负。
+
+
+
+> 洛谷P5656-输入 $1\le a,b,c\le 10^9$ ，求 $ax+by=c$ 的整数解。无解输出 `-1` ，有正整数解( $x,y\in Z_+$ )输出正整数解数量，所有正整数解中 $x,y$ 的最小值，最大值。若无正整数解，输出 $x,y$ 代表整数解里 $x,y$ 的最小正整数值
+
+```c++
+#include <bits/stdc++.h>
+using namespace std;
+typedef long long ll;
+ll exgcd(ll a, ll b, ll &x, ll &y)
+{
+    ll d = a;
+    if (!b)
+        x = 1, y = 0;
+    else
+        d = exgcd(b, a % b, y, x), y -= a / b * x;
+    return d;
+}
+ll a, b, c, x, y, t, d, p, q, k;
+signed main()
+{
+    for (scanf("%lld", &t); t; --t)
+    {
+        scanf("%lld%lld%lld", &a, &b, &c);
+        d = exgcd(a, b, x, y);
+        if (c % d != 0)
+            printf("-1\n");
+        else
+        {
+            x *= c / d, y *= c / d, p = b / d, q = a / d;
+            if (x < 0)
+                k = ceil((1.0 - x) / p), x += p * k, y -= q * k;
+            else
+                k = (x - 1) / p, x -= p * k, y += q * k;
+            if (y > 0)
+            {
+                printf("%lld ", (y - 1) / q + 1);
+                printf("%lld %lld ", x, (y - 1) % q + 1);
+                printf("%lld %lld\n", x + (y - 1) / q * p, y);
+            }
+            else
+                printf("%lld %lld\n", x, y + q * (ll)ceil((1.0 - y) / q));
+        }
+    }
+    return 0;
+}
+```
+
+
+
+#### 取模公式
+
+**费马小定理**：若 $p$ 为素数， $a\in Z_+,a\bot p$ ，则 $a^{p-1}\equiv 1(\bmod p)$ 
+
+线性逆元公式(从 $1$ 开始)：$i^{-1}\equiv-\lfloor\dfrac pi\rfloor\times(p\bmod i)^{-1}(\bmod p)$   (实现时 $+p$ 再取模)
+
+任意 $n$ 数线性求逆元公式：记 $s_i$ 是前缀积，则 $a_i^{-1}\equiv s_{i-1}\cdot (s_i)^{-1}\bmod p$ (预处理 $s_{i-1}^{-1}\equiv s_i^{-1}\cdot a_i\bmod p$ )
+
+阶乘线性逆元公式：$((i-1)!)^{-1}=i\times(i!)^{-1}$  (推论： $\dfrac 1i\equiv({i!})^{-1}\times(i-1)!\bmod p$)
+
+
+
+**卢卡斯定理：**
+$$
+n=sp+q,m=tp+r,0\le q,r\le p-1,p是质数，则\\
+\begin{pmatrix}n\\m\end{pmatrix}\mod p=
+\begin{pmatrix}\lfloor\frac np\rfloor\\\lfloor\frac mp\rfloor\end{pmatrix}
+\cdot\begin{pmatrix}n\mod p\\m\mod p\end{pmatrix}\mod p
+$$
+时间复杂度为$\Omicron(f+g\log n)$,f是预处理组合数复杂度(如阶乘逆元)，g是单次求组合数复杂度
+
+> 洛谷P3807-求 $C_{n+m}^n\bmod p,p$ 是质数， $1\le n,m,p\le10^5,1\le T\le10$
+
+```c++
+#include <bits/stdc++.h>
+using namespace std;
+typedef double db;
+typedef long long ll;
+#define mn 100002
+ll a[mn], p, t, n, m;//i!=a[i]
+ll qpow(ll a, ll b)
+{
+	ll res = 1;
+	for (; b; b >>= 1, a = a * a % p) if (b & 1)
+		res = res * a % p;
+	return res;
+}
+ll C(ll n, ll m)
+{
+	if (m > n) return 0;
+	return ((a[n] * qpow(a[m], p - 2)) % p * qpow(a[n - m], p - 2) % p);
+}
+ll lucas(ll n, ll m)
+{
+	if (!m) return 1;
+	return C(n % p, m % p) * lucas(n / p, m / p) % p;
+}
+signed main()
+{
+	a[0] = 1;
+	for (scanf("%lld", &t); t; --t)
+	{
+		scanf("%lld%lld%lld", &n, &m, &p);
+		for(ll i = 1; i <= p; ++i) a[i] = a[i - 1] * i % p;
+		printf("%lld\n", lucas(n + m, n));//原题算C(m+n,n)
+	}
+	return 0;
+}
+```
+
+
+
+**欧拉定理：** $\gcd(a,m)=1$ 则 $a^{\varphi(m)}\equiv 1(\bmod m)$ 
+
+**拓展欧拉定理**：
+$$
+a^b\equiv\begin{cases}
+a^{b\ \bmod\ \varphi(p)},&\gcd(a,p)=1\\
+a^b,&\gcd(a,p)\neq1,b < \varphi(p)\\
+a^{b\ \bmod\ \varphi(p)+\varphi(p)},&\gcd(a,p)\neq1,b\ge\varphi(p)
+\end{cases}(\bmod p)
+$$
+
+> 洛谷P5091-求 $a^b\bmod m,1\le a\le10^9,1\le m\le10^8,1\le b\le10^{2\times10^7}$
+
+```c++
+#include <bits/stdc++.h>
+using namespace std;
+typedef int ll;
+ll a, b, m, t, phi, ans = 1;
+char c; bool flag;
+signed main()
+{
+	scanf("%d%d", &a, &m);
+	t = phi = m;
+	for (ll i = 2; i * i <= m; ++i) if (t % i == 0)
+	{
+		phi = phi - phi / i;
+		while (t % i == 0) t /= i;
+	}
+	if (t > 1) phi = phi - phi / t;
+	while (!isdigit(c = getchar()));
+	for (; isdigit(c); c = getchar())
+	{
+		b = (b << 1) + (b << 3) + (c ^ '0');
+		if (b >= phi) flag = true, b %= phi;
+	}
+	if (flag) b += phi;
+	for (ans = 1; b; b >>= 1, a = 1LL * a * a % m) if (b & 1)
+		ans = 1LL * ans * a % m;
+	printf("%d", ans);
+	return 0;
+}
+```
+
+
+
+> 杂项：一个数对9取模等于数位和对9取模
+
+
+
+#### 欧拉函数
+
+$\varphi(n)$ 表示正整数 $[1,n]$ 中与 $n$ 互质的数的个数，如 $\varphi(0)=0,\varphi(1)=1,\varphi(8)=len\{1,3,5,7\}=4$
+$$
+\varphi(x)=x\cdot\prod_{i=1}^n(1-\frac 1{p_i}),p_i为x的所有质因数,x\in\N_+
+$$
+欧拉函数性质：
+
+1. $p$ 是素数时,  $\varphi(p)=p-1$
+2. $p$ 是素数时,  $k\in N^*$ , $\varphi(p^k)=p^k-p^{k-1}$
+3. 欧拉函数是积性函数， $\forall a,b\in Z,(a,b)=1$ , 有 $\varphi(ab)=\varphi(a)\varphi(b)$
+4. $\varphi(n)=\prod_{i=1}^m\varphi(p_i^{k_i})$ 
+5. 若 $p$ 是素数，$\varphi(i\cdot p)=\begin{cases}\varphi(i)\cdot(p-1)&,p\nmid i\\\varphi(i)\cdot p&,p\mid i\end{cases}$
+6. $n=\sum_{d|n}\varphi(d)$ 
+
+求一个数的欧拉函数： $O(\sqrt n)$
+
+```c++
+ll t = phi = m;
+for (ll i = 2; i * i <= m; ++i) if (t % i == 0)
+{
+    phi = phi - phi / i;
+    while (t % i == 0) t /= i;
+}
+if (t > 1) phi = phi - phi / t; //phi为所求
+```
+
+埃氏筛求 $[1,n]$ 欧拉函数：
+
+```c++
+// C++ Version
+void pre() {
+  memset(is_prime, 1, sizeof(is_prime));
+  int cnt = 0;
+  is_prime[1] = 0;
+  phi[1] = 1;
+  for (int i = 2; i <= 5000000; i++) {
+    if (is_prime[i]) {
+      prime[++cnt] = i;
+      phi[i] = i - 1;
+    }
+    for (int j = 1; j <= cnt && i * prime[j] <= 5000000; j++) {
+      is_prime[i * prime[j]] = 0;
+      if (i % prime[j])
+        phi[i * prime[j]] = phi[i] * phi[prime[j]];
+      else {
+        phi[i * prime[j]] = phi[i] * prime[j];
+        break;
+      }
+    }
+  }
+}
+```
+
+ (洛谷P3601, 求 $\sum_{i=l}^r(i-\varphi(i))\bmod666623333,1\le l\le r\le10^{12},r-l\le10^6$ )
+
+求区间欧拉函数，复杂度为 $\sum_{p\in prime}\dfrac{r-l}p+1=\sqrt r+(r-l)\ln r$
+
+```c++
+#include <bits/stdc++.h>
+using namespace std;
+typedef long long ll;
+#define MAXN 1000002
+#define MOD 666623333
+ll l, r, ans, cnt, prime[MAXN], a[MAXN], b[MAXN];
+bool vis[MAXN];
+signed main()
+{
+	for(ll i=2;i<=MAXN;++i)
+	{
+		if (!vis[i]) prime[++cnt] = i;
+		for (ll j = i << 1; j <= MAXN; j += i) vis[j] = true;
+	}
+	scanf("%lld%lld", &l, &r);
+	for(ll i=l;i<=r;++i) a[i - l] = b[i - l] = i;
+	ll i = 1;
+	while (prime[i] * prime[i] <= r)
+	{
+		ll p = prime[i];
+		for (ll x = (p - l % p) % p; x + l <= r; x += p)
+		{
+			(a[x] /= p) *= p - 1;
+			while (b[x] % p == 0) b[x] /= p;
+		}
+		++i;
+	}
+	for(ll i=0;i<=r-l;++i)
+	{
+		if (b[i] != 1) (a[i] /= b[i]) *= b[i] - 1;
+		(ans += l + i - a[i]) %= MOD;
+	}
+	printf("%lld", ans);
+	return 0;
+}
+```
 
 
 
@@ -461,6 +1318,12 @@ ll exgcd(ll a, ll b, ll &x, ll &y)
 
 
 ### 杂项
+
+#### 快速傅里叶变换
+
+
+
+
 
 #### 高斯消元
 
@@ -8565,17 +9428,25 @@ System.out.println(a.divide(b, 2, BigDecimal.ROUND_HALF_DOWN));
 求高精度整数平方根：范围约为 $10^{1000}$ 
 
 ```c++
-public static BigInteger isqrtNewton(BigInteger n) {
-  BigInteger a = BigInteger.ONE.shiftLeft(n.bitLength() / 2);
-  boolean p_dec = false;
-  for (;;) {
-    BigInteger b = n.divide(a).add(a).shiftRight(1);
-    if (a.compareTo(b) == 0 || a.compareTo(b) < 0 && p_dec)
-      break;
-    p_dec = a.compareTo(b) > 0;
-    a = b;
-  }
-  return a;
+import java.math.BigInteger;
+
+public class Main {
+    public static void main(String[] args) {
+        System.out.println(isqrtNewton(new BigInteger("99999")));
+    }
+
+    public static BigInteger isqrtNewton(BigInteger n) {
+        BigInteger a = BigInteger.ONE.shiftLeft(n.bitLength() / 2);
+        boolean p_dec = false;
+        for (;;) {
+            BigInteger b = n.divide(a).add(a).shiftRight(1);
+            if (a.compareTo(b) == 0 || a.compareTo(b) < 0 && p_dec)
+                break;
+            p_dec = a.compareTo(b) > 0;
+            a = b;
+        }
+        return a;
+    }
 }
 ```
 
@@ -8619,8 +9490,11 @@ print((x / y * y * y).quantize(Decimal('0.00'), ROUND_HALF_DOWN))
 
 注意：
 
+- 取模只可以是整型之间的；负数运算结果等于取绝对值计算，最后正负号与被除数一致，如 $(-5)\bmod 3=-2,5\bmod (-3)=2$  (C99/C++11开始 / JAVA同)
+
+  所有版本 C/C++ 必然满足：`(a/b)*b+a%b=a`
+
 - 浮点数除，被除数为 $0$ ，被除数和除数存在一个负数，结果为负零
-- 取模只可以是整型之间的；负数运算结果等于取绝对值计算，最后正负号与被除数一致，如 $(-5)\bmod 3=-2,5\bmod (-3)=2$  (JAVA同)
 
 > Python : `-17%10=-7,17%-10=7,-17%-10=-7` (除时取取比实际结果稍小的最大整数)
 
