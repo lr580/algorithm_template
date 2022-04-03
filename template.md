@@ -6,7 +6,7 @@
 
 ![image-20220325120131181](img/image-20220325120131181.png)
 
-<div align="center" style="font-size:18px">Last built at Apr. 1, 2022</div>
+<div align="center" style="font-size:18px">Last built at Apr. 3, 2022</div>
 
 <div STYLE="page-break-after: always;"></div>
 
@@ -406,9 +406,27 @@ $$
 
 
 
-等价无穷小： -
+等价无穷小： $a^x-1\sim x\ln a,\arcsin(ax)\sim\sin(ax)\sim ax$ $,\arctan(ax)\sim\tan(ax)\sim ax,$ $\ln(1+x)\sim x$ , $\sqrt{1+x}-\sqrt{1-x}\sim x,$ $(1+ax)^b-1\sim abx,$ $\sqrt[b]{1+ax}-1\sim\dfrac abx$ $,1-\cos x\sim\dfrac{x^2}2,$ $x-\ln(1+x)\sim\dfrac{x^2}2,$ $\tan x-\sin x\sim\dfrac{x^3}2,$ $x-\arctan x\sim\dfrac{x^3}3$ $,x-\sin x\sim\dfrac{x^3}6$ $,\arcsin x-x\sim\dfrac{x^3}6$  
 
-泰勒展开： - 
+泰勒展开 (幂级数展开式)： (通常取 $x_0=0$ )
+$$
+f(x)=f(x_0)+\dfrac{f'(x_0)}{1!}(x-x_0)
+%+\dfrac{f''(x_0)}{2!}(x-x_0)^2
++\cdots+\dfrac{f^{n}(x_0)}{n!}(x-x_0)^n
++R_n
+$$
+
+$$
+\begin{align}
+e^x&=1+\dfrac1{1!}x+\dfrac1{2!}x^2+\cdots\\
+\ln(1+x)&=x-\dfrac12x^2+\dfrac13x^3+\cdots\\
+\sin x&=x-\dfrac1{3!}x^3+\dfrac1{5!}x^5+\cdots\\
+\arcsin x&=x+\dfrac12\dfrac{x^3}3+\dfrac{1\times3}{2\times4}\dfrac{x^5}5+\cdots\\
+\cos x&=1-\dfrac1{2!}x^2+\dfrac1{4!}x^4\\
+\dfrac1{1-x}&=1+x+x^2+x^3+\cdots\\
+(1+x)^a&=1+\dfrac{a}{1!}x+\dfrac{a(a-1)}{2!}x^2+\cdots\\
+\end{align}
+$$
 
 
 $$
@@ -472,7 +490,7 @@ $$
 
 点到平面距离公式：$d=\dfrac{|Ax+By+Cz+D|}{\sqrt{A^2+B^2+C^2}}$
 
-###### 
+
 
 球面一般方程：$x^2+y^2+z^2+Ax+By+Cz+D=0$ 若$A^2+B^2+C^2-4D>0$，是球面
 
@@ -568,7 +586,137 @@ $$
 
 
 
+#### 线性代数
 
+齐次线性方程组(等式右边全是 $0$ )必有零解。
+$$
+\mathbf{A}\times\mathbf{B}=(\sum_{k=1}^na_{ik}\cdot b_{kj})
+$$
+矩阵乘法符合结合律、分配律，不符合交换律
+
+运算可行的前提下，转置满足如下运算规律：
+
+- $(A^T)^T=A$
+- $(A+B)^T=A^T+B^T$
+- $(\lambda A)^T=\lambda A^T$
+- $(AB)^T=B^TA^T$
+
+矩阵$\mathbf{A=O}$的充要条件是$\mathbf{AA^T=O}$
+
+
+$$
+\left|\matrix{a_{11}&a_{12}&a_{13}\\a_{21}&a_{22}&a_{23}\\a_{31}&a_{32}&a_{33}}\right|\\=a_{11}(a_{22}a_{33}-a_{23}a_{32})-a_{12}(a_{21}a_{33}-a_{23}a_{31})+a_{13}(a_{21}a_{32}-a_{22}a_{31})
+$$
+行列式 $\det$ 的性质：
+
+- 行列式和它的转置行列式相等
+
+- 对换行列式的相邻两行或两列，行列式变号
+
+  $\to$如果行列式存在两行或两列完全相同，则行列式为 $0$
+
+- 行列式某一行或某一列所有元素同时乘以同一个数$k$，等于用$k$乘以整个行列式
+
+  $\to$行列式某一行或某一列所有公因子可以提取到行列式外面
+
+- 行列式如果有两行或两列元素成比例，则这个行列式为$0$
+
+- 若行列式某一行元素都是两数之和，那么可以将该行列式拆成两个行列式，这两个行列式除了这一行值分别是两数外，其他行不变；列同理
+
+- 行列式某一行或列各元素乘以同一个数加到另一行或列对应元素上，行列式不变
+
+- $|\lambda A|=\lambda^n|A|$
+
+- $|AB|=|A||B|$
+
+在$n$阶行列式中，把$a_{ij}$所在行和列去掉后，留下的$n-1$阶行列式叫做$a_{ij}$的余子式$M_{ij}$。且有代数余子式$A_{ij}$定义如下：
+$$
+A_{ij}=(-1)^{i+j}M_{ij}
+$$
+
+行列式的按行（列）展开法则：行列式等于它的任一行（列）各元素与其对应的代数余子式乘积之和：
+$$
+D=\sum_{i=1}^na_{ij}A_{ij}=\sum_{j=1}^na_{ij}A_{ij}
+$$
+
+一个$n$阶矩阵$\mathbf{A}$各个元素的代数余子式$A_{ij}$的转置矩阵构成了矩阵$\mathbf{A}$的伴随矩阵$\mathbf{A^*}$：
+$$
+\mathbf{A^*}=(A_{ij})^T=(A_{ji})=\left(\matrix{A_{11}&A_{21}&\cdots&A_{n1}\\A_{12}&A_{22}&\cdots&A_{n2}\\\vdots&\vdots&\ddots&\vdots\\A_{1n}&A_{2n}&\cdots&A_{nn}}\right)
+$$
+伴随阵满足如下运算：(可以求逆矩阵)
+$$
+\mathbf{AA^*=A^*A=|A|E}
+$$
+
+若矩阵$\mathbf{A}$可逆，则$|\mathbf{A}|\neq0$ ，称为非奇异矩阵。
+$$
+\left(\matrix{a&b\\c&d}\right)^{-1}=\frac1{ad-bc}\left(\matrix{d&-b\\-c&a}\right)
+$$
+
+- $\lambda\neq0,(\lambda\mathbf{A})^{-1}=\frac1\lambda\mathbf{A^{-1}}$
+- $\mathbf{(AB)^{-1}=B^{-1}A^{-1}}$
+- $\Lambda^{-1}=diag(\lambda_1^{-1},\cdots,\lambda_m^{-1})$ 
+
+初等变换得到的等价关系具有传递性。$\mathbf{A\sim B}$的充要条件是存在$m$阶可逆矩阵$\mathbf{P}$、$n$阶可逆矩阵$\mathbf{Q}$使得$\mathbf{PAQ=B}$ 。方阵$\mathbf A$可逆的充要条件是$\mathbf{A\overset{c}{\sim}B}$或$\mathbf{A\overset{c}{\sim}B}$或$\mathbf{A\sim B}$ 
+
+若矩阵$\mathbf A$中有不为$0$的$r$阶子式$D$，且所有$r+1$阶子式(若存在)均为$0$，则$D$称为$\mathbf A$的**最高阶非零子式**，且$r$称为$\mathbf A$的**秩**，记作$R(\mathbf A)$ 。可逆矩阵的秩等于矩阵阶数，不可逆矩阵的秩小于矩阵阶数
+
+向量方程组 $\mathbf A\mathbf x=\mathbf b$ ，解为 $\mathbf x=\mathbf A^{-1}\mathbf b$
+
+- 无解的充要条件是$R(\mathbf A)<R(\mathbf A,\mathbf b)$
+- 有唯一解的充要条件是$R(\mathbf A)=R(\mathbf A,\mathbf b)=n$
+- 有无穷解的充要条件是$R(\mathbf A)=R(\mathbf A,\mathbf b)<n$
+
+
+
+#### 概率论
+
+事件的运算规律：
+
+- 若 $A\subset B$ 则 $A\cup B=B,AB=A$
+
+- $A-B=A\overline B=A-AB,A\cup B=A\cup(B-A)$
+
+- 结合律 $(A\cup B)\cup C=A\cup(B\cup C)$, $(A\cap B)\cap C=A\cap(B\cap C)$
+
+- 分配律 $(A\cup B)\cap C=(A\cap C)\cup(B\cap C)$
+
+  $$(A\cap B)\cup C=(A\cap C)\cup(B\cup C)$$
+
+- 对偶律 $\overline{A\cup B}=\overline A\cap \overline B$ , $\overline{A\cap B}=\overline A\cup \overline B$
+
+概率公式：
+
+- $P(A-B)=P(A)-P(AB)$ 
+- 若 $B\subset A$ ，有：$P(A-B)=P(A)-P(B)$ , $P(A)\ge P(B)$
+- $P(A\cup B)=P(A)+P(B)-P(AB)$ ，可由容斥原理推广到任意多事件
+
+在事件 $A$ 发生的条件下，事件 $B$ 的条件概率 $P(B|A)=\dfrac{P(AB)}{P(A)}$
+$$
+P(A_1\cup\cdots\cup A_n|A)=P(A_1|A)+\cdots+P(A_n|A)
+$$
+
+$$
+P(A_1\cdots A_n)=P(A_1)P(A_2|A_1)\cdots P(A_n|A_1\cdots A_{n-1})
+$$
+
+如两个事件 $A,B$ 满足：$P(AB)=P(A)P(B)$ ，那么称 $A,B$ 独立
+
+两点分布方差为 $p(1-p)$ ，二项分布方差为 $np(1-p)$ ，均匀分布期望 $\dfrac{a+b}2$ ，方差 $\dfrac{(b-a)^2}{12}$
+
+数学期望的性质：
+
+- 若 $C$ 是常数，则 $E(C)=C,E(CX)=CE(X)$
+
+- $E(X_1+X_2)=E(X_1)+E(X_2)$ 
+
+- 若 $X,Y$ 相互独立，则 $E(XY)=E(X)E(Y)$
+
+方差计算公式 $D(X)=E(X^2)-[E(X)]^2$ 
+
+- 设 $C$ 是常数，则 $D(C)=0$ ，$D(CX)=C^2D(X)$
+
+- 若 $X,Y$ 相互独立，则 $D(X\pm Y)=D(X)+D(Y)$ (注意都是加)
 
 
 
@@ -584,6 +732,11 @@ $$
 - $\sum_{i=1}^nf^2(i)=f(n)\times f(n+1)$
 - $f(n+m)=f(n+1)f(m)+f(n)f(m-1)$
 - $f(n)^2=(-1)^{n+1}+f(n-1)f(n+1)$
+- $f(n+1)<2f(n)<f(n+2)$
+- $f(n+2)<3f(n)$
+- $4f(n)<3f(n+1)\Rightarrow f(n)<f(n+1)<3f(n-1)$
+
+> 齐肯多夫定理：任何正整数可以表示为若干个不连续的 Fibonacci 数之和
 
 
 
@@ -604,6 +757,10 @@ signed main()
 {   for(scanf("%d",&n);n;n=(n-1)/26) x=(char)('A'+(n-1)%26 )+x;
     return std::cout<<x,0;  }
 ```
+
+
+
+闰年公式：满足其一 ① 为 $4$ 的倍数不为 $100$ 的倍数； ② 为 $400$ 的倍数
 
 
 
@@ -664,18 +821,19 @@ signed main()
 
 > 利用唯一分解定理质因数分解的复杂度为 $O(\sqrt n)$ ，最坏复杂度在质数时取得 (也可以枚举素数，复杂度为 $O(\dfrac{n}{\ln n})$ ，但是需要素数筛预处理)
 
-设 $x=\prod p_i^{k_i}$ ，则 $x$ 因子数、因子和分别为 $\prod(a_i+1),\prod(\sum_{j=0}^{a_i}p_i^j)=\prod\dfrac{p_i^{a_i+1}-1}{p_i-1}$
+设 $x=\prod p_i^{a_i}$ ，则 $x$ 因子数、因子和分别为 $\prod(a_i+1),\prod(\sum_{j=0}^{a_i}p_i^j)=\prod\dfrac{p_i^{a_i+1}-1}{p_i-1}$
 
 > 根据上式可知完全平方数(1,4,9,...)有奇数个因数，其他数有偶数个因数。因子和是积性函数，设 $x$ 分解出一个素数 $p$ ，则 $f(x)=f(\dfrac xp)f(p)$ ，其中显然 $f(p)=p+1$
 
 
 
-最大公因数/最小公倍数的性质：
+互质/最大公因数/最小公倍数的性质：
 
 - (辗转相除法) `gcd(a,b)=b?gcd(b,a%b):a` 复杂度 $O(\log n)$ ; $[a,b]=\dfrac{ab}{(a,b)}$
 - 若 $a,b\in N^*,(a,b)=k$ 则 $(\dfrac ak,\dfrac bk)=1$ ；若 $[a,b]=k$ 则 $(\dfrac ka,\dfrac kb)=1$
-- 若 $p\bot q$ ，则 $(p^n,q^m)=1$
+- 若 $p\bot q$ ，则 $(p^n,q^m)=1$ ，也意味着 $p^n\bmod q^m\neq 0$ 
 - 若 $x(a,b)=a,y(a,b)=b$ 则 $(x,y)=1$ 即 $(\dfrac{a}{(a,b)},\dfrac{b}{(a,b)})=1$ 
+- 若 $(a\cdot b)\bot(c\cdot d)$ 则 $a\bot c,a\bot d,b\bot c,b\bot d$ 
 
 > 应用：从长为 $n$ 的环任意位置开始循环每次跳 $m$ 格走，能遍历全部位置充要条件是 $(n,m)=1$ 
 
@@ -1033,25 +1191,24 @@ ax+by=(a,b)
 $$
 
 ```c++
-ll exgcd(ll a, ll b, ll &x, ll &y)
+void exgcd(ll a, ll b, ll &x, ll &y)
 {
-    if (!b)
-    {
-        x = 1;
-        y = 0;
-        return a;
-    }
-    ll d = exgcd(b, a % b, x, y);
-    ll t = x;
-    x = y;
-    y = t - (a / b) * y;
-    return d;
-} // 或 exgcd(b, a % b, y, x); y -= a / b * x;
+    if (!b) x = 1, y = 0;
+    else exgcd(b, a % b, y, x), y -= a / b * x;
+}
 ```
+
+
 
 若要求 $ax+by=c$ 的一组整数解，需要先求出 $ax_0+by_0=(a,b)$ 的一组解，然后得到 $ax_0\times\dfrac{c}{(a,b)}+by_0\times\dfrac{c}{(a,b)}=(a,b)\times\dfrac{c}{(a,b)}$ ，若 $\dfrac{c}{(a,b)}$ 非整数，无解。
 
 显然有恒等式 $a(x+db)+b(y-da)=c$ ，令 $d=\dfrac1{(a,b)}$ ，可以得到最小非负数解 $x'=(x\bmod \dfrac b{(a,b)}+\dfrac b{(a,b)})\bmod \dfrac b{(a,b)}$ 。特别地若 $a<0$ 可以两边同时取负。
+
+
+
+> 洛谷P1082-求 $ax\equiv 1(\bmod b)$ 的最小正整数解 $x$ ，保证有解
+
+本质是 $ax=by+1\to ax-by=1$ ,有解条件是 $(a,b)=1$ ,输出 $(x\bmod b+x)\bmod b$ 即可
 
 
 
@@ -1311,9 +1468,1351 @@ signed main()
 
 
 
+#### 中国剩余定理
+
+CRT(Chnese Remainder Theorem) 求解如下方程最小正元 $x$ ：( $n_i$ 两两互质)
+
+$$
+\begin{cases}
+x\equiv b_1(\mod a_1)\\
+x\equiv b_2(\mod a_2)\\
+\quad\quad\quad\ \ \ \vdots\\
+x\equiv b_k(\mod a_k)\\
+\end{cases}
+$$
+
+> 洛谷P1495-输入不等式数 $n$ 和 $a_i,b_i$ ( $a_i$ 互质)，求最小 $x$
+
+```c++
+#include <bits/stdc++.h>
+using namespace std;
+typedef long long ll;
+#define mn 13
+ll n, a[mn], b[mn], pd = 1, c, ci, z, ans;
+void exgcd(ll a, ll b, ll &x, ll &y)
+{
+    if (!b)
+        x = 1, y = 0;
+    else
+        exgcd(b, a % b, y, x), y -= a / b * x;
+}
+signed main()
+{
+    scanf("%lld", &n);
+    for (ll i = 1; i <= n; ++i)
+    {
+        scanf("%lld%lld", &a[i], &b[i]);
+        pd *= a[i];
+    }
+    for (ll i = 1; i <= n; ++i)
+    {
+        c = pd / a[i], z = 0, ci = 0;
+        exgcd(c, a[i], ci, z);
+        ans += b[i] * c * ((ci + a[i]) % a[i]);
+    }
+    printf("%lld", ans % pd);
+    return 0;
+}
+```
+
+**拓展中国定理：** ( $a_i$ 不互质) 洛谷P4777- $n\le10^5,\gcd\le10^{18},1\le b_i,a_i\le10^{18}$
+
+```c++
+#include <bits/stdc++.h>
+using namespace std;
+typedef long long ll;
+#pragma GCC diagnostic ignored "-Wpedantic" using int128 = __int128; //忽略警告
+#define mn 100002
+ll n, ai[mn], bi[mn], x, y, k, m, ans, a, b, c, gcc, bg;
+ll exgcd(ll a, ll b, ll &x, ll &y)
+{
+    ll d = a;
+    if (!b)
+        x = 1, y = 0;
+    else
+        d = exgcd(b, a % b, y, x), y -= a / b * x;
+    return d;
+}
+signed main()
+{
+    scanf("%lld", &n);
+    for (ll i = 1; i <= n; ++i)
+        scanf("%lld%lld", ai + i, bi + i);
+    m = ai[1], ans = bi[1];
+    for (ll i = 2; i <= n; ++i)
+    {
+        a = m, b = ai[i], c = (bi[i] - ans % b + b) % b;
+        gcc = exgcd(a, b, x, y), bg = b / gcc;
+        if (c % gcc != 0)
+            return printf("-1") & 0;
+        x = (__int128)x * (c / gcc) % bg;
+        ans += x * m, m *= bg, ans = (ans % m + m) % m;
+    }
+    printf("%lld", (ans % m + m) % m);
+    return 0;
+}
+```
+
+
+
+#### BSGS
+
+求最小非负整数 $x$ ，满足 $a^x\equiv b(\bmod p), p$ 是质数， $O(\sqrt p)$  (洛谷P4195)
+
+```c++
+#include <bits/stdc++.h>
+using namespace std;
+typedef long long ll;
+#define mn 1000700
+#define mod 1000007
+struct hasht
+{
+    ll mp[mn], hsh[mn]; //避免关键字冲突map,hash
+    ll find(ll x)       //拉链法构造散列表
+    {
+        ll t = x % mod;
+        for (; mp[t] != x && mp[t] != -1; (t += 107) %= mod)
+            ;
+        return t;
+    }
+    void insert(ll x, ll i)
+    {
+        ll f = find(x);
+        mp[f] = x, hsh[f] = i;
+    }
+    bool in(ll x)
+    {
+        return mp[find(x)] == x;
+    }
+    ll get_hash(ll x)
+    {
+        return hsh[find(x)];
+    }
+    void init()
+    {
+        memset(hsh, -1, sizeof hsh), memset(mp, -1, sizeof mp);
+    }
+} h;
+ll a, b, p, m, s;
+signed main()
+{
+    scanf("%lld%lld%lld", &p, &a, &b);
+    h.init();
+    if (b == 1)
+    {
+        return !printf("0");
+    }
+    m = ceil(sqrt((double)p)) + 1, s = 1;
+    for (ll i = 1; i <= m; ++i)
+    {
+        h.insert(b, i);
+        s = (1LL * s * a) % p, b = (1LL * a * b) % p;
+    }
+    a = s;
+    for (ll i = 1; i <= m; ++i)
+    {
+        if (h.in(a))
+        {
+            return printf("%lld", i * m - h.get_hash(a) + 1) & 0;
+        }
+        a = (1LL * a * s) % p;
+    }
+    return printf("no solution"), 0;
+}
+```
+
+若 $p$ 不是质数，使用 exBSGS 算法 (洛谷P4195) 复杂度 $O(\sqrt{\varphi(p)})$
+
+```c++
+#include <bits/stdc++.h>
+using namespace std;
+typedef long long ll;
+#define mn 100000
+#define mod 1000007
+#define big 0xfffffffffffffa
+ll a, b, p, baby[mn + 3], giant[mn + 3], key[mod], comment[2][mod];
+ll stk[mod << 1 | 1];
+ll mhash(ll v)
+{
+    ll w = v * v % mod;
+    while (key[w] && key[w] != v)
+    {
+        (w += 1) %= mod;
+    }
+    if (!key[w])
+    {
+        stk[++stk[0]] = w;
+    }
+    return w;
+}
+ll phi(ll x)
+{
+    ll r = x;
+    for (ll i = 2; i * i <= x; ++i)
+    {
+        if (x % i == 0)
+        {
+            r = r / i * (i - 1);
+            while (x % i == 0)
+            {
+                x /= i;
+            }
+        }
+    }
+    if (x > 1)
+    {
+        r = r / x * (x - 1);
+    }
+    return r;
+}
+ll exbsgs()
+{
+    ll res = big, block = ceil(sqrt(2 * phi(p)));
+    baby[0] = 1;
+    for (ll i = 1; i <= block; ++i)
+    {
+        baby[i] = baby[i - 1] * a % p;
+    }
+    comment[0][mhash(1)] = 0;
+    giant[0] = 1;
+    for (ll i = 1; i <= block; ++i)
+    {
+        giant[i] = giant[i - 1] * baby[block] % p;
+        ll now = mhash(giant[i]);
+        if (!comment[0][now])
+        {
+            comment[0][now] = i;
+        }
+        else if (!comment[1][now])
+        {
+            comment[1][now] = i;
+        }
+    }
+    for (ll i = 0; i <= block; ++i)
+    {
+        ll now = mhash(b * baby[i] % p);
+        ll t0 = comment[0][now], t1 = comment[1][now];
+        if (t0 && giant[t0 - 1] * baby[block - i] % p == b)
+        {
+            res = min(res, t0 * block - i);
+        }
+        else if (t1 && giant[t1 - 1] * baby[block - i] % p == b)
+        {
+            res = min(res, t1 * block - i);
+        }
+    }
+    return res;
+}
+signed main()
+{
+    while (scanf("%lld%lld%lld", &a, &p, &b) != EOF)
+    {
+        if (!p && !a && !b)
+        {
+            break;
+        }
+        b %= p, a %= p;
+        while (stk[0])
+        {
+            key[stk[stk[0]]] = 0;
+            comment[0][stk[stk[0]]] = 0;
+            comment[1][stk[stk[0]]] = 0;
+            --stk[0];
+        }
+        ll res = exbsgs();
+        if (res == big)
+        {
+            printf("No Solution\n");
+        }
+        else
+        {
+            printf("%lld\n", res);
+        }
+    }
+    return 0;
+}
+```
+
 
 
 ### 计算几何
+
+三角函数： 使用**弧度制**，弧度制 `deg` 跟角度制 `arg` 的转换公式：( $\pi=180°$ )
+$$
+1=\dfrac{deg}{180°}=\dfrac{arg}{\pi}\Rightarrow 
+\begin{cases}
+arg=\dfrac{\pi\cdot deg}{180°}\\
+deg=\dfrac{180°\cdot arg}{\pi}
+\end{cases}
+$$
+三角函数是 `sin, cos, tan` ，反三角函数是 `asin, acos, atan, atan2(y, x)` ，其中 `atan2(y, x)=atan(y/x)` 。反三角函数求出的角度值域范围是：`asin, atan` 为 $[-\dfrac\pi2,\dfrac\pi2]$ ，`acos` 为 $[0,\pi]$ ，`atan2` 为 $[-\pi,\pi]$ 。
+
+注意这里 `atan2` 的含义是：向量 $(x,y)$ 与 $x$ 正半轴夹角的大小，即从 $X$ 轴逆时针旋转的角度，如果为负数就表示顺时针旋转的角度。与 `atan` 是本质不同的函数
+
+
+
+#### 向量
+
+向量点乘，有结论： $\vec a\cdot \vec b$ 的符号大于 $0$ 夹角在 $[0,90°)$ ，等于 $0$ 为 $90°$ ；小于 $0$ 为 $(90°,180°]$ 。点乘的几何意义是 $\vec a$ 长度与 $\vec b$ 投影到 $\vec a$ 的长度的乘积或 $\vec b$ 长度与 $\vec a$ 投影到 $\vec b$ 的长度的乘积。即 $\vec a\cdot \vec b=|\vec a|\cdot|\vec b|\cos<\vec a,\vec b>$ 。如果是正的，说明投影后朝向一致，否则说明投影后朝向不一致
+
+向量 $\vec a,\vec b$ 叉乘得到一个向量 $\vec c$，其方向垂直这两向量形成的平面，如果 $\vec b$ 满足 $\vec a$ 经由 $180°$ 内的逆时针旋转可以与其平行，那么 $\vec c$ 的竖坐标是正的；如果是 $180°$ 内的顺时针，那么是负的。可以用右手定则表示：当右手的四指从 $\vec a$ 以不超过 $180°$ 的转角转向 $\vec b$ 时，竖起的大拇指指向是 $\vec a\times \vec b$ 的方向(向上正，向下负)，叉乘满足： $(\lambda \vec a)\times \vec b=\vec a \times(\lambda\vec b)=\lambda (\vec a\times \vec b)$ ,  $(\vec a+\vec b)\times\vec c=\vec a\times\vec c+\vec b\times \vec c$ 
+
+判断向量共线(平行)：两非零向量 $\vec a,\vec b$ 共线当且仅当存在唯一实数 $\lambda$ ，使得 $\vec b=\lambda \vec a$ ，或 $|\vec{a}\cdot \vec{b}|=|\vec a||\vec b|$ (也可以用 $\vec a\times \vec b=0$ )
+
+判断向量垂直： $a\cdot b=0$
+
+向量与原点的夹角： $\theta=\arctan\dfrac{y}{x}$ ，由角和长度 $l$ 逆求坐标 $(l\cos\theta,l\sin\theta)$
+
+两向量的夹角：$\cos<\vec a,\vec b>=\dfrac{\vec a\cdot\vec b}{|\vec a||\vec b|}$ ，再来个反三角函数  $\arccos$ 即可。
+
+> 若 $A,B,C$ 三点共线：那么对任意点 $O$ 有 $\vec{OB}=\lambda \vec{OA}+(1-\lambda)\vec{OC}$
+
+向量旋转公式：设向量 $\vec a=(x,y)$ ，倾角为 $\alpha$ ，长度为 $l=\sqrt{x^2+y^2}$ ，即 $\vec a=(l\cos\alpha,l\sin\alpha)$ ，逆时针旋转 $\beta$ ，得到 $\vec{a'}=(l\cos(\alpha+\beta),l\sin(\alpha+\beta))$ 。展开化简得：
+$$
+\begin{align}
+\vec{a'}&=(l(\cos\alpha\cos\beta-\sin\alpha\sin\beta),l(\sin\alpha\cos\beta+\cos\beta\sin\alpha))\\
+&=(x\cos\beta-y\sin\beta,x\sin\beta+y\cos\beta)
+\end{align}
+$$
+
+依次取 $\beta=90°,180°,270°$ ，对 $(x,y)$ 得到的分别为： $(-y,x),(-x,-y),(y,-x)$ 
+
+```c++
+#define EPS (1e-10)
+#define equals(a, b) (fabs((a) - (b)) < EPS)
+class Point
+{
+public:
+    double x, y;
+    Point(double x = 0, double y = 0) : x(x), y(y) {}
+    Point operator+(const Point &p) const { return Point(x + p.x, y + p.y); }
+    Point operator-(const Point &p) const { return Point(x - p.x, y - +p.y); }
+    Point operator*(const double &a) const { return Point(x * a, y * a); }
+    Point operator/(const double &a) const { return Point(x / a, y / a); }
+    double norm() const { return x * x + y * y; }
+    double abs() const { return sqrt(norm()); }
+    bool operator<(const Point &p) const
+    {
+        return x != p.x ? x < p.x : y < p.y;
+    }
+    bool operator==(const Point &p) const
+    {
+        return fabs(x - p.x) < EPS && fabs(y - p.y) < EPS;
+    }
+};
+typedef Point Vector;
+double dot(const Point &a, const Point &b)
+{
+    return a.x * b.x + a.y * b.y;
+}
+double cross(const Point &a, const Point &b)
+{
+    return a.x * b.y - a.y * b.x;
+}
+bool isParallel(const Vector &a, const Vector &b)
+{
+    return equals(cross(a, b), 0.0);
+}
+bool isOrthogonal(const Vector &a, const Vector &b)
+{
+    return equals(dot(a, b), 0.0);
+}
+double getDistance(const Point &a, const Point &b)
+{
+    return (a - b).abs();
+}
+//极坐标互换
+double arg(const Vector &p) { return atan2(p.y, p.x); }
+Vector polar(const double &a, const double &r)
+{
+    return Point(cos(r) * a, sin(r) * a);
+}
+```
+
+
+
+#### 线段
+
+##### 点到直线距离
+
+点 $P$ 到直线 $AB$ 的距离 $|PD|=\dfrac{|\vec{AB}\times \vec{AP}|}{|AB|}$
+
+```c++
+double dis_lp(const Point &a, const Point &b, const Point &p)
+{
+    return abs(cross(b - a, p - a)) / (b - a).abs();
+}
+```
+
+点到线段的距离：
+
+```c++
+double dis_sp(const Point &a, const Point &b, const Point &p)
+{
+    if (dot(b - a, p - a) < 0.0)
+    {
+        return (p - a).abs();
+    }
+    if (dot(a - b, p - b) < 0.0)
+    {
+        return (p - b).abs();
+    }
+    return dis_lp(a, b, p);
+}
+```
+
+
+
+##### 线段相交判定
+
+判断线段 $AB,CD$ 是是否相交：
+
+```c++
+bool isIntersect(const Point &a, const Point &b, const Point &c, const Point &d)
+{
+    return cross(c - a, d - a) * cross(c - b, d - b) <= 0.0 && cross(a - c, b - c) * cross(a - d, b - d) <= 0.0;
+} // 条件: AB,CD不在一条直线上
+```
+
+```c++
+ll f(const Point &a, const Point &b)
+{
+    if (cross(a, b) > eps)
+    {
+        return 1; //逆时针
+    }
+    if (cross(a, b) < -eps)
+    {
+        return -1; //顺时针
+    }
+    if (dot(a, b) < -eps)
+    {
+        return 2; // P在AB左方
+    }
+    if (a.abs() < b.abs())
+    {
+        return -2; // P在AB右方
+    }
+    return 0; // P在AB内部
+}
+bool isIntersect(const Point &a, const Point &b, const Point &c, const Point &d)
+{
+    return f(c - a, d - a) * f(c - b, d - b) <= 0 && f(a - c, b - c) * f(a - d, b - d) <= 0;
+}
+```
+
+直线 $AB$ 与线段 $CD$ ，那么只需要判断 $C,D$ 是否在 $AB$ 两段即可，不必反过来再判断一次，即只需要判断：
+$$
+(\vec{CA}\times\vec{CB})\cdot(\vec{DA}\times \vec{DB})\le 0
+$$
+线段 $AB,CD$ 的距离，如果两线段相交，距离为 $0$ ，否则分别计算 $A,B$ 到线段 $CD$ 的 $C,D$ 到线段 $AB$ 的距离，取四者最小值即可
+
+
+
+##### 直线交点
+
+直线 $AB,CD$ 交于点 $P$  ，则 $\vec{OP}=\vec{OC}+\dfrac{\vec{CA}\times\vec{AB}}{\vec{CD}\times\vec{AB}}\cdot\vec OD$
+
+```c++
+Point intersect(const Point &a, const Point &b, const Point &c, const Point &d)
+{
+    return c + (d - c) * (cross(a - c, b - a) / cross(d - c, b - a));
+}
+```
+
+线段 $AB,CD$ 交点，那么可以先判断 $AB,CD$ 是否相交，如果是的话同直线交点的处理方法，如果不相交，输出不存在
+
+
+
+##### 点在直线投影
+
+点 $P$ 在直线 $AB$ 上投影点 $C$ 满足 $\vec{OC}=\vec{OA}+\dfrac{\vec{AB}\cdot\vec{AP}}{|AB|^2}\cdot\vec{AB}$
+
+```c++
+Point project(const Point &a, const Point &b, const Point &p)
+{
+    return a + (b - a) * (dot(b - a, p - a) / (b - a).norm());
+}
+```
+
+ $P$ 关于 $AB$ 对称的点 $P'$ ，可以先求投影点 $P_0$ ，那么根据 $\vec{PP'}=2\vec{PP_0}$ ，可知 $\vec{OP'}=\vec{OP}+\vec{PP'}=\vec{OP}+2\vec{PP_0}$ 
+
+
+
+求圆 $P$ 与直线 $AB$ 的交点 $C,D$，求出 $P$ 在 $AB$ 的投影点及距离 $|PE|$ ，则：
+$$
+\vec{OC}=\vec{OE}+\vec{EC}=\vec{OE}-\dfrac{\sqrt{r^2-|PE|^2}}{|AB|}\vec{AB}
+\\
+\vec{OD}=\vec{OE}-\vec{EC}=\vec{OE}+\dfrac{\sqrt{r^2-|PE|^2}}{|AB|}\vec{AB}
+$$
+求两圆 $P,Q$ 的交点：由余弦定理，求出夹角 $\cos\theta=\cos\ang APQ=\cos\ang BPQ=\dfrac{|PQ|^2+r_1^2-r_2^2}{2r_1|PQ|}$ ，可得角度 $\theta$ 。根据反三角函数可知 $\vec{OP}$ 的夹角 $\alpha$ ，则 $\vec{PA}=(r_1\cos(\alpha+\theta),r_1\sin(\alpha+\theta))$ 且 $\vec{PB}=(r_1\cos(\alpha-\theta),r_1\sin(\alpha-\theta))$ ，那么 $\vec{OA}=\vec{OP}+\vec{PA},\vec{OB}=\vec{OP}+\vec{PB}$ 
+
+
+
+#### 多边形
+
+由在同一平面且<u>不在同一直线上</u>的三条或三条以上的线段首尾顺次连结且<u>不相交</u>所组成的封闭图形叫做多边形。又称简单多边形。不满足“不相交”的就是复杂多边形。
+
+凸多边形是没有任何一个内角为优角(范围在区间 $(180°,360°)$ 的角)的多边形。凹多边形则至少有一个优角。凸多边形以任意一条边延长为直线，其他所有边都必然在直线的同一侧。凹多边形则存在不在同一侧的情况。凸多边形上的点或内部点间连线位于多边形都在多边形内部或边上。凹多边形存在两个点的连线不全在多边形内部
+
+多边形的性质：
+
+- 无论凹凸， $n$ 边形的内角和是 $180°\cdot (n-2)$
+
+- 凸多边形外角和是 $360°$
+
+- $n$ 边形的对角线数量是 $\dfrac{n(n-3)}2$ 
+
+三角形的性质：
+
+- 设 $p=\dfrac12(a+b+c),R$ 是外接圆半径， $r$ 是内接圆半径，则面积公式：
+
+- $S=\sqrt{p(p-a)(p-b)(p-c)}=\dfrac{abc}{4R}=rp$ 
+
+- 三角形重心坐标是三点坐标的平均值。
+
+- 三角形外角和是 $360°$ ，等于不相邻内角之和。
+
+- 三角形中线将三角形划分为面积相等的两部分。
+
+- 直角三角形斜边中线等于斜边一半。
+
+- 三线合一：等腰三角形顶角平分线、底边中线、底边高是同一条直线
+
+**多边形面积公式**：(点按逆时针排序)
+$$
+S=\dfrac12\sum_{i=1}^n\vec{OA_i}\times \vec{OA_{i+1}}
+$$
+**PIP 问题**：点是否在多边形内部(或边上)问题。
+
+- **光线投射算法**，从该点出发作射线(注意不是直线)，如果与奇数个点相交在多边形内，偶数个点相交在多边形外。实现上，可以作平行 $x$ 轴的射线，枚举每条线段，如果线段两端点坐标值都小于该点，那么忽略该线段，否则套用上文直线与线段相交的模板进行判断即可。特别注意，如果相交在端点，那么应当算相交了两次(相交时特判横坐标是否与其中一个端点相同即可)。
+- **回转数算法**求这个问题。计算该点与每相邻两个顶点的夹角弧度制(取范围 $[-\pi,\pi]$ )，然后将其求和，判断是否为 $0$ ，是就在多边形外。实现上，$O(n)$ 枚举相邻边，利用 $<\vec a,\vec b>=\arccos\dfrac{\vec a\cdot\vec b}{|\vec a||\vec b|}$ 求角，累加，最后与 $0$ 判断即可(注意浮点误差)
+
+是否位于多边形边上，可以通过检查p与相邻两端点的向量(p为起点)是否在同一直线且方向相反(相同是可以内包的)
+
+```c++
+int contains(Polygon g, Point p) //伪代码
+{
+    int n = g.size();
+    bool x = false;
+    for(int i=0;i<n;i++)
+    {
+        Point a = g[i] - p, b = g[(i+1)%n]-p;
+        if(abs(cross(a,b))<EPS&&dot(a,b)<EPS)
+            return 1;
+        if(a.y<b.y) swap(a,b);
+        if(a.y<EPS && EPS<b.y && cross(a,b)>EPS)
+            x=!x;
+    }
+    return (x?2:0);
+}
+```
+
+##### 
+
+
+
+#### 极角排序
+
+如果极角大小值相同，可以规定按照离原点的远近排序(越近越小)
+
+atan2 参考代码：(范围是 $[-\pi,\pi]$ )
+
+```c++
+#include <bits/stdc++.h>
+using namespace std;
+typedef long long ll;
+typedef double db;
+#define sc(x) scanf("%lld", &x)
+#define cp const point &
+struct point
+{
+    db x, y;
+    point(db a = 0, db b = 0) : x(a), y(b) {}
+    point operator-(cp r) const { return point(x - r.x, y - r.y); }
+    db ang() const { return atan2(y, x); }
+    db norm() const { return x * x + y * y; }
+} p[1010], p0;
+db cross(cp a, cp b) { return a.x * b.y - a.y * b.x; }
+bool operator<(cp a, cp b)
+{
+    point p1 = (a - p[1]), p2 = (b - p[1]);
+    return p1.ang() != p2.ang() ? p1.ang() < p2.ang() : p1.norm() < p2.norm();
+}
+ll n, b;
+signed main()
+{
+    sc(n);
+    for (ll i = 1; i <= n; ++i)
+    {
+        scanf("%lf%lf", &p[i].x, &p[i].y);
+    }
+    sort(p + 2, p + 1 + n); //假设以第一个点为坐标原点
+    for (ll i = 1; i <= n; ++i)
+    {
+        printf("(%lf, %lf) %lf\n", p[i].x, p[i].y, (p[i] - p[1]).ang());
+    }
+    return 0;
+}
+```
+
+如果范围要求 $[0,2\pi]$ 的排序，那么更改 `ang` 函数的定义：
+
+```c++
+db ang() const
+{
+    db v = atan2(y, x);
+    return v < 0 ? v + 2 * acos(-1) : v;
+}
+```
+
+
+
+叉乘 (极角取值为 $[0,2\pi]$ ，最左下为原点):
+
+```c++
+#include <bits/stdc++.h>
+using namespace std;
+typedef long long ll;
+typedef double db;
+#define sc(x) scanf("%lld", &x)
+#define mn 100010
+#define cp const point &
+ll n, ss;
+struct point
+{
+    db x, y;
+    point(db a = 0, db b = 0) : x(a), y(b) {}
+    point operator-(cp r) const { return point(x - r.x, y - r.y); }
+    db norm() const { return x * x + y * y; }
+} p[mn];
+db cross(cp a, cp b) { return a.x * b.y - a.y * b.x; }
+bool operator<(cp a, cp b)
+{
+    db v = cross(a - p[1], b - p[1]);
+    return v > 0 || (v == 0 && (a - p[1]).norm() < (b - p[1]).norm());
+}
+signed main()
+{
+    sc(n);
+    for (ll i = 1; i <= n; ++i)
+    {
+        scanf("%lf%lf", &p[i].x, &p[i].y);
+        if (p[i].y < p[1].y || (p[i].y == p[1].y && p[i].x < p[1].x))
+        {
+            swap(p[i], p[1]);
+        }
+    }
+    sort(p + 2, p + 1 + n);
+    for (ll i = 1; i <= n; ++i)
+    {
+        printf("(%lf, %lf)\n", p[i].x, p[i].y);
+    }
+    return 0;
+}
+```
+
+任意点为原点：
+
+```c++
+#include <bits/stdc++.h>
+using namespace std;
+typedef long long ll;
+typedef double db;
+#define sc(x) scanf("%lld", &x)
+#define mn 100010
+#define cp const point &
+ll n, ss;
+struct point
+{
+    db x, y;
+    point(db a = 0, db b = 0) : x(a), y(b) {}
+    point operator-(cp r) const { return point(x - r.x, y - r.y); }
+    db norm() const { return x * x + y * y; }
+    ll quadrant() const
+    {
+        return 1 * (x > 0 && y >= 0) + 2 * (x <= 0 && y > 0) + 3 * (x < 0 && y <= 0) + 4 * (x >= 0 && y < 0);
+    }
+} p[mn], s[mn], p0;
+db cross(cp a, cp b) { return a.x * b.y - a.y * b.x; }
+bool operator<(cp a, cp b)
+{
+    if ((a - p0).quadrant() != (b - p0).quadrant())
+    {
+        return (a - p0).quadrant() < (b - p0).quadrant();
+    }
+    db v = cross(a - p0, b - p0);
+    return v > 0 || (v == 0 && (a - p0).norm() < (b - p0).norm());
+}
+signed main()
+{
+    sc(n);
+    for (ll i = 1; i <= n; ++i)
+    {
+        scanf("%lf%lf", &p[i].x, &p[i].y);
+    }
+    sort(p + 1, p + 1 + n);
+    for (ll i = 1; i <= n; ++i)
+    {
+        printf("(%lf, %lf)\n", p[i].x, p[i].y);
+    }
+    return 0;
+}
+```
+
+
+
+#### 凸包
+
+平面上能包含所有给定点的周长最小的凸多边形是凸包。(注意不是面积最小)。上凸壳是圆的第一第二象限逆时针方向朝向(含 $x$ 负半轴)，其余是下凸壳。
+
+Graham算法：(洛谷P2742)
+
+```c++
+#include <bits/stdc++.h>
+using namespace std;
+typedef long long ll;
+typedef double db;
+#define sc(x) scanf("%lld", &x)
+#define mn 100010
+#define cp const point &
+ll n, ss;
+struct point
+{
+    db x, y;
+    point(db a = 0, db b = 0) : x(a), y(b) {}
+    point operator+(cp r) const { return point(x + r.x, y + r.y); }
+    point operator-(cp r) const { return point(x - r.x, y - r.y); }
+    db norm() const { return x * x + y * y; }
+} p[mn], s[mn];
+db cross(cp a, cp b) { return a.x * b.y - a.y * b.x; }
+bool operator<(cp a, cp b)
+{
+    db v = cross(a - p[1], b - p[1]);
+    return v > 0 || (v == 0 && a.norm() < b.norm());
+}
+signed main()
+{
+    sc(n);
+    for (ll i = 1; i <= n; ++i)
+    {
+        scanf("%lf%lf", &p[i].x, &p[i].y);
+        if (p[i].y < p[1].y || (p[i].y == p[1].y && p[i].x < p[1].x))
+        {
+            swap(p[i], p[1]);
+        }
+    }
+    sort(p + 2, p + 1 + n);
+    s[++ss] = p[1];
+    for (ll i = 2; i <= n; ++i)
+    {
+        while (ss > 1 && cross(s[ss] - s[ss - 1], p[i] - s[ss]) < 0)
+        { //根据题目要求选择 < 或 <=
+            --ss;
+        }
+        s[++ss] = p[i];
+    }
+    for (ll i = 1; i <= ss; ++i) //输出各点
+    {
+        printf("%lf %lf\n", s[i].x, s[i].y);
+    }
+    return 0;
+}
+```
+
+Andrew算法：(洛谷P2742)
+
+```c++
+#include <bits/stdc++.h>
+using namespace std;
+typedef long long ll;
+typedef double db;
+#define sc(x) scanf("%lld", &x)
+#define mn 100010
+#define cp const point &
+ll n, ss, top;
+struct point
+{
+    db x, y;
+    point(db a = 0, db b = 0) : x(a), y(b) {}
+    point operator+(cp r) const { return point(x + r.x, y + r.y); }
+    point operator-(cp r) const { return point(x - r.x, y - r.y); }
+    db norm() const { return x * x + y * y; }
+} p[mn], s[mn * 2];
+db cross(cp a, cp b) { return a.x * b.y - a.y * b.x; }
+bool operator<(cp a, cp b)
+{
+    return a.x != b.x ? a.x < b.x : a.y < b.y;
+}
+void f(ll i)
+{
+    while (ss > top && cross(s[ss] - s[ss - 1], p[i] - s[ss]) < 0)
+    { //根据题目要求选择 < 或 <=
+        --ss;
+    }
+    s[++ss] = p[i];
+}
+signed main()
+{
+    sc(n);
+    for (ll i = 1; i <= n; ++i)
+    {
+        scanf("%lf%lf", &p[i].x, &p[i].y);
+    }
+    sort(p + 1, p + 1 + n);
+    top = 1, s[ss = 1] = p[1];
+    for (ll i = 2; i <= n; ++i)
+    {
+        f(i);
+    }
+    top = ss;
+    for (ll i = n - 1; i >= 1; --i)
+    {
+        f(i);
+    }
+    for (ll i = 1; i < ss; ++i) //输出各点
+    {
+        printf("%lf %lf\n", s[i].x, s[i].y);
+    }
+    return 0;
+}
+```
+
+旋转卡壳模板-求凸包直径：(洛谷P1452)
+
+```c++
+#include <bits/stdc++.h>
+using namespace std;
+typedef long long ll;
+#define sc(x) scanf("%lld", &x)
+#define mn 50010
+#define cp const point &
+struct point
+{
+    ll x, y;
+    point(ll a = 0, ll b = 0) : x(a), y(b) {}
+    point operator-(cp r) const { return point(x - r.x, y - r.y); }
+    ll norm() const { return x * x + y * y; }
+} p[mn], s[mn];
+ll cross(cp a, cp b) { return a.x * b.y - a.y * b.x; }
+bool operator<(cp a, cp b)
+{
+    ll v = cross(a - p[1], b - p[1]);
+    return v > 0 || (v == 0 && (a - p[1]).norm() < (b - p[1]).norm());
+}
+ll area(cp a, cp b, cp c) { return cross(b - a, c - a); }
+ll n, ss, ans;
+signed main()
+{
+    sc(n);
+    for (ll i = 1; i <= n; ++i)
+    {
+        sc(p[i].x), sc(p[i].y);
+        if (p[i].x < p[1].x || (p[i].x == p[1].x && p[i].y < p[1].y))
+        {
+            swap(p[i], p[1]);
+        }
+    }
+    sort(p + 2, p + 1 + n);
+    for (ll i = 1; i <= n; ++i)
+    {
+        while (ss > 1 && cross(s[ss] - s[ss - 1], p[i] - s[ss]) <= 0)
+        {
+            --ss;
+        }
+        s[++ss] = p[i];
+    }
+    s[ss + 1] = s[1];
+    if (ss == 2) // not n==2
+    {
+        printf("%lld", (s[2] - s[1]).norm());
+        return 0;
+    }
+    for (ll i = 1, j = 3; i <= ss; ++i)
+    {
+        while (area(s[i], s[i + 1], s[j]) <= area(s[i], s[i + 1], s[j % ss + 1]))
+        {
+            j = j % ss + 1;
+        }
+        ans = max(ans, max((s[j] - s[i]).norm(), (s[j] - s[i + 1]).norm()));
+    }
+    printf("%lld", ans);
+    return 0;
+}
+```
+
+
+
+#### 扫描线
+
+矩形面积并
+
+> 洛谷P5490-输入 $n$ 和矩形左下角、右上角，输出 $n$ 矩形并集总面积
+
+复杂度 $O(n\log n)$ ，先离散化，再线段树维护
+
+```c++
+#include <bits/stdc++.h>
+using namespace std;
+typedef long long ll;
+#define mn 300010
+unordered_map<ll, ll> h;
+struct scline
+{
+    ll x, ay, by, c;
+    bool operator<(const scline &p) const { return x < p.x; }
+} sc[mn];
+ll ax, ay, bx, by, n, xs[mn], xss, c[mn << 2], lp[mn << 2], rp[mn << 2], v[mn << 2], lf, rf, k, ans;
+#define lfs h << 1
+#define rfs h << 1 | 1
+#define mkcf ll cf = (lf + rf) >> 1
+void init(ll lf, ll rf, ll h)
+{
+    lp[h] = lf, rp[h] = rf;
+    if (lf != rf)
+    {
+        mkcf;
+        init(lf, cf, lfs);
+        init(cf + 1, rf, rfs);
+    }
+}
+void add(ll h)
+{
+    if (rf < lp[h] || lf > rp[h])
+        return;
+    if (lf <= lp[h] && rp[h] <= rf)
+        c[h] += k;
+    else
+        add(lfs), add(rfs);
+    if (c[h])
+        v[h] = xs[rp[h] + 1] - xs[lp[h]];
+    else
+        v[h] = v[lfs] + v[rfs];
+}
+signed main()
+{
+    scanf("%lld", &n);
+    for (ll i = 1; i <= n; ++i)
+    {
+        scanf("%lld%lld%lld%lld", &ax, &ay, &bx, &by);
+        sc[i] = {ax, ay, by, 1};
+        sc[i + n] = {bx, ay, by, -1};
+        xs[++xss] = by;
+        xs[++xss] = ay;
+    }
+    n <<= 1;
+    sort(sc + 1, sc + 1 + n);
+    sort(xs + 1, xs + 1 + n);
+    xss = unique(xs + 1, xs + 1 + n) - xs - 1;
+    for (ll i = 1; i <= xss; ++i)
+        h[xs[i]] = i;
+    init(1, n, 1);
+    for (ll i = 1; i < n; ++i)
+    {
+        lf = h[sc[i].ay], rf = h[sc[i].by] - 1, k = sc[i].c;
+        add(1);
+        ans += v[1] * (sc[i + 1].x - sc[i].x);
+    }
+    printf("%lld", ans);
+    return 0;
+}
+```
+
+
+
+矩形周长并 (洛谷P1856)
+
+```c++
+#include <bits/stdc++.h>
+#define mn 10002
+using namespace std;
+typedef long long ll;
+ll n,ax,ay,bx,by,xs[mn],m,bf,ans;
+struct scline
+{
+    ll y,ax,bx,c;
+    bool inline operator < (const scline& b) const
+    {
+        if(y==b.y) return c>b.c;
+        return y<b.y;
+    }
+} sc[mn];
+struct segtr
+{
+    ll c,s,l,r,len;
+    bool lc,rc;
+} t[mn<<2];
+#define lfi (i<<1)
+#define rfi (i<<1|1)
+void init(ll i, ll lf, ll rf)
+{
+    t[i].l=lf,t[i].r=rf;
+    if(lf!=rf)
+    {
+        ll cf=lf+rf>>1;
+        init(lfi,lf,cf);
+        init(rfi,cf+1,rf);
+    }
+}
+void pushup(ll i)
+{
+    ll l=t[i].l,r=t[i].r;
+    if(t[i].s)
+    {
+        t[i].len=xs[r+1]-xs[l];
+        t[i].lc=t[i].rc=true;
+        t[i].c=1;
+        return;
+    }
+    t[i].len=t[lfi].len+t[rfi].len;
+    t[i].lc=t[lfi].lc,t[i].rc=t[rfi].rc;
+    t[i].c=t[lfi].c+t[rfi].c;
+    if(t[lfi].rc&&t[rfi].lc) t[i].c--;
+}
+void add(ll i, ll lf, ll rf, ll ci)
+{
+    ll lt=xs[t[i].l],rt=xs[t[i].r+1];
+    if(lt>=rf||rt<=lf) return;
+    if(lt>=lf&&rt<=rf)
+    {
+        t[i].s+=ci;
+        pushup(i);
+        return;
+    }
+    add(lfi,lf,rf,ci);
+    add(rfi,lf,rf,ci);
+    pushup(i);
+}
+signed main()
+{
+    scanf("%lld",&n);
+    for(ll i=1;i<=n;++i)
+    {
+        scanf("%lld%lld%lld%lld",&ax,&ay,&bx,&by);
+        sc[i]={ay,ax,bx,1};
+        sc[i+n]={by,ax,bx,-1};
+        xs[i]=ax;
+        xs[i+n]=bx;
+    }
+    n<<=1;
+    sort(sc+1,sc+1+n);
+    sort(xs+1,xs+1+n);
+    m=unique(xs+1,xs+1+n)-xs-1;
+    init(1,1,m-1);
+    for(ll i=1;i<n;++i)
+    {
+        add(1,sc[i].ax,sc[i].bx,sc[i].c);
+        ans+=abs(bf-t[1].len); bf=t[1].len;
+        ans+=2*t[1].c*(sc[i+1].y-sc[i].y);
+    }
+    printf("%lld",ans+sc[n].bx-sc[n].ax);
+    return 0;
+}
+```
+
+
+
+#### 杂项
+
+##### Pick定理
+
+顶点为整点的简单多边形，面积 $A$ ，内部格点数目 $i$ ，边上格点数目 $b$ 满足：$A=i+\dfrac b2-1$ ，其中 $1$ 是多边形的欧拉特征数。
+
+边上格点数目，对于每一条边，其贡献量为：$\gcd(\Delta x,\Delta y)$ (闭环之后刚好每个顶点都被算了一次，所以不需要额外 $+1$ ，单边时就需要)，于是可以根据公式求出 $i$ 
+
+> 如果是平行四边形格点，同上；如果是三角形格点， $A=2i+b-2$ ；高维推广 Ehrhart 多项式
+
+欧拉公式：$V-E+F=2$ ，$V,E,F$ 是简单几何体顶点数、边数、面数
+
+> POJ1265-有多组测试，每组测试 $n(3\le n\le100)$ 个点，接下来输入若干坐标偏量，代表当前点离上一个点的坐标位移。求这个多边形的内部包含格点整点数、边上包含的格点整点数和多边形面积
+
+```c++
+#include <cstdio>
+using namespace std;
+typedef long long ll;
+#define sc(x) scanf("%lld", &x)
+#define mn 200
+ll t, n, x[mn], y[mn], s, edge, kase;
+ll gcd(ll a, ll b)
+{
+    return b ? gcd(b, a % b) : a;
+}
+ll abs(ll x)
+{
+    return x < 0 ? -x : x;
+}
+signed main()
+{
+    for (sc(t); t--;)
+    {
+        sc(n);
+        s = edge = 0;
+        for (ll i = 1, dx, dy; i <= n; ++i)
+        {
+            sc(dx), sc(dy);
+            x[i] = x[i - 1] + dx, y[i] = y[i - 1] + dy;
+            edge += gcd(abs(dx), abs(dy));
+        }
+        x[n + 1] = x[1], y[n + 1] = y[1];
+        for (ll i = 1, dx, dy; i <= n; ++i)
+        {
+            s += x[i] * y[i + 1] - x[i + 1] * y[i];
+        }
+        s = abs(s);
+        printf("Scenario #%lld:\n%lld %lld %.1f\n\n", ++kase, (s - edge + 2) / 2, edge, s * 0.5f);
+    }
+    return 0;
+}
+```
+
+
+
+
+
+##### 平面最近点对
+
+(洛谷P7883) 归并排序复杂度 $O(n\log n)$ ，若快排复杂度 $O(n\log^2n)$
+
+```c++
+#include <bits/stdc++.h>
+using namespace std;
+typedef long long ll;
+#define sc(x) scanf("%lld", &x)
+#define mn 400010
+ll n, ans = 1e18;
+struct node
+{
+    ll x, y;
+    bool operator<(const node &r) const { return x < r.x; }
+} p[mn];
+void solve(ll lc, ll rc)
+{
+    if (lc == rc)
+    {
+        return;
+    }
+    ll cc = (lc + rc) >> 1;
+    ll cx = p[cc].x; //修改前的
+    solve(lc, cc), solve(cc + 1, rc);
+    inplace_merge(p + lc, p + cc + 1, p + rc + 1, [](const node &x, const node &y)
+                  { return x.y < y.y; });
+    vector<node> v;
+    for (ll i = lc; i <= rc; ++i)
+    {
+        if ((cx - p[i].x) * (cx - p[i].x) <= ans)
+        {
+            v.emplace_back(p[i]);
+        }
+    }
+    for (auto lf = v.begin(), rf = lf; lf != v.end(); lf++)
+    {
+        double sans = sqrt(ans);
+        while (rf != v.end() && rf->y <= lf->y + sans)
+        {
+            ++rf;
+        }
+        for (auto i = lf + 1; i != rf; ++i)
+        {
+            ans = min(ans, (lf->x - i->x) * (lf->x - i->x) + (lf->y - i->y) * (lf->y - i->y));
+        }
+    }
+}
+signed main()
+{
+    sc(n);
+    for (ll i = 1; i <= n; ++i)
+    {
+        sc(p[i].x), sc(p[i].y);
+    }
+    sort(p + 1, p + 1 + n);
+    solve(1, n);
+    printf("%lld", ans);
+    return 0;
+}
+```
+
+> 拓展-洛谷P4423-求平面周长最小三角形(含共线三点)
+
+```c++
+#include <bits/stdc++.h>
+using namespace std;
+typedef long long ll;
+typedef double db;
+#define sc(x) scanf("%lld", &x)
+#define mn 200010
+ll n;
+db ans = 1e21;
+struct node
+{
+    ll x, y;
+    bool operator<(const node &r) const { return x < r.x; }
+} p[mn];
+db dis(const node &a, const node &b)
+{
+    return sqrt((a.x - b.x) * (a.x - b.x) + (a.y - b.y) * (a.y - b.y));
+}
+db tri(const node &a, const node &b, const node &c)
+{
+    return dis(a, b) + dis(b, c) + dis(c, a);
+}
+void solve(ll lc, ll rc)
+{
+    if (lc == rc)
+        return;
+    ll cc = (lc + rc) >> 1;
+    ll cx = p[cc].x; //修改前的
+    solve(lc, cc), solve(cc + 1, rc);
+    inplace_merge(p + lc, p + cc + 1, p + rc + 1, [](const node &x, const node &y)
+                  { return x.y < y.y; });
+    vector<node> v;
+    for (ll i = lc; i <= rc; ++i)
+        if (abs(cx - p[i].x) < ans / 2)
+            v.emplace_back(p[i]);
+    for (auto lf = v.begin(), rf = lf; lf != v.end(); lf++)
+    {
+        while (rf != v.end() && abs(rf->y - lf->y) < ans / 2)
+            ++rf;
+        for (auto i = lf + 1; i != rf; ++i)
+            for (auto j = lf + 1; j != i; ++j)
+                ans = min(ans, tri(*lf, *i, *j));
+    }
+}
+signed main()
+{
+    sc(n);
+    for (ll i = 1; i <= n; ++i)
+        sc(p[i].x), sc(p[i].y);
+    sort(p + 1, p + 1 + n);
+    solve(1, n);
+    printf("%lf", ans);
+    return 0;
+}
+```
+
+
+
+##### 随机增量法
+
+洛谷P1742-最小圆覆盖(求圆的半径和坐标，使得圆覆盖 $n$ 个给定点) $O(n)$ 
+
+```c++
+#include <bits/stdc++.h>
+using namespace std;
+typedef long long ll;
+typedef double db;
+#define mn 100010
+#define cp const point &
+ll n;
+struct point
+{
+    db x = 0, y = 0;
+    point(db a = 0, db b = 0) : x(a), y(b) {}
+    point operator+(cp r) const { return point(x + r.x, y + r.y); }
+    point operator-(cp r) const { return point(x - r.x, y - r.y); }
+    point operator*(const db r) const { return point(x * r, y * r); }
+    point operator/(const db r) const { return point(x / r, y / r); }
+    db norm() const { return x * x + y * y; }
+    point rotate() const { return point(y, -x); } //顺90
+} p[mn], o;
+db r2; // r*r
+db cross(cp a, cp b) { return a.x * b.y - a.y * b.x; }
+point intersect(cp p0, cp v0, cp p1, cp v1)
+{
+    return p0 + v0 * (cross(p1 - p0, v1) / cross(v0, v1));
+}
+void solve(cp a, cp b, cp c)
+{
+    o = intersect((a + b) / 2, (a - b).rotate(), (a + c) / 2, (a - c).rotate());
+    r2 = (a - o).norm();
+}
+signed main()
+{
+    scanf("%lld", &n);
+    for (ll i = 1; i <= n; ++i)
+    {
+        scanf("%lf%lf", &p[i].x, &p[i].y);
+    }
+    random_shuffle(p + 1, p + 1 + n);
+    for (ll i = 1; i <= n; ++i)
+    {
+        if ((p[i] - o).norm() > r2)
+        {
+            o = p[i], r2 = 0;
+            for (ll j = 1; j < i; ++j)
+            {
+                if ((p[j] - o).norm() > r2)
+                {
+                    o = (p[i] + p[j]) / 2, r2 = ((p[i] - p[j]) / 2).norm();
+                    for (ll k = 1; k < j; ++k)
+                    {
+                        if ((p[k] - o).norm() > r2)
+                        {
+                            solve(p[i], p[j], p[k]);
+                        }
+                    }
+                }
+            }
+        }
+    }
+    printf("%.12lf\n%.12lf %.12lf", sqrt(r2), o.x, o.y);
+    return 0;
+}
+```
+
+
+
+### 博弈论
+
+P-position: 先手必败,  N-position: 先手必胜
+
+局面的性质：
+
+1. 合法操作集合为空的局面是P-position
+2. 可以移动到P-position的局面是N-position
+3. 所有移动都只能到N-position的局面是P-position
+
+mex 函数：最小不属于某集合的非负整数 $mex(A)=\min\{k|k\in\complement_NA\}$
+
+SG 函数：所有后继中都未出现的最小值 $sg(x)=mex\{sg(y)|y为x的直接儿子\}$
+
+顶点 $x$ 所代表的局面是 P-position 当且仅当 $sg(x)=0$
+
+**SG定理**：由 n 个有向图组成的ICG，设它们的起点分别为 $s_1,s_2,\dots,s_n$ ，当且仅当 $SG(s_1)\oplus SG(s_2)\oplus\dots\oplus SG(s_1)\ne0$ 时，这个游戏先手必胜
+
+经典博弈：
+
+- **巴什博奕** 有 n 个物品，两人轮流取物，每次至少取一个，最多取 m 个，最后取完者胜
+
+  先手必败条件： $n\bmod (m+1)=0$
+
+- **Nim游戏** (所有ICG游戏都可以转化为Nim游戏求解) 有 n 堆数，每堆有 $s_i$ 个，每次可以从任意堆里取 1 到任意多个数
+
+  先手必败条件： $\oplus_{i=1}^ns_i=0$
+
+  先手必胜方案输出：当前异或和 $x\neq0$ 时，$O(\log a)$ 找 $b_i\oplus x < b_i$ ，将 $b_i$ 更改为 $b_i\oplus x$ ；否则任取完一堆；回合数可以不超 $2n$ (SCNUOJ1701)
+
+- **威佐夫博弈**  有两堆物品，轮流从一堆拿任意个或同时从两堆拿同样的任意个，取完者胜
+
+  先手必败条件为 $(b,a),a > b, b=\lfloor\dfrac{1+\sqrt5}2\times(a-b)\rfloor$
+
+- **斐波那契博弈** 一堆物品，先手最少取一个且不能取完，之后每次取不能少于1或超过上次的二倍，取完者胜
+
+  先手必败条件： 物品是斐波那契数列
+
+在普通SG游戏的基础上，新增一条规则：每次行动，每个可以移动的SG游戏都要移动，是Every-SG游戏
+
+> 例如棋盘上有n个棋子在不同的位置，双方每次行动都要将每一个可以移动的棋子按规则移动，这就是典型的Every-SG游戏。
+
+$$
+step(v)=\begin{cases}
+0,&v为终止状态\\
+\max(step(u))+1,&sg(v)>0,sg(u)=0\\
+\min(step(u))+1,&sg(v)=0
+\end{cases}
+$$
+
+
+定理：Every-SG游戏先手必胜当且仅当单一游戏中最大的 step 为奇数
 
 
 
@@ -1321,7 +2820,135 @@ signed main()
 
 #### 快速傅里叶变换
 
+系数表示法：$F(x)=y=\sum_{i=0}^na_ix^i$，其中$\{a_i\}$是每一项的系数。
 
+点值表示法：$F(x)$可以被n个点$(x_i,f(x_i))$唯一确定
+
+两多项式相乘即求卷积： $f(x)\times g(x)={(x_i,f(x_i)\times g(x_i))}$ ，点值表示法下 $O(n)$
+
+将系数表示法转点值表示法为快速傅里叶变换(FFT), 点值转系数为IFFT , 均 $O(n\log n)$
+
+> 洛谷P3803-输入 $n,m$ 和 $n$ 次多项式 $F(x)$ , $m$ 次多项式 $G(x)$ , 求 $F(x)\cdot G(x)$ , 系数都是个位数
+
+```c++
+#include <bits/stdc++.h>
+using namespace std;
+typedef long long ll;
+typedef double db;
+#define mn ((1 << 21) + 1)
+ll n1, n2, rev[mn], ans[mn], k, s = 1, len, n;
+db pi = acos(-1), v;
+typedef complex<db> cp;
+cp a[mn], b[mn];
+void fft(cp *a, ll n, ll flag)
+{
+    for (ll i = 0; i < n; ++i)
+    {
+        if (i < rev[i])
+        {
+            swap(a[i], a[rev[i]]);
+        }
+    }
+    for (ll h = 1; h < n; h <<= 1)
+    {
+        cp wn = exp(cp(0, flag * pi / h));
+        for (ll j = 0; j < n; j += h << 1)
+        {
+            cp w(1, 0);
+            for (ll k = j; k < j + h; ++k)
+            {
+                cp x = a[k], y = w * a[k + h];
+                a[k] = x + y;
+                a[k + h] = x - y;
+                w *= wn;
+            }
+        }
+    }
+    if (flag == -1)
+    {
+        for (ll i = 0; i < n; ++i)
+        {
+            a[i] /= n;
+        }
+    }
+}
+#pragma GCC diagnostic ignored "-Wformat" //忽略db转complex警告
+signed main()
+{
+    scanf("%lld%lld", &n1, &n2), n = n1 + n2;
+    for (ll i = 0; i <= n1; ++i)
+    {
+        scanf("%lf", a + i);
+    }
+    for (ll i = 0; i <= n2; ++i)
+    {
+        scanf("%lf", b + i);
+    }
+    while (s <= n)
+    {
+        s <<= 1, ++k;
+    }
+    for (ll i = 0; i < s; ++i)
+    {
+        rev[i] = (rev[i >> 1] >> 1) | ((i & 1) << (k - 1));
+    }
+    fft(a, s, 1), fft(b, s, 1);
+    for (ll i = 0; i <= s; ++i)
+    {
+        a[i] *= b[i];
+    }
+    fft(a, s, -1);
+    for (ll i = 0; i <= n; ++i)
+    {
+        printf("%lld ", (ll)(a[i].real() + 0.5));
+    }
+    return 0;
+}
+```
+
+
+
+#### 拉格朗日插值法
+
+> 洛谷P4781-给定由 n 个点确定的多项式 $f(x)$，求 $f(k)\bmod998244353$ , $x_i$ 各异
+
+复杂度为 $O(n^2)$ ，比高斯消元快 (但高斯消元对给出点坐标无要求) (若 $x_i=i$ 可以朴素 $O(n^2)$ 差分)
+$$
+f(k)=\sum_{i=0}^ny_i\prod_{i\neq j}\frac{k-x_j}{x_i-x_j}
+$$
+
+```c++
+#include <bits/stdc++.h>
+using namespace std;
+typedef long long ll;
+#define MAXN 2002
+#define MOD 998244353
+ll n, k, x[MAXN], y[MAXN], ans, s1, s2;
+ll qpow(ll a, ll x)
+{
+	ll res = 1, t = a;
+	for (; x; t = t * t % MOD, x >>= 1) if (x & 1)
+		res = res * t % MOD;
+	return res;
+}
+inline ll inv(ll x) { return qpow(x, MOD - 2); }
+signed main()
+{
+	scanf("%lld%lld", &n, &k);
+	for(ll i = 1; i <= n; ++i) scanf("%lld%lld", x + i, y + i);
+	for(ll i = 1; i <= n; ++i)
+	{
+		s1 = y[i] % MOD, s2 = 1;
+		for(ll j = 1; j <= n; ++j) if (i != j)
+			s1 = s1 * (k - x[j]) % MOD,
+			s2 = s2 * ((x[i] - x[j] % MOD) % MOD) % MOD;
+		ans += s1 * inv(s2) % MOD;
+		ans = (ans + MOD) % MOD;
+	}
+	printf("%lld", ans);
+	return 0;
+}
+```
 
 
 
@@ -1409,6 +3036,10 @@ signed main()
 	return 0;
 }
 ```
+
+
+
+
 
 
 
@@ -1730,8 +3361,6 @@ int main()
 	}
 } 
 ```
-
-
 
 
 
@@ -5779,7 +7408,7 @@ signed main()
 
 #### 杂项
 
-##### 最小距离和
+最小距离和
 
 > 例题P1364：给定 $n(1\le n\le100)$ 节点二叉树(输入为 $w,u,v$ 为第 $i$ 个节点点权和左右儿子( $0$ 是无子))，求最小距离和(以某点为原点各点点权乘以路径长)( $1\le w\le10^5$ )
 
@@ -7696,7 +9325,7 @@ signed main()
 
 ### 其他
 
-#### 欧拉路
+欧拉路
 
 欧拉路径：经过每条边一次且仅一次的路径(起点不为终点)
 
@@ -7830,13 +9459,1371 @@ signed main()
 
 ## 动态规划
 
+### 模板
+
+#### 背包问题
+
+**01背包**：
+
+```c++
+for (int i = 1; i <= n; i++) //W容量 v价值
+  for (int l = W; l >= w[i]; l--) f[l] = max(f[l], f[l - w[i]] + v[i]);
+```
+
+**完全背包**：(可以选取无限次) (将01背包第二维修改顺序即可)
+
+```c++
+for (int l = w[i]; l <= W; l++)
+```
+
+**多重背包**：(每种物品有 $k_i$ 个) 将 $k_i$ 拆分为 $2^i$ ，然后用 01 背包解决
+
+二维费用背包：(有两个重量维度) (加一层循环, 加一维数组枚举, 同 01 背包解决)
+
+**分组背包**：(每组内物品冲突，只能选组内一个)
+
+```c++
+for (int k = 1; k <= ts; k++)          // 循环每一组
+  for (int i = m; i >= 0; i--)         // 循环背包容量
+    for (int j = 1; j <= cnt[k]; j++)  // 循环该组的每一个物品
+      if (i >= w[t[k][j]])
+        dp[i] = max(dp[i],
+                    dp[i - w[t[k][j]]] + c[t[k][j]]);  // 像0-1背包一样状态转移
+```
+
+**依赖背包**：将依赖关系转化为分组关系，用分组背包求
+
+
+
+#### 字符DP
+
+> atcoder-contest122-d 求有多少长为 $n$ ，只含字符 `ACGT` 且满足 ①无子串 `AGC` ② 交换相邻两位仍无子串 `AGC` ; 对 $10^9+7$ 取模
+
+设$dp[h][i][j][k]$是长为$h$且最后一、二、三个字符分别为$i,j,k$的字符串的答案 $O(n4^4)$
+
+```c++
+#include <iostream>
+#define maxn 105
+using namespace std;
+typedef long long ll;
+
+ll dp[maxn][4][4][4];
+const ll MOD = 1e9 + 7;
+bool check(int j, int k, int v)
+{
+	return !(j == 0 && k == 2 && v == 1);
+}
+bool check2(int j, int k, int v)
+{
+	// 0->a, 1->c, 2->g, 3->t
+	if (!((j == 0 && k == 2 && v == 1) || (j == 0 && k == 1 && v == 2) || (j == 2 && k == 0 && v == 1)))
+		return true;
+	return false;
+}
+
+int main()
+{
+	int n;
+	cin >> n;
+
+	for (int j = 0; j < 4; j++)
+	{
+		for (int k = 0; k < 4; k++)
+		{
+			for (int v = 0; v < 4; v++)
+			{
+				if (check2(j, k, v))
+					dp[3][j][k][v] = 1;
+			}
+		}
+	}
+
+	for (int i = 4; i <= n; i++)
+	{
+		for (int j = 0; j < 4; j++)
+		{
+			for (int k = 0; k < 4; k++)
+			{
+				for (int v = 0; v < 4; v++)
+				{
+					for (int u = 0; u < 4; u++)
+						if (check2(j, k, v) && check(u, k, v) && check(u, j, v) && check(u, j, k))//最后一个check没有也行；因为这种情况下原dp[i-1][u][j][k]就是0
+							dp[i][j][k][v] = (dp[i][j][k][v] + dp[i - 1][u][j][k]) % MOD;
+				}
+			}
+		}
+	}
+
+	ll ans = 0;
+		for (int i = 0; i < 4; i++)
+			for (int j = 0; j < 4; j++)
+				for (int k = 0; k < 4; k++)
+					ans = (ans + dp[n][i][j][k]) % MOD;
+
+	cout << ans << endl;
+	return 0;
+}
+```
+
+
+
+#### 树上DP
+
+> $n$ 点有点权树, 选当前节点就不能选全部直接子节点,求选择方案使得点权和最大,输出最大值(洛谷P1352)
+
+设 $dp[i][j]$ , $j=0$ 表示不选 $i$ 时 $i$ 子树最大值; $j=1$ 表示选 $i$ 时 $i$ 子树最大值
+
+```c++
+#include <bits/stdc++.h>
+using namespace std;
+#define MAXN 6002
+struct edge
+{
+    int to, nx;
+} e[MAXN];
+int n, ui, vi, hd[MAXN], cnt, dp[MAXN][2], v[MAXN], root;
+bool fa[MAXN];
+inline void adde(int &u, int &v)
+{
+    e[++cnt].to = v;
+    e[cnt].nx = hd[u];
+    hd[u] = cnt;
+}
+void dfs(int h)
+{
+    dp[h][0] = 0;
+    dp[h][1] = v[h];
+    for (int i = hd[h]; i; i = e[i].nx)
+    {
+        int toi = e[i].to;
+        dfs(toi);
+        dp[h][0] += max(dp[toi][0], dp[toi][1]);
+        dp[h][1] += dp[toi][0];
+    }
+}
+signed main()
+{
+    scanf("%d", &n);
+    for (int i = 1; i <= n; ++i)
+        scanf("%d", &v[i]);
+    for (int i = 1; i < n; ++i)
+    {
+        scanf("%d%d", &vi, &ui);
+        adde(ui, vi);
+        fa[vi] = true;
+    }
+    for (int i = 1; i <= n; ++i)
+        if (!fa[i])
+        {
+            root = i;
+            break;
+        }
+    dfs(root);
+    printf("%d", max(dp[root][0], dp[root][1]));
+    return 0;
+}
+```
+
+
+
+#### 区间DP
+
+区间 DP 的复杂度是 $O(n^3)$
+
+> 洛谷P1880-(a,b)合并获得值a+b，若干石子成环(数大于等于0)的最大最小值
+
+```c++
+#include <bits/stdc++.h>
+#define MAXN 203
+const int BIG = 0x7fffffff;
+using namespace std;
+int mi, mx, n, dpmi[MAXN][MAXN], dpmx[MAXN][MAXN], s[MAXN], a[MAXN], kd;
+signed main()
+{
+    scanf("%d", &n);
+    for (int i = 1; i <= n; ++i)
+    {
+        scanf("%d", &a[i]);
+        a[i + n] = a[i];
+    }
+    for (int i = 1; i < n + n; ++i)
+    {
+        s[i] = s[i - 1] + a[i];
+    }
+    for (int h = 1; h < n; ++h)
+    {
+        for (int i = 1, j = i + h; i < n + n && j < n + n; i++, j = i + h)
+        {
+            dpmi[i][j] = BIG;
+            kd = s[j] - s[i - 1];
+            for (int k = i; k < j; ++k)
+            {
+                dpmi[i][j] = min(dpmi[i][j], dpmi[i][k] + dpmi[k + 1][j] + kd);
+                dpmx[i][j] = max(dpmx[i][j], dpmx[i][k] + dpmx[k + 1][j] + kd);
+            }
+        }
+    }
+    mi = BIG;
+    for (int i = 1; i <= n; ++i)
+    {
+        mx = max(mx, dpmx[i][i + n - 1]);
+        mi = min(mi, dpmi[i][i + n - 1]);
+    }
+    printf("%d\n%d", mi, mx);
+    return 0;
+}
+```
+
+> P1063洛谷-如果前一颗能量珠的头标记为m，尾标记为r，后一颗能量珠的头标记为r，尾标记为n，则聚合后释放的能量为m×r×n，新产生的珠子的头标记为m，尾标记为n。给出成环的n和各个标记，求最大能量
+
+```c++
+#include <bits/stdc++.h>
+#define MAXN 205
+#define pr pair<int, int>
+using namespace std;
+int n, e, a[MAXN][MAXN], b[MAXN], ans;//a为[i,j]内答案
+signed main()
+{
+	scanf("%d", &n);
+	for (int i = 1; i <= n; ++i)
+	{
+		scanf("%d", &b[i]);
+		b[i + n] = b[i];
+	}
+	for (int i = 2; i <= n + 1; ++i)//区间长
+	{
+		for (int lf = 1, rf = lf + i - 1; rf <= n + n; ++lf, ++rf)
+		{
+			for (int k = lf + 1; k <= rf - 1; ++k)
+			{
+				a[lf][rf] = max(a[lf][rf], a[lf][k] + a[k][rf] + b[lf] * b[k] * b[rf]);
+			}
+		}
+	}
+	for (int i = 1; i <= n; ++i) ans = max(ans, a[i][i + n]);
+	printf("%d", ans);
+	return 0;
+}
+```
+
+
+
+#### 状压DP
+
+> 洛谷P1896-在 $n\times n$ 格子放 $k$ 人，每人周围八方向不得有人，求方案数 $1\le n\le9,0\le k\le n^2$
+
+设每一行的状态为 $j$ ，即 $n$ 个 $0/1$ 组合的 $2^n$ 个状态，设 $dp[i][j][k]$ 表示只考虑前 $i$ 行，第 $i$ 行的分布为 $j$ ，已经放置了 $k$ 个人的方案数；先暴力处理一行内所有可能的情况(某状态对应多少个人)
+
+复杂度 $O(2^n+n2^{2n})$
+
+```c++
+#include <bits/stdc++.h>
+using namespace std;
+typedef long long ll;
+#define repe(i,a,b) for(ll i=a;i<=b;++i)
+#define MAXN 514//2^n
+#define N 12//dp的第三维度(从左往右数)定11或以下会WA
+ll sit[MAXN], gs[MAXN], cnt, n, k, dp[N][MAXN][N], ans;
+void dfs(ll h, ll sum, ll po)
+{//现在是状态h,有sum个人,现在处理第po位
+	if (po >= n)//处理完了
+	{//一行内所有可能的状态(编号)数量为cnt;cnt<2^n,优化后续DP
+		sit[++cnt] = h;//该编号对应二进制状态h
+		gs[cnt] = sum;//该编号有多少个人(1数目)
+		return;
+	}
+	dfs(h, sum, po + 1);//该位选与不选
+	dfs(h + (1 << (int)po), sum + 1, po + 2);
+}
+signed main()
+{
+	scanf("%lld%lld", &n, &k);
+	dfs(0, 0, 0);
+	repe(i, 1, cnt) dp[1][i][gs[i]] = 1;
+	repe(i, 2, n) repe(j, 1, cnt) repe(a, 1, cnt)
+	{//上下//左上右下//右上左下有人冲突
+		if (sit[j] & sit[a] || (sit[j] << 1) & sit[a] || sit[j] & (sit[a] << 1)) continue;
+        for(ll s=k;s>=gs[j];--s) dp[i][j][s] += dp[i - 1][a][s - gs[j]];
+	}
+	repe(i, 1, cnt) ans += dp[n][i][k];
+	printf("%lld", ans);
+	return 0;
+}
+```
+
+
+
+#### 数位DP
+
+> 牛客2022寒假第五场D-求区间 $[l,r]$ 内满足如下条件的数字个数①相邻两数位和是素数 ②至少有一个数位1 ③无前导0 $1\le l\le r\le10^{10}$
+
+设 $dp[i][j][k]$ 表示从个位开始数的 i 位，最大的位数字是 j ， k 表示是否出现过 1，相邻数位和都是数组的方案数，即 $i$ 位数区间 $[\overline{j0\cdots 0},\overline{j9\cdots 9}]$ 范围
+
+根据定义，初始化为 $dp[1][1][1]=1$ , $dp[1][j][0]=1 (0\le j\le 9, j\neq 1)$ ，表示十个个位数的情况
+
+递推方程为若 $j+j'$ 是素数，那么 $k'=k\cup k'\cup j==1\cup j'==1$  时可以加上去(具体看代码)
+
+特别地，设 $dd[i]$ 表示区间 $[1,10^{i-1}-1]$ 的答案，则：
+$$
+dd[i]=dd[i-1]+\sum_{j=1}^9dp[i-1][j][1]
+$$
+对 $[1, r]$ 的区间内的答案计数，对 $r=\overline{a_k\cdots a_2a_1}$ ，先用 $dd[k]$ 计数前 $k$ 位数的答案，然后讨论 $k$ 位数答案，对第 $i$ 位，$> i$ 的位都取 $r$ 值即 $a_h(h > i)$，第 $i$ 位进行枚举 $[0, a_i)$ ，得到一个范围内的答案；注意若 $> i$ 时出现过 $1$ ，则 $dp$ 第三维度任取，否则只能取 $1$
+
+答案为 $[1,r]$ 内答案减去 $[1,l-1]$ 内答案
+
+```c++
+#include <bits/stdc++.h>
+using namespace std;
+typedef long long ll;
+typedef double db;
+#define sc(x) scanf("%lld", &x)
+ll dp[12][12][2]; //后i位,最高位为j,是否出现过1,相邻数位和为素数的方案数
+ll prime[] = {2, 3, 5, 7, 11, 13, 17}, ps = 7;
+ll l, r, res;
+ll dd[12]; //[1,10^(i-1)-1]内的答案
+ll ispr(ll x)
+{
+    for (ll i = 0; i < ps; ++i)
+    {
+        if (x == prime[i])
+        {
+            return 1;
+        }
+    }
+    return 0;
+}
+ll ask(ll rf)
+{
+    res = 0;
+    if (rf <= 9 && rf >= 1)
+    {
+        return 1;
+    }
+    ll bs = 0;
+    ll b[12] = {};
+    for (ll i = rf; i; i /= 10)
+    {
+        ++bs;
+        b[bs] = i % 10;
+    }
+    ll ever1 = 0, ever2 = 0;
+    for (ll i = bs; i >= 1; --i)
+    {
+        ll je = b[i] + (i == 1);
+        if (je > 0 && i > 1 && !ever2)
+        {
+            res += dd[i];
+            ever2 = 1;
+        }
+        ll jb = 1 - (i != bs);
+        for (ll j = jb; j < je; ++j)
+        {
+            ll k = (i > 1) ? 1 : ((j == 1) ? 1 : !ever1);
+            if (i != bs && !ispr(b[i + 1] + j))
+            {
+                continue;
+            }
+            res += dp[i][j][k];
+            if (ever1)
+            {
+                res += dp[i][j][k ^ 1];
+            }
+        }
+        ever1 |= (b[i] == 1);
+        if (i != bs && !ispr(b[i] + b[i + 1]))
+        {
+            break;
+        }
+    }
+    return res;
+}
+ll bfcheck(ll lf, ll rf)
+{
+    ll cnt = 0;
+    for (ll h = lf; h <= rf; ++h)
+    {
+        ll has1 = 0;
+        ll bs = 0;
+        ll b[12] = {};
+        for (ll j = h; j; j /= 10)
+        {
+            ++bs;
+            b[bs] = j % 10;
+            has1 |= (b[bs] == 1);
+        }
+        if (bs == 1)
+        {
+            cnt += (h == 1);
+            continue;
+        }
+        ll ok = 1;
+        for (ll i = 1; i < bs; ++i)
+        {
+            ll isprime = ispr(b[i] + b[i + 1]);
+            if (isprime == 0)
+            {
+                ok = 0;
+                break;
+            }
+        }
+        if (ok && has1)
+        {
+            ++cnt;
+        }
+    }
+    return cnt;
+}
+signed main()
+{
+    dp[1][1][1] = 1;
+    for (ll i = 2; i <= 9; ++i)
+    {
+        dp[1][i][0] = 1; //没有相邻，条件1恒成立
+    }
+    dp[1][0][0] = 1;
+    for (ll i = 2; i <= 11; ++i)
+    {
+        for (ll x = 0; x <= 9; ++x)
+        {
+            ll now0 = (x == 1);
+            for (ll y = 0; y <= 9; ++y)
+            {
+                for (ll pr = 0; pr <= 1; ++pr)
+                {
+                    ll has0 = now0 || ((y == 1) || pr);
+                    ll s = x + y;
+                    ll isprime = 0;
+                    for (ll j = 0; j < ps; ++j)
+                    {
+                        if (s == prime[j])
+                        {
+                            isprime = 1;
+                            break;
+                        }
+                    }
+                    if (!isprime)
+                    {
+                        continue;
+                    }
+                    dp[i][x][has0] += dp[i - 1][y][pr];
+                }
+            }
+        }
+    }
+    for (ll i = 2; i <= 11; ++i)
+    {
+        dd[i] = dd[i - 1];
+        for (ll j = 1; j <= 9; ++j)
+        {
+            dd[i] += dp[i - 1][j][1];
+        }
+    }
+    sc(l), sc(r);
+    ll ar = ask(r), al = ask(l - 1);
+    printf("%lld", ar - al);
+    return 0;
+}
+```
+
+
+
+
+
+### 杂项
+
+#### 最长公共子序列
+
+如abcbdab,bdcaba的最长子序列是bcba
+
+```c++
+int c[N+1][N+1];//c[i][j]代表Xi与Yj的LCS长度
+int lcs(string X, string Y)
+{
+    int m = X.size();
+    int n = Y.size();
+    int maxl = 0;
+    X = ' ' + X;
+    Y = ' ' + Y;
+    for(int i=1;i<=m;i++) c[i][0] = 0;
+    for(int j=1;j<=n;j++) c[0][j] = 0;
+    for(int i=1;i<=m;i++)
+    {
+        for(int j=1;j<=n;j++)
+        {
+            if(X[i]==Y[j]) c[i][j] = c[i-1][j-1] + 1;
+            else c[i][j] = max(c[i-1][j], c[i][j-1]);
+            maxl = max(maxl, c[i][j]);
+        }
+    }
+    return maxl;
+}
+```
+
+
+
+#### 编辑距离
+
+> 有字符串x,y；每次只能进行如下编辑的一种：删除/插入/修改一个字符，求最小编辑次数，使x=y。
+
+定义$dp[i][j]$表示将长为i的x子串编辑为长为j的y子串的编辑距离。
+
+```c++
+#include <bits/stdc++.h>
+using namespace std;
+#define MAXN 2002
+#define repe(i,a,b) for(int i=a;i<=b;++i)
+int n,dp[MAXN][MAXN];
+char x[MAXN],y[MAXN];
+int edit(int a, int b)
+{
+    if(dp[a][b]!=-1) return dp[a][b];
+    if(!a) return dp[a][b]=b;
+    if(!b) return dp[a][b]=a;
+    return dp[a][b]=min(min(edit(a-1,b)+1,edit(a,b-1)+1),edit(a-1,b-1)+(int)(x[a]!=y[b]));
+}
+signed main()
+{
+    scanf("%s%s",x+1,y+1);
+    repe(i,0,2000) repe(j,0,2000) dp[i][j]=-1;
+    printf("%d", edit(strlen(x+1),strlen(y+1)));
+    return 0;
+}
+```
+
+
+
+#### 约瑟夫问题
+
+$n$ 人从 $1$ 开始编号排列成环，每次数到第 $q$ 个人杀掉，求最后活着的人编号
+
+当 $q=2$ 时，$n=2^k, J=1$ ，否则 $J(2^k+t)=2t+1$ (做掉$t$人后，变成了一个$2^k$环，在这个$2^k$环上，最后活下来的是环的第一个人)
+
+一般情况(设编号从 $0$ 开始)： $J_{n,q}=(J_{n-1,q}+q)\bmod n$
+
 
 
 ## 字符串
 
+### 字符串哈希
+
+$$
+\begin{cases}
+h(1)=s_1\\
+h(i)=h(i-1)\times p+s_i\quad ,i > 1
+\end{cases}\bmod2^{64}
+$$
+
+$$
+h(x)=\sum_{i=1}^{x}s_i\cdot p^{x-i}=s_1p^{x-1}+s_2p^{x-2}+\cdots +s_xp^0\bmod2^{64}
+$$
+
+对子串 $S[l..r]$ ，有  $h(S[l..r])=h(S[1..r])-h(S[1..l-1])\times p^{r-l+1}$
+
+> 以字符串匹配为例 SCNUOJ1713
+
+```c++
+#include <bits/stdc++.h>
+using namespace std;
+typedef long long ll;
+typedef unsigned long long ull;
+#define mn 2000010
+char s[mn], t[mn];
+ull p = 131, pw[mn], h[mn], ht, n, m, cnt;
+signed main()
+{
+    pw[0] = 1;
+    for (ll i = 1; i < mn; ++i)
+    {
+        pw[i] = pw[i - 1] * p;
+    }
+    scanf("%s%s", s, t);
+    n = strlen(s), m = strlen(t);
+    for (ull i = 0; i < n; ++i)
+    {
+        h[i + 1] = h[i] * p + s[i];
+    }
+    for (ull i = 0; i < m; ++i)
+    {
+        ht = ht * p + t[i];
+    }
+    for (ull lf = 1, rf = m; rf <= n; ++lf, ++rf)
+    {
+        if (h[rf] - h[lf - 1] * pw[rf - lf + 1] == ht)
+        {
+            printf("%lld ", lf), ++cnt;
+        }
+    }
+    if (!cnt)
+    {
+        printf("-1"); // not found
+    }
+    return 0;
+}
+```
 
 
-## 计算几何
+
+### KMP
+
+$\pi(x)$ 是长为 $x$ 的子串最长真前缀与真后缀相等的长度；无解为 $0$ 
+
+> 以字符串匹配为例 SCNUOJ1713
+
+```c++
+#include <bits/stdc++.h>
+using namespace std;
+typedef long long ll;
+#define mn 2000010
+char s[mn], t[mn];
+ll kmp[mn], ns, nt, cnt;
+signed main()
+{
+    scanf("%s%s", s + 1, t + 1);
+    ns = strlen(s + 1), nt = strlen(t + 1);
+    for (ll i = 2, j = 0; i <= nt; ++i)
+    {
+        while (j > 0 && t[j + 1] != t[i])
+        {
+            j = kmp[j];
+        }
+        if (t[j + 1] == t[i])
+        {
+            ++j;
+        }
+        kmp[i] = j;
+    }
+    for (ll i = 1, j = 0; i <= ns; ++i)
+    {
+        while (j > 0 && t[j + 1] != s[i])
+        {
+            j = kmp[j];
+        }
+        if (t[j + 1] == s[i])
+        {
+            ++j;
+        }
+        if (j == nt)
+        {
+            ++cnt;
+            printf("%lld ", i - j + 1);
+            j = kmp[j];
+        }
+    }
+    if (cnt == 0)
+    {
+        printf("-1");
+    }
+    return 0;
+}
+```
+
+应用：
+
+- 定义 $\exists p\in N,\forall i\in [1,|S|-p]$ 都有 $S[i]=S[i+p]$ ，那么 $p$ 是 $S$ 的周期，则最短周期为 $|S|-\pi(|S|)$ (SCNUOJ1716)
+
+- 串 $S$ 的每个真前缀在串 $S$ 出现次数：(SCNUOJ1717)
+
+  ```c++
+  fill(ans + 1, ans + 1 + n, 1);
+  for (ll i = n; i >= 1; --i)
+      ans[kmp[i]] += ans[i];
+  ```
+
+  串 $S$ 的每个真前缀在串 $T$ 出现次数：(SCNUOJ1718)
+
+  重构 $S=S+$ `#` $+T$ ，继续执行上述过程 ( $n'=n+m+1$ )，取 $ans_{1..n}$ 
+
+
+
+### manacher
+
+> 洛谷P3805-只由小写英文字符组成，求：最长回文子串长度
+
+```c++
+#include <bits/stdc++.h>
+using namespace std;
+#define mn 22000010
+char s[mn], ch;
+int p[mn], n, ans, r, c;
+signed main()
+{
+    s[0] = '#', s[++n] = '#';
+    while (EOF != (ch = getchar()))
+        s[++n] = ch, s[++n] = '#';
+    for (int i = 1; i <= n; ++i)
+    {
+        if (i <= r)
+            p[i] = min(p[c * 2 - i], r - i + 1);
+        while (s[i + p[i]] == s[i - p[i]])
+            ++p[i];
+        if (i + p[i] > r)
+            r = p[i] + i - 1, c = i;
+        ans = max(ans, p[i]);
+    }
+    printf("%d", ans - 1);
+    return 0;
+}
+```
+
+
+
+### 字典树
+
+> 主要是01字典树相关的一些总结。
+
+对多个数 $a$ 找一个数 $a_i$ 使得所有 $a$ 里 $a_i$ 异或指定数 $k$ 得到的值 $r$ 最大：
+
+对这些数 $a$ 建立01trie，然后以 $k$ 遍历 trie ，贪心选择与 $k$ 二进制数位相反的路径
+
+```c++
+ll res = 0, u = rt; //取字典树根节点
+for(ll i = 11; i >= 0; --i)
+{
+    ll c = (k >> i) & 1; //k的第i位是c
+    if (ch[u][c ^ 1]) //存在该位相反的数a,异或得1<<i
+        u = ch[u][c ^ 1], res += (1 << i);
+    else u = ch[u][c];//不存在
+} //伪代码
+```
+
+
+
+### AC自动机
+
+失配指针：状态 $u$ 的失配指针 $fail$ 指向另一个状态 $v$ ，满足 $v$ 是 $u$ 的最长后缀。复杂度 $O(Cn)$ 
+
+> 洛谷P3808-求有多少个模式串在主串出现过(模式串和,主串长度 $\le10^6$ )
+
+```c++
+#include <bits/stdc++.h>
+using namespace std;
+typedef long long ll;
+#define sc(x) scanf("%lld", &x)
+#define mn 1000010
+int tr[mn][26], cnt, e[mn], fail[mn];
+ll n, ans;
+char s[mn];
+queue<int> q;
+signed main()
+{
+    sc(n);
+    for (ll i = 1; i <= n; ++i)
+    {
+        scanf("%s", s + 1);
+        int u = 0;
+        for (int i = 1; s[i]; ++i)
+        {
+            int a = s[i] - 'a';
+            if (!tr[u][a])
+            {
+                tr[u][a] = ++cnt;
+            }
+            u = tr[u][a];
+        }
+        ++e[u];
+    }
+    for (ll i = 0; i < 26; ++i)
+    {
+        if (tr[0][i])
+        {
+            q.push(tr[0][i]);
+        }
+    }
+    while (!q.empty())
+    {
+        int u = q.front();
+        q.pop();
+        for (int i = 0; i < 26; ++i)
+        {
+            if (tr[u][i])
+            {
+                fail[tr[u][i]] = tr[fail[u]][i];
+                q.push(tr[u][i]);
+            }
+            else
+            {
+                tr[u][i] = tr[fail[u]][i];
+            }
+        }
+    }
+    scanf("%s", s + 1);
+    int u = 0;
+    for (int i = 1; s[i]; ++i)
+    {
+        int a = s[i] - 'a';
+        u = tr[u][a];
+        for (int j = u; j && e[j] != -1; j = fail[j])
+        {
+            ans += e[j], e[j] = -1;
+        }
+    }
+    printf("%lld", ans);
+    return 0;
+}
+```
+
+> 洛谷P3796-求所有出现次数最多的字符串(每个模式串长度不超过 $70$ )
+
+思路：对模式串AC自动机，对主串遍历时每个遍历到的节点，不断跳 fail ，跳到的点对应的模式串出现次数都加一，复杂度 $O(70n+Cn)$ 
+
+> 洛谷P5357-求每个模式串的出现次数，模式串总长度不超过 $2\times10^5$ 
+
+思路：在P3796基础上，对模式串 $T$ 去个重。建自动机时，把每个真实连接的 fail 指针(而不是失配 fail) 指向的节点增加一个入度，使用拓扑排序跳 fail ，复杂度 $O(|S|+26|T|)$
+
+```c++
+#include <bits/stdc++.h>
+using namespace std;
+typedef long long ll;
+#define sc(x) scanf("%lld", &x)
+#define mn 200010
+#define alp 26
+ll n, cnt, ss;
+ll tr[mn][alp], idx[mn], nti[mn], fail[mn], in[mn], ans[mn], vis[mn];
+char t[mn], s[mn * 10];
+signed main()
+{
+    sc(n);
+    for (ll i = 1, ts; i <= n; ++i)
+    {
+        scanf("%s", t + 1);
+        ts = strlen(t + 1);
+        ll p = 0;
+        for (ll j = 1, ti; j <= ts; ++j)
+        {
+            ti = t[j] - 'a';
+            if (tr[p][ti] == 0)
+            {
+                tr[p][ti] = ++cnt;
+            }
+            p = tr[p][ti];
+        }
+        if (idx[p] == 0)
+        {
+            idx[p] = i;
+        }
+        nti[i] = idx[p];
+    }
+    queue<ll> q;
+    for (ll i = 0; i < alp; ++i)
+    {
+        if (tr[0][i])
+        {
+            q.push(tr[0][i]);
+        }
+    }
+    while (!q.empty())
+    {
+        ll u = q.front();
+        q.pop();
+        for (ll i = 0; i < alp; ++i)
+        {
+            if (tr[u][i])
+            {
+                fail[tr[u][i]] = tr[fail[u]][i];
+                ++in[fail[tr[u][i]]];
+                q.push(tr[u][i]);
+            }
+            else
+            {
+                tr[u][i] = tr[fail[u]][i];
+            }
+        }
+    }
+    scanf("%s", s + 1);
+    ss = strlen(s + 1);
+    for (ll i = 1, p = 0; i <= ss; ++i)
+    {
+        p = tr[p][s[i] - 'a'];
+        ++ans[p];
+    }
+    for (ll i = 0; i <= cnt; ++i)
+    {
+        if (in[i] == 0)
+        {
+            q.push(i);
+        }
+    }
+    while (!q.empty())
+    {
+        ll u = q.front();
+        q.pop();
+        vis[idx[u]] = ans[u];
+        ll v = fail[u];
+        ans[v] += ans[u];
+        if (--in[v] == 0)
+        {
+            q.push(v);
+        }
+    }
+    for (ll i = 1; i <= n; ++i)
+    {
+        printf("%lld\n", vis[nti[i]]);
+    }
+    return 0;
+}
+```
+
+
+
+
+
+### 后缀数组
+
+下标从 $1$ 开始，后缀 $i$ 表示以第 $i$ 个字符开头的后缀。后缀间大小比较依据是字典序
+
+数组 `sa[i]` 表示将所有后缀排序后第 $i$ 小后缀的编号
+
+数组 `rk[i]` 表示后缀 $i$ 的排名
+
+满足性质： `sa[rk[i]] == rk[sa[i]] == i`
+
+定义 $LCP(x,y)$ 为后缀 $x,y$ 的最长公共前缀 
+
+定义 `height[i]` ： 为 $LCP(sa[i],sa[i-1])$ ，规定 $height[1]=0$
+
+定义：`H[i]` : 为 $height[rk[i]]$
+
+性质： $H[i]\ge H[i-1]-1$  
+
+洛谷P3809 $|S|\le10^6$ ; 复杂度 $O(n\log n)$
+
+```c++
+#include <bits/stdc++.h>
+using namespace std;
+typedef long long ll;
+#define mn 1000010
+char s[mn];
+ll n, sa[mn], rk[mn], oldrk[mn << 1], id[mn], px[mn], cnt[mn];
+bool cmp(ll x, ll y, ll w)
+{
+    return oldrk[x] == oldrk[y] && oldrk[x + w] == oldrk[y + w];
+}
+ll m = 300, i, p, w; //ASCII范围<300为计数排序值域,p是新值域
+signed main()
+{
+    scanf("%s", s + 1), n = strlen(s + 1);
+    for (ll i = 1; i <= n; ++i)
+    { //暂时以第一关键字为排序值，有很多同名并列
+        ++cnt[rk[i] = s[i]];
+    }
+    for (ll i = 1; i <= m; ++i)
+    {
+        cnt[i] += cnt[i - 1];
+    }
+    for (ll i = n; i >= 1; --i)
+    {
+        sa[cnt[rk[i]]--] = i;
+    }
+    for (w = 1;; w <<= 1, m = p)
+    {
+        for (p = 0, i = n; i > n - w; --i)
+        { //第二关键字排序；无穷小区域
+            id[++p] = i;
+        }
+        for (ll i = 1; i <= n; ++i)
+        {
+            if (sa[i] > w)
+            {
+                id[++p] = sa[i] - w;
+            }
+        }
+        memset(cnt, 0, sizeof cnt);
+        for (ll i = 1; i <= n; ++i) //第一关键字排序
+        {
+            ++cnt[px[i] = rk[id[i]]];
+        }
+        for (ll i = 1; i <= m; ++i)
+        {
+            cnt[i] += cnt[i - 1];
+        }
+        for (ll i = n; i >= 1; --i)
+        {
+            sa[cnt[px[i]]--] = id[i];
+        }
+        memcpy(oldrk, rk, sizeof rk);
+        for (p = 0, i = 1; i <= n; ++i)
+        {
+            rk[sa[i]] = cmp(sa[i], sa[i - 1], w) ? p : ++p;
+        }
+        if (p == n)
+        {
+            for (ll i = 1; i <= n; ++i)
+            {
+                sa[rk[i]] = i;
+            }
+            break;
+        }
+    }
+    for (ll i = 1; i <= n; ++i)
+    {
+        printf("%lld ", sa[i]);
+    }
+    return 0;
+}
+```
+
+$O(n)$ 求 height 数组：
+
+```c++
+for (i = 1, k = 0; i <= n; ++i) {
+  if (rk[i] == 0) continue;
+  if (k) --k;
+  while (s[i + k] == s[sa[rk[i] - 1] + k]) ++k;
+  height[rk[i]] = k;
+}
+```
+
+应用：
+
+- 字符串匹配：模式串 $T$ 若出现必然是主串 $S$ 后缀的前缀，二分 $sa$ ，复杂度为 $O(|T|\log|S|)$ ，可以一并求出出现次数和位置
+- 求循环同构串里字典序最小的 (最小表示法算法的第二解法) (可以离散化)
+- 两子串的最长公共前缀 $lcp(sa[i],sa[j])=\min(height[i+1..j])$ 
+- 比较两个子串的大小关系： $A=S[a..b],B=S[c..d]$ ，若 $lcp(a,c)\ge \min(|A|,|B|)，A < B\Leftrightarrow |A|<|B|$ ，否则 $A < B\Leftrightarrow rk[a] < rk[c]$ 
+- 本质不同的子串的数目 $\dfrac{n(n+1)}2-\sum_{i=2}^nheight[i]$
+- 出现至少 k 次的子串的最大长度：
+- 出现至少 k 次意味着后缀排序后有至少连续 k 个后缀的 LCP 是这个子串。所以，求出每相邻 k-1 个 height 的最小值，再求这些最小值的最大值就是答案。可以使用单调队列 $O(n)$ 解决
+- 是否有某字符串在文本串中至少不重叠地出现了两次：可以二分目标串的长度 |s|，将 h 数组划分成若干个连续 LCP 大于等于 |s| 的段，利用 RMQ 对每个段求其中出现的数中最大和最小的下标，若这两个下标的距离满足条件，则一定有长度为 |s| 的字符串不重叠地出现了两次
+- 连续的若干个相同子串：枚举连续串的长度 |s| ，按照 |s| 对整个串进行分块，对相邻两块的块首进行 LCP 与 LCS 查询
+
+
+
+### 后缀自动机
+
+构造时空复杂度 $O(n)$ ，在线算法
+
+> 洛谷P3804-求出现次数不为 $1$ 的子串的出现次数乘长度的最大值
+
+```c++
+#include<cstdio>
+#include<algorithm>
+using namespace std;const int N=3*1e6+10;typedef long long ll;
+char mde[N];int nl;ll res;
+struct suffixautomation
+{
+    int mp[N][30];int fa[N];int ed;int ct;int len[N];int siz[N];
+    suffixautomation(){ed=ct=1;}
+    int v[N];int x[N];int al[N];int cnt;
+    inline void add(int u,int V){v[++cnt]=V;x[cnt]=al[u];al[u]=cnt;}
+    inline void ins(int c) 
+    {
+        int p=ed;siz[ed=++ct]=1;len[ed]=nl;//先初始化size和len 
+        for(;p&&mp[p][c]==0;p=fa[p]){mp[p][c]=ed;}//然后顺着parent树的路径向上找 
+        if(p==0){fa[ed]=1;return;}int q=mp[p][c];//case1 
+        if(len[p]+1==len[q]){fa[ed]=q;return;}//case2
+        len[++ct]=len[p]+1;//case 3
+        for(int i=1;i<=26;i++){mp[ct][i]=mp[q][i];}
+        fa[ct]=fa[q];fa[q]=ct;fa[ed]=ct;
+        for(int i=p;mp[i][c]==q;i=fa[i]){mp[i][c]=ct;}
+    }
+    inline void bt(){for(int i=2;i<=ct;i++){add(fa[i],i);}}//暴力建树 
+    void dfs(int u)//dfs 
+    {
+        for(int i=al[u];i;i=x[i]){dfs(v[i]);siz[u]+=siz[v[i]];}
+        if(siz[u]!=1){res=max(res,(ll)siz[u]*len[u]);}
+    }
+}sam;
+int main()
+{
+    scanf("%s",mde+1);
+    for(nl=1;mde[nl]!='\0';nl++){sam.ins(mde[nl]-'a'+1);}
+    sam.bt();sam.dfs(1);printf("%lld",res);return 0;
+}
+```
+
+
+
+### FFT字符串匹配
+
+字符串 $A$ 与 $B$ 以第 $x$ 位结束的连续 $m$ 位完全匹配可以表示为：(从 $0$ 开始下标)
+$$
+P(x)=\sum_{i=0}^{m-1}[A(i)-B(x-(m-1)+i)]^2
+$$
+设 $S(x)=A(m-x-1)$ ，则：
+$$
+P(x)=\sum_{i=0}^{m-1}[S(m-i-1)-B(x-m+i+1)]^2\\
+
+=\sum_{i=0}^{m-1}S(i)^2+\sum_{i=x-m+1}^xB(i)^2-2\sum_{i+j=x}S(i)B(j)
+$$
+设通配符的ASCII为$0$，则：
+$$
+C(x,y)=[A(x)-B(y)]^2A(x)B(y)
+$$
+完全匹配函数即：
+$$
+P(x)=\sum_{i=0}^{m-1}C(i,x-m+i+1)\\
+=\sum_{i+j=x}S(i)^3B(j)+\sum_{i+j=x}S(i)B(j)^3-2\sum_{i+j=x}S(i)^2B(j)^2
+$$
+带幂的可以先预处理每一项的系数做幂运算。伪代码如下：
+
+```c++
+void FFT_match(char *s1,char *s2,int m,int n)
+{
+	reverse(ss1,ss1+m);
+	for(int i=0;i<m;i++) A[i]=(s1[i]!='*')?(s1[i]-'a'+1):0;
+	for(int i=0;i<n;i++) B[i]=(s2[i]!='*')?(s2[i]-'a'+1):0;
+	
+	for(int i=0;i<len;i++) a[i]=Comp(A[i]*A[i]*A[i],0),b[i]=Comp(B[i],0);
+	FFT(a,len,1);FFT(b,len,1);
+	for(int i=0;i<len;i++) P[i]=P[i]+a[i]*b[i];
+	
+	for(int i=0;i<len;i++) a[i]=Comp(A[i],0),b[i]=Comp(B[i]*B[i]*B[i],0);
+	FFT(a,len,1);FFT(b,len,1);
+	for(int i=0;i<len;i++) P[i]=P[i]+a[i]*b[i];
+	
+	for(int i=0;i<len;i++) a[i]=Comp(A[i]*A[i],0),b[i]=Comp(B[i]*B[i],0);
+	FFT(a,len,1);FFT(b,len,1);
+	for(int i=0;i<len;i++) P[i]=P[i]-a[i]*b[i]*Comp(2,0);
+	
+	FFT(P,len,-1);
+	for(int i=m-1;i<n;i++) if(fabs(P[i].r)<=1e-7) printf("%d ",i-m+2);
+}
+```
+
+> 给定带通配符`*`的字符串$a,b,|a|=m,|b|=n$，下标从$1$开始，求$a$的首位作为$b$的第$k$位时能够匹配的所有解和解数目。$1\le m\le n\le3\times10^5$
+
+对 $b$ ，设$P(i)$，一共需要计算$m-n+1$个$P$。事实上，卷积的时候，由于计算的是所有$i\times j$,然后对于某一次只取$i+j=C$的，那么可以对计算出来的结果一次FFT计算后分别累加到不同的$P$上。
+
+```c++
+#include <bits/stdc++.h>
+using namespace std;
+#define db double
+const db pi = acos(-1);
+#define MAX 1100000
+char sa[MAX], sb[MAX];
+int m, n, N, top, a[MAX], b[MAX];
+int rev[MAX], sta[MAX];
+#define il inline
+#define ll int
+#define re
+il ll read()
+{
+    re char p = 0;
+    re ll r = 0, o = 0;
+    for (; p < '0' || p > '9'; o |= p == '-', p = getchar())
+        ;
+    for (; p >= '0' && p <= '9'; r = (r << 1) + (r << 3) + (p ^ 48), p = getchar())
+        ;
+    return o ? (~r) + 1 : r;
+}
+struct cpx
+{
+    double x, y;
+    cpx() {}
+    cpx(double xx, double yy) { x = xx, y = yy; }
+    cpx(int xx, int yy) { x = xx, y = yy; }
+    friend cpx operator*(cpx a, cpx b)
+    {
+        return cpx(a.x * b.x - a.y * b.y, a.x * b.y + a.y * b.x);
+    }
+    friend cpx operator/(cpx a, double b)
+    {
+        return cpx(a.x / b, a.y / b);
+    }
+    friend cpx operator+(cpx a, cpx b)
+    {
+        return cpx(a.x + b.x, a.y + b.y);
+    }
+    friend cpx operator-(cpx a, cpx b)
+    {
+        return cpx(a.x - b.x, a.y - b.y);
+    }
+    friend cpx operator*(cpx a, double b)
+    {
+        return cpx(a.x * b, a.y * b);
+    }
+};
+cpx A[MAX], B[MAX], C[MAX];
+void fft(cpx *a, int f)
+{
+    for (int i = 0; i < N; i++)
+        if (i < rev[i])
+            swap(a[i], a[rev[i]]);
+    for (int i = 1; i < N; i <<= 1)
+    {
+        cpx wn(cos(pi / i), f * sin(pi / i));
+        for (int j = 0; j < N; j += (i << 1))
+        {
+            cpx w(1, 0);
+            for (int k = 0; k < i; k++)
+            {
+                cpx x = a[j + k], y = w * a[j + k + i];
+                a[j + k] = x + y;
+                a[j + k + i] = x - y;
+                w = w * wn;
+            }
+        }
+    }
+    if (f == -1)
+        for (int i = 0; i < N; i++)
+            a[i] = a[i] / N;
+}
+int main()
+{
+    scanf("%d%d%s%s", &m, &n, sa, sb);
+    reverse(sa, sa + m);
+    int l = 0;
+    for (N = 1; N < 2 * n; N <<= 1)
+    {
+        l++;
+    }
+    for (int i = 0; i < N; i++)
+    {
+        rev[i] = (rev[i >> 1] >> 1) | ((i & 1) << (l - 1));
+    }
+    for (int i = 0; i < m; i++)
+    {
+        if (sa[i] != '*')
+        {
+            a[i] = sa[i] - 'a' + 1;
+        }
+    }
+    for (int i = 0; i < n; i++)
+    {
+        if (sb[i] != '*')
+        {
+            b[i] = sb[i] - 'a' + 1;
+        }
+    }
+    for (int i = 0; i < m; i++)
+    {
+        A[i] = cpx(a[i] * a[i] * a[i], 0);
+    }
+    for (int i = 0; i < n; i++)
+    {
+        B[i] = cpx(b[i], 0);
+    }
+    fft(A, 1);
+    fft(B, 1);
+    for (int i = 0; i < N; i++)
+    {
+        C[i] = C[i] + A[i] * B[i];
+    }
+
+    for (int i = 0; i < N; i++)
+    {
+        A[i] = B[i] = cpx(0, 0);
+    }
+    for (int i = 0; i < m; i++)
+    {
+        A[i] = cpx(a[i] * a[i], 0);
+    }
+    for (int i = 0; i < n; i++)
+    {
+        B[i] = cpx(b[i] * b[i], 0);
+    }
+    fft(A, 1);
+    fft(B, 1);
+    for (int i = 0; i < N; i++)
+    {
+        C[i] = C[i] - A[i] * B[i] * 2.0;
+    }
+
+    for (int i = 0; i < N; i++)
+    {
+        A[i] = B[i] = cpx(0, 0);
+    }
+    for (int i = 0; i < m; i++)
+    {
+        A[i] = cpx(a[i], 0);
+    }
+    for (int i = 0; i < n; i++)
+    {
+        B[i] = cpx(b[i] * b[i] * b[i], 0);
+    }
+    fft(A, 1);
+    fft(B, 1);
+    for (int i = 0; i < N; i++)
+    {
+        C[i] = C[i] + A[i] * B[i];
+    }
+
+    fft(C, -1);
+    for (int i = m - 1; i < n; i++)
+    {
+        if (fabs(C[i].x) < 0.5)
+        {
+            sta[top++] = i - m + 2;
+        }
+    }
+    printf("%d\n", top);
+    for (int i = 0; i < top; i++)
+    {
+        printf("%d ", sta[i]);
+    }
+    return 0;
+}
+```
+
+
+
+### 最小表示法
+
+> 可以用 SAM, SA, Lyndon 分解等做
+
+求循环同构串里字典序最小的串，复杂度 $O(n)$
+
+```c++
+#include <bits/stdc++.h>
+using namespace std;
+typedef long long ll;
+ll n, ans, a[300002], i, j = 1, k;
+signed main()
+{
+	scanf("%lld", &n);
+	for(ll i=0;i<n;++i) scanf("%lld", a + i);
+	while (i < n && j < n && k < n)
+	{
+		if (a[(i + k) % n] == a[(j + k) % n]) ++k;
+		else
+		{
+			if (a[(i + k) % n] > a[(j + k) % n]) i += k + 1;
+			else j += k + 1;
+			if (i == j) ++i; 
+			k = 0;
+		}
+	}
+	ans = min(i, j);
+	for(ll i=0;i<n;++i) printf("%lld ", a[(i + ans) % n]);
+	return 0;
+}
+```
+
+
+
+### Lyndon分解
+
+> SAM 也可以做 Lyndon 分解
+
+对于一个字符串，若其本身就是其最小后缀，则称它为 Lyndon 串，即若一个串的字典序比他所有后缀的字典序小。
+
+任意一个字符串都可以被唯一的分解成若干个字典序非严格递减的 Lyndon 串。对于长度为 n的字符串 s，存在唯一的若干个 Lyndon 串 $t_{1\dots m}$ ，满足 $s=t_1 + t_2 + \cdots + t_m$ 且 $ t_1 \ge t_2 \ge \cdots \ge t_m$。
+
+Duval 算法可以在 $O(n)$ 的时间求出一个字符串的 Lyndon 分解
+
+> 洛谷P6114-求所有Lyndon串右端点的异或和
+
+```c++
+#include <bits/stdc++.h>
+using namespace std;
+typedef int ll;
+ll n, ans, i = 1, j, k;
+char s[5000002];
+signed main()
+{
+	scanf("%s", s + 1);
+	n = strlen(s + 1);
+	while (i <= n)
+	{
+		j = i, k = i + 1;
+		while (k <= n && s[j] <= s[k]) j = s[j] == s[k++] ? j + 1 : i;
+		while (i <= j) i += k - j, ans ^= i - 1;
+	}
+	printf("%d", ans);
+	return 0;
+}
+```
+
+> 改成 `, ans = i <= n ? i : ans` 可以求最小表示法的起点
 
 
 
@@ -8051,7 +11038,7 @@ signed main()
 
 #### 其他
 
-##### 最小成本排序
+最小成本排序
 
 > 有n个重量互不重复为wi的货物，每次交换两个货物产生i+j的成本。1<=n<=1000,0<=wi<=10000，需要将货物升序排序，求最小成本
 
@@ -9034,7 +12021,59 @@ signed main()
 
 ### 随机化
 
+**爬山算法 / 模拟退火**：
 
+规定熵值越低解越优。通常可以跑多次。一种卡时方法：
+
+```c++
+while ((double)clock()/CLOCKS_PER_SEC < MAX_TIME) simulateAnneal();
+```
+
+
+
+> (SCNUOJ1679) 求满足 $x+y=k$ 下 $\sqrt{p-a+x^2}+\sqrt{p-b+y^2}$ 最小的解 $(x,y)$
+
+```c++
+#include <bits/stdc++.h>
+using namespace std;
+typedef long long ll;
+typedef double db;
+ll p, a, b, q;
+db k, t = 1.0, d, minx = 0.5, nowx, nowe, mine = 1e18;
+db f(db x) //assume k=1
+{
+    return sqrt(p - a + x * x) + sqrt(p - b + (1 - x) * (1 - x));
+}
+signed main()
+{
+    scanf("%lld%lld%lld%lld", &p, &a, &b, &q);
+    while (t > 1e-15) //t是温度参数, 可以设如初始t=3000
+    {
+        nowx = minx + (2.0 * rand() - RAND_MAX) / RAND_MAX * t;
+        nowe = f(nowx);
+        d = nowe - mine;
+        if (d < 0) // || exp(-d / t) * RAND_MAX > rand()加上注释是模拟退火
+        {          //不加是爬山算法
+            minx = nowx;
+        }
+        if (d < 0)
+        {
+            mine = nowe;
+        }
+        t *= 0.996; //0.996是降温系数
+    }
+    while (q--)
+    {
+        scanf("%lf", &k);
+        printf("%lf %lf\n", minx * k, (1 - minx) * k);
+    }
+    return 0;
+}
+```
+
+> 洛谷P2503-将 $n$ 个数分成 $m$ 组，组内求和得到 $m$ 个数，求最小方差 $m\le n\le20,2\le m\le6$ 
+>
+> 对某个序列，每次将当前数贪心放进 $m$ 组里和最小的一组，可以证明是对确定序列得到最小方差的；然后用模拟退火不断打乱序列即可，对每个位置退火 $1$ 次，共退火 $n$ 次
 
 
 
@@ -9503,6 +12542,8 @@ $$
 \lceil\dfrac ab\rceil=\dfrac{a+b-1}b=\dfrac{a-1}b+1
 $$
 
+`__gcd(a,b)` 若一方为零，返回另一方(无论正负)；二者均负返回负，一正一负比较特殊
+
 
 
 #### 位运算
@@ -9650,6 +12691,12 @@ cout<<bitset<sizeof(unsigned long) * 8>(1UL << 27)<<endl;
 
 #### 其他
 
+计时：(单位：秒) 
+
+```c++
+(double)clock() / CLOCKS_PER_SEC
+```
+
 decltype
 
 ```c++
@@ -9738,7 +12785,17 @@ C 风格字符串
 - `strstr(char* s1, char* s2)` 在主串 $s1$ 进行模式匹配 ，返回首个匹配成功地址或 `NULL` 
 - `strchr(char* s1, char s2)` 模式匹配
 - `strchr(char* s1, char s2)` 模式匹配(从右开始)
-- `strtok(char* s1, const char* sep)` 子串分割(用法见下方示例代码)
+- `strtok(char* s1, const char* sep)` 子串分割
+
+```c++
+const char *sep = ", ";   //必须const
+char *u = strtok(s, sep); // strtok用法模板
+while (u)
+{
+    t.insert(u); //输出分割结果
+    u = strtok(nullptr, sep);
+}
+```
 
 
 
