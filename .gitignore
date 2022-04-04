@@ -1,4 +1,5 @@
 *.exe
 *.pdf
+*.log
 .vscode/
 code/.vscode/

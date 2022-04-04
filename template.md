@@ -230,6 +230,56 @@ $$
 
 正整数 $n$ 拆分为 $m$ 个正整数即 $a_1x_1+a_2x_2+\cdots+a_mx_m=n$ ，若不允许重复，生成函数为 $\prod_{i=1}^m(1+x^{a_i})$ ，若允许重复，为 $\prod_{i=1}^m\dfrac1{1-x^i}$ 。均取系数 $x^n$ 。不允许就先每个至少取 $1$ 所以乘 $x^m$ 
 
+> 例洛谷P2386- $m$ 个相同苹果放 $n$ 相同盘子,可空盘, 求方案数
+
+```c++
+#include <bits/stdc++.h>
+using namespace std;
+#define sc(x) scanf("%lld", &x)
+typedef long long ll;
+#define mn 30
+ll n, m, t, dp[mn][mn]; //考虑前i个生成函数, x^j系数
+signed main()
+{
+    dp[0][0] = 1;
+    for (ll i = 1; i < mn; ++i) //暴力多项式乘法
+        for (ll j = 0; j < mn; j += i) // 1+x^i+x^{2i}+...
+            for (ll k = 0; k + j < mn; ++k) // 枚举dp[i-1][k]
+                dp[i][k + j] += dp[i - 1][k];
+    for (sc(t); t--;)
+    {
+        sc(m), sc(n); // m无区别球放n无区别盒,可空盒
+        printf("%lld\n", dp[n][m]);
+    } //等价于前n个生成函数,系数为x^m
+    return 0;
+}
+```
+
+一种非正整数划分的 DP 解法 (时空 $O(nm)$ )
+
+```c++
+#include <bits/stdc++.h>
+using namespace std;
+#define sc(x) scanf("%lld", &x)
+typedef long long ll;
+#define mn 30
+ll n, m, t, dp[mn][mn]; // m球n盒方案数
+signed main()
+{
+    for (ll i = 0; i < mn; ++i) //无球或单盒为1
+        dp[0][i] = dp[i][1] = 1;
+    for (ll i = 1; i < mn; ++i)
+        for (ll j = 1; j < mn; ++j)
+            if (j > i) //盒比球多,(?,0)=(?)
+                dp[i][j] = dp[i][i];
+            else //放满时每盒拿走一个;放不满时拿走空盒一个
+                dp[i][j] = dp[i - j][j] + dp[i][j - 1];
+    for (sc(t); t--;)
+        sc(m), sc(n), printf("%lld\n", dp[m][n]);
+    return 0;
+}
+```
+
 
 
 ##### 其他
@@ -1185,7 +1235,7 @@ int main(){
 $$
 ax+by=(a,b)
 $$
-费马小定理又称贝祖定理（Bézout's lemma）,设 $a,b\in\Z,ab\neq0$ ,则 $\exist x,y\in\Z$：
+裴蜀定理又称贝祖定理（Bézout's lemma）,设 $a,b\in\Z,ab\neq0$ ,则 $\exist x,y\in\Z$：
 $$
 ax+by=(a,b)
 $$
@@ -2007,8 +2057,6 @@ int contains(Polygon g, Point p) //伪代码
     return (x?2:0);
 }
 ```
-
-##### 
 
 
 
@@ -9933,7 +9981,7 @@ signed main()
 
 #### 最长公共子序列
 
-如abcbdab,bdcaba的最长子序列是bcba
+LCS, 如abcbdab,bdcaba的最长子序列是bcba
 
 ```c++
 int c[N+1][N+1];//c[i][j]代表Xi与Yj的LCS长度
@@ -9998,7 +10046,7 @@ $n$ 人从 $1$ 开始编号排列成环，每次数到第 $q$ 个人杀掉，求
 
 当 $q=2$ 时，$n=2^k, J=1$ ，否则 $J(2^k+t)=2t+1$ (做掉$t$人后，变成了一个$2^k$环，在这个$2^k$环上，最后活下来的是环的第一个人)
 
-一般情况(设编号从 $0$ 开始)： $J_{n,q}=(J_{n-1,q}+q)\bmod n$
+一般情况(设编号从 $0$ 开始)： $J_{n,q}=(J_{n-1,q}+q)\bmod n$ ，初始状态为 $J_{1,q}=0$
 
 
 
@@ -13253,8 +13301,6 @@ signed main()
 
 
 
-
-
 Python:
 
 ```python
@@ -13262,10 +13308,6 @@ import sys
 input = sys.stdin.readline
 print = sys.stdout.write # 仅字符串输出
 ```
-
-Java:
-
-
 
 
 
@@ -13283,8 +13325,3 @@ Java:
 return ((ull)a*b-(ull)((ull)a/k*b)*k+k)%k; 
 ```
 
-
-
-
-
-### 常用术语表
