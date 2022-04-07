@@ -6,7 +6,7 @@
 
 ![image-20220325120131181](img/image-20220325120131181.png)
 
-<div align="center" style="font-size:18px">Last built at Apr. 3, 2022</div>
+<div align="center" style="font-size:18px">Last built at Apr. 7, 2022</div>
 
 <div STYLE="page-break-after: always;"></div>
 
@@ -2389,6 +2389,8 @@ signed main()
 }
 ```
 
+如果每次以某个端点为原点进行极角排序，再枚举线段第二端点，配合单调栈，可以用 $O(n^2\log n)$ 实现枚举(但是处理概率连乘积乘除特别是 $1$ (对应概率为 $0$ )比较麻烦)，暂时没有什么好的实现方法
+
 
 
 #### 扫描线
@@ -4357,10 +4359,6 @@ signed main()
 
 
 
-#### 李超线段树
-
-
-
 #### 主席树
 
 ##### 可持久化数组
@@ -4949,8 +4947,6 @@ signed main()
 
 
 
-
-
 ### 平衡树
 
 使用示例：(洛谷P6136) (目前该题平衡树均为别人的代码,后续版本可能改)
@@ -5520,7 +5516,45 @@ int main() {
 
 
 
-### 笛卡尔树
+### 堆
+
+#### 可删堆
+
+> 例题：P2056洛谷(的一部分)
+
+以 $O(\log n)$ 均摊实现：①插入任意值 ②删除指定值 ③求最大值 
+
+> 若要求次大值，可以弹两次堆顶，再把第一次弹的压进去，最后返回第二次弹的结果
+
+```c++
+struct heap //可删堆(大根堆)
+{
+    priority_queue<ll> a, b;
+    void insert(ll x) { a.push(x); }
+    void erase(ll x) { b.push(x); }
+    ll top()
+    {
+        while (!b.empty() && a.top() == b.top())
+        {
+            a.pop(), b.pop();
+        }
+        return a.top();
+    }
+    ll pop()
+    {
+        ll t = top();
+        a.pop();
+        return t;
+    }
+    ll size() { return a.size() - b.size(); }
+}
+```
+
+
+
+
+
+#### 笛卡尔树
 
 节点由 $(k,w)$ 组成， $k$ 满足二叉搜索树， $w$ 满足堆，若 $(k,w)$ 分别互不相同，那么结构唯一
 
@@ -5568,11 +5602,7 @@ signed main()
 
 
 
-> ### 树套树
-
-
-
-### 可并堆
+#### 可并堆
 
 左偏树。支持在 $O(\log n)$ 的时间复杂度内进行合并的堆式数据结构
 
@@ -7148,7 +7178,7 @@ signed main()
 
 经过点分治，可以求出满足可加的每一条路径的值。点分治的复杂度是 $O(n\log n)$
 
-> 例题洛谷P3806：$n(1\le n\le10^4)$ 点带权树，$m(1\le m\le100)$ 次询问，每次询问求树上是否有距离为 $k$ 个点对，有就输出 `AYE` 
+> 例题洛谷P3806：$n(1\le n\le10^4)$ 点带边权树，$m(1\le m\le100)$ 次询问，每次询问求树上是否有距离为 $k$ 的点对，有就输出 `AYE` 
 >
 
 ```c++
@@ -7162,7 +7192,7 @@ typedef long long ll;
 struct edge
 {
     ll to, nx, w;
-} e[mn << 2];
+} e[mn << 1];
 ll hd[mn], ecnt;
 void adde(ll &u, ll &v, ll &w)
 {
@@ -12630,7 +12660,7 @@ $$
 
 内建函数：
 
-- 注：对 `unsigned long long` 每个函数名后面加上 `ll`
+- 注：对 `unsigned long long` 每个函数名后面加上 `ll` (传入的是什么类型不影响结果, 影响的是函数名)
 
 **1.__builtin_popcount(unsigned int n)**
 
@@ -12680,6 +12710,8 @@ int m = 8;	//1000
 cout<< 32 - __builtin_clz(n) <<endl;	//输出1
 cout<< 64 - __builtin_clzll(m) <<endl;	//输出4
 ```
+
+应用：`31 - __builtin_clz(n)` 等效于 $\lfloor\log_2n\rfloor$ 
 
 
 
@@ -13305,9 +13337,51 @@ Python:
 
 ```python
 import sys
-input = sys.stdin.readline
-print = sys.stdout.write # 仅字符串输出
+input = sys.stdin.readline # 实测约快10倍
+print = sys.stdout.write # 仅字符串输出(注意不会换行)
 ```
+
+
+
+Java
+
+```java
+import java.io.*;
+
+public class Main {
+    static StreamTokenizer scanner = new StreamTokenizer(new BufferedReader(new InputStreamReader(System.in)));
+    static PrintWriter out = new PrintWriter(new BufferedWriter(new OutputStreamWriter(System.out)));
+
+    public static int nextInt() throws IOException {// 快约一倍
+        scanner.nextToken();
+        return (int) scanner.nval;
+    }
+
+    public static long nextLong() throws IOException {
+        scanner.nextToken();
+        return (long) scanner.nval;
+    }
+
+    static String next() throws IOException {
+        scanner.nextToken();
+        return scanner.sval;
+    }
+
+    public static void main(String[] args) throws IOException {
+        int n = nextInt() / 10;
+        for (int i = 0; i < n; ++i) {
+            int s = 0;
+            for (int j = 0; j < 10; ++j) {
+                s += nextInt();
+            }
+            out.println(s);// 实测快约4倍
+        }
+        out.close();// 没有的话什么也不输出
+    }
+}
+```
+
+
 
 
 
