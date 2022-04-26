@@ -1920,8 +1920,8 @@ double dis_sp(const Point &a, const Point &b, const Point &p)
 ```c++
 bool isIntersect(const Point &a, const Point &b, const Point &c, const Point &d)
 {
-    return cross(c - a, d - a) * cross(c - b, d - b) <= 0.0 && cross(a - c, b - c) * cross(a - d, b - d) <= 0.0;
-} // 条件: AB,CD不在一条直线上
+    return cross(b - a, c - a) * cross(b - a, d - a) <= 0 && cross(d - c, a - c) * cross(d - c, b - c) <= 0;
+} // 条件: A,B,C,D 不共线
 ```
 
 ```c++
@@ -1947,13 +1947,13 @@ ll f(const Point &a, const Point &b)
 }
 bool isIntersect(const Point &a, const Point &b, const Point &c, const Point &d)
 {
-    return f(c - a, d - a) * f(c - b, d - b) <= 0 && f(a - c, b - c) * f(a - d, b - d) <= 0;
+    return f(b - a, c - a) * f(b - a, d - a) <= 0 && f(d - c, a - c) * f(d - c, b - c) <= 0;
 }
 ```
 
-直线 $AB$ 与线段 $CD$ ，那么只需要判断 $C,D$ 是否在 $AB$ 两段即可，不必反过来再判断一次，即只需要判断：
+直线 $AB$ 与线段 $CD$ ，那么只需要判断 $C,D$ 是否在 $AB$ 两端即可，不必反过来再判断一次，即只需要判断：
 $$
-(\vec{CA}\times\vec{CB})\cdot(\vec{DA}\times \vec{DB})\le 0
+f(\vec{AB},\vec{AC})\cdot f(\vec{AB},\vec{AD})\le 0
 $$
 线段 $AB,CD$ 的距离，如果两线段相交，距离为 $0$ ，否则分别计算 $A,B$ 到线段 $CD$ 的 $C,D$ 到线段 $AB$ 的距离，取四者最小值即可
 
@@ -2813,9 +2813,9 @@ signed main()
 
 ### 博弈论
 
-P-position: 先手必败,  N-position: 先手必胜
+P-position: (p:previous) 先手必败,  N-position: (n:next) 先手必胜
 
-局面的性质：
+局面的性质：(总结：只要能移动到 $P$ 就是 $N$ ，否则都是 $P$ )
 
 1. 合法操作集合为空的局面是P-position
 2. 可以移动到P-position的局面是N-position
@@ -5701,51 +5701,88 @@ signed main()
 
 进行求取区间左右端点操作时，必须先 split 右端点，再 split 左端点。若先 split 左端点，返回的迭代器可能在 split 右端点的时候失效，可能会导致 RE
 
-节点：
+> (SCNUOJ1731)你有一个长度为 $n$ 的序列，下标从 $1$ 开始，一开始每个数都是 $1236895$ ，你需要维护 $m$ 次下列操作：
+>
+> 1. `1 l r x` 将区间 $[l,r]$ 的每个值都设为 $x$ 
+> 2. `2 l r x` 将区间 $[l,r]$ 的每个值都加上 $x$
+> 3. `3 l r` 查询区间 $[l,r]$ 的值之和
+>
+>  $n,m(1\le n,m\le10^5)$ ，数据随机，$1\le x\le10^7$ 
 
 ```c++
-struct Node_t {
-  int l, r;
-  mutable int v;
-
-  Node_t(const int &il, const int &ir, const int &iv) : l(il), r(ir), v(iv) {}
-
-  inline bool operator<(const Node_t &o) const { return l < o.l; }
+#include <bits/stdc++.h>
+using namespace std;
+#define sc(x) scanf("%lld", &x)
+typedef long long ll;
+ll n;
+struct node_t
+{
+    ll l, r;
+    mutable ll v; // mutable使得const可变(set元素是const)
+    node_t(const ll &il, const ll &ir, const ll &iv) : l(il), r(ir), v(iv) {}
+    inline bool operator<(const node_t &o) const { return l < o.l; }
 };
-auto split(int x) {
-  if (x > n) return odt.end();
-  auto it = --odt.upper_bound(Node_t{x, 0, 0});
-  if (it->l == x) return it;
-  int l = it->l, r = it->r, v = it->v;
-  odt.erase(it);
-  odt.insert(Node_t(l, x - 1, v));
-  return odt.insert(Node_t(x, r, v)).first;
+set<node_t> odt; //建立一棵珂朵莉树
+auto split(ll x) //珂朵莉基操
+{
+    if (x > n)
+        return odt.end();
+    auto it = --odt.upper_bound(node_t{x, 0, 0});
+    if (it->l == x)
+        return it;
+    ll l = it->l, r = it->r, v = it->v;
+    odt.erase(it);
+    odt.insert(node_t(l, x - 1, v));
+    return odt.insert(node_t(x, r, v)).first;
+}
+void assign(ll l, ll r, ll v) //区间赋值为v, 均摊O(loglogn)
+{
+    auto itr = split(r + 1), itl = split(l);
+    odt.erase(itl, itr);
+    odt.insert(node_t(l, r, v));
+}
+void add(ll l, ll r, ll v) //区间增加v, 均摊O(loglogn)
+{
+    auto itr = split(r + 1), itl = split(l);
+    for (; itl != itr; ++itl) //枚举每个子区间
+    {
+        itl->v = itl->v + v;
+    }
+}
+ll query(ll l, ll r) //区间查询, 均摊O(loglogn)
+{
+    ll res = 0;
+    auto itr = split(r + 1), itl = split(l);
+    for (; itl != itr; ++itl)
+    { // itl->l, itl->r, itl->v 是当前子区间的左右端点和值
+        res += (itl->r - itl->l + 1) * (itl->v);
+    }
+    return res;
+}
+signed main()
+{
+    sc(n);
+    odt.insert({1, n, 1236895}); //初始化区间
+    ll m, cmd, l, r, x;
+    for (sc(m); m--;)
+    {
+        sc(cmd), sc(l), sc(r);
+        if (cmd == 1)
+        {
+            sc(x), assign(l, r, x);
+        }
+        else if (cmd == 2)
+        {
+            sc(x), add(l, r, x);
+        }
+        else
+        {
+            printf("%lld\n", query(l, r));
+        }
+    }
+    return 0;
 }
 ```
-
-区间赋值：
-
-```c++
-void assign(int l, int r, int v) {
-  auto itr = split(r + 1), itl = split(l);
-  odt.erase(itl, itr);
-  odt.insert(Node_t(l, r, v));
-}
-```
-
-区间遍历：
-
-```c++
-void performance(int l, int r) {
-  auto itr = split(r + 1), itl = split(l);
-  for (; itl != itr; ++itl) {
-    // Perform Operations here
-    //以区间和查询为例：res+=(itl->r-itl->l+1)*(itl->v);
-  }
-}
-```
-
-
 
 
 
@@ -10199,6 +10236,8 @@ signed main()
 
 - 定义 $\exists p\in N,\forall i\in [1,|S|-p]$ 都有 $S[i]=S[i+p]$ ，那么 $p$ 是 $S$ 的周期，则最短周期为 $|S|-\pi(|S|)$ (SCNUOJ1716)
 
+  定义 $S$ 的 border 是前缀和后缀相等的一段前缀。所有 border 长度为 $\pi(|S|),\pi(\pi(S)),\cdots$ 。周期数等于 border 数且串长-周期长度=border长度。
+
 - 串 $S$ 的每个真前缀在串 $S$ 出现次数：(SCNUOJ1717)
 
   ```c++
@@ -12099,7 +12138,21 @@ signed main()
 
 ### 随机化
 
+$$
+(1-\dfrac1n)^n\le\dfrac 1e,\forall n\ge 1
+$$
+
+意义：有 $n$ 个**相互独立**的坏事件，且设它们的发生概率都是 $1-\dfrac 1n$ ，那么它们全部都发生的概率至多是 $\dfrac1e\approx0.3679$  
+
+假设可以枚举到的全体解是 $U$ ，$|U|=n$ ，其中正解是 $S$ ，如果每次随机枚举一个解，期望正确率是 $1-\epsilon$ (即错误率是 $\epsilon$ )，那么单次枚举有 $\dfrac{|S|}n$ 概率得到正解，枚举 $n(-\log\dfrac\epsilon{|S|})$ 次可以把全体 $S$ 元素都枚举一次
+
+
+
 **爬山算法 / 模拟退火**：
+
+设枚举次数是 $m$ ，那么 $tC^m\approx t_0$ 即 $m\approx\log(\dfrac{t_0}t,C)$ ，即复杂度为 $O\left(\log(\dfrac{t_0}t,C)\right)$  
+
+通常降温系数 $C\in [0.985,0.999],t_0=10^{-15}$ ，$t$ 一般看定义域，例如 $t=10^4$ 
 
 规定熵值越低解越优。通常可以跑多次。一种卡时方法：
 
@@ -12117,37 +12170,109 @@ using namespace std;
 typedef long long ll;
 typedef double db;
 ll p, a, b, q;
-db k, t = 1.0, d, minx = 0.5, nowx, nowe, mine = 1e18;
-db f(db x) //assume k=1
+db k, t = 0.5, d, minx = 0.5, nowx = 0.5;
+db f(db x) // assume k=1
 {
-    return sqrt(p - a + x * x) + sqrt(p - b + (1 - x) * (1 - x));
+    return sqrt(p - a + x * x) + sqrt(p - b + (k - x) * (k - x));
 }
 signed main()
 {
     scanf("%lld%lld%lld%lld", &p, &a, &b, &q);
-    while (t > 1e-15) //t是温度参数, 可以设如初始t=3000
-    {
-        nowx = minx + (2.0 * rand() - RAND_MAX) / RAND_MAX * t;
-        nowe = f(nowx);
-        d = nowe - mine;
-        if (d < 0) // || exp(-d / t) * RAND_MAX > rand()加上注释是模拟退火
-        {          //不加是爬山算法
-            minx = nowx;
-        }
-        if (d < 0)
-        {
-            mine = nowe;
-        }
-        t *= 0.996; //0.996是降温系数
-    }
     while (q--)
     {
         scanf("%lf", &k);
-        printf("%lf %lf\n", minx * k, (1 - minx) * k);
+        minx = nowx = k / 2;
+        t = k / 2;
+        while (t > 1e-6) // t是温度参数
+        {
+            db x1 = nowx + t;
+            db x2 = nowx - t;
+            db newx = f(x1) < f(x2) ? x1 : x2;
+            nowx = newx;
+            if (f(newx) < f(minx))
+            {
+                minx = newx;
+            }
+            t *= 0.9; // 降温系数
+        }
+        printf("%lf %lf\n", minx, (k - minx));
     }
     return 0;
 }
 ```
+
+
+
+> (SCNUOJ1730) 给定常数 $a,b,c,d,e,l,r$ ，求下列函数在定义域 $[l,r]$ 的最大值：
+> $$
+> f(x)=\sin(\dfrac xa)+\sin(\dfrac xb)+\sin(\dfrac xc)+\sin(\dfrac xd)+\sin(\dfrac xe)
+> $$
+>
+> ```c++
+> #include <bits/stdc++.h>
+> using namespace std;
+> #define sc(x) scanf("%lld", &x)
+> typedef long long ll;
+> typedef double db;
+> ll a, b, c, d, e, l, r;
+> db x, t, now, mx, ans = -6;
+> db f(db x)
+> {
+>     return sin(x / a) + sin(x / b) + sin(x / c) + sin(x / d) + sin(x / e);
+> }
+> void solve()
+> {
+>     static ll rd = 1;//也可以用random_device生成种子
+>     mt19937 mt(rd + time(0));
+>     rd *= 2;
+>     uniform_real_distribution<db> dist0(0, 1);
+>     now = (l + r) / 2, t = r - l;
+>     while (t > 1e-6)
+>     {
+>         uniform_real_distribution<db> dist(-t, t);
+>         db newx = now + dist(mt);
+>         newx = max(1. * l, min(1. * r, newx));
+>         db fnow = f(now), fnew = f(newx);
+>         db dt = (-fnew) - (-fnow);
+>         if (fnow < fnew || exp(-dt / t) > dist0(mt))
+>         {
+>             now = newx;
+>         }
+>         if (ans < fnew)
+>         {
+>             ans = fnew;
+>         }
+>         t *= 0.999;
+>     }
+>     for (ll i = 0; i < 1000; ++i) //在终温随机多次
+>     { //优化效果不明显
+>         uniform_real_distribution<db> dist(-t, t);
+>         db newx = now + dist(mt);
+>         newx = max(1. * l, min(1. * r, newx));
+>         db fnow = f(now), fnew = f(newx);
+>         if (fnow < fnew)
+>         {
+>             now = newx;
+>         }
+>         if (ans < fnew)
+>         {
+>             ans = fnew;
+>         }
+>     }
+> }
+> signed main()
+> {
+>     sc(a), sc(b), sc(c), sc(d), sc(e), sc(l), sc(r);
+>     for (ll i = 0; i < 20; ++i) //重要：多次退火
+>     {
+>         solve();
+>     }
+>     printf("%lf", ans);
+>     return 0;
+> }
+> ```
+
+
 
 > 洛谷P2503-将 $n$ 个数分成 $m$ 组，组内求和得到 $m$ 个数，求最小方差 $m\le n\le20,2\le m\le6$ 
 >
@@ -12925,13 +13050,21 @@ signed main()
 using namespace std;
 int main()
 {
-	unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
-	mt19937 rand_num(seed);
+	//unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
+	//mt19937 rand_num(seed); 方法一
+    random_device divc;
+	mt19937 rand_num(divc()); //方法二：Linux真随机数
 	uniform_int_distribution<long long> dist(0, 1000000000);
 	cout << dist(rand_num) << endl;
 	return 0;
 }
 ```
+
+distribution 范围支持负数和超过 int 的范围(即 long long)。
+
+`uniform_real_distribution<T>` 生成实数范围
+
+随机打乱：  `shuffle(first, last, myrand)` ，`myrand` 通常用 `mt19937` 
 
 
 
@@ -12960,8 +13093,6 @@ partial_sort(lf,cf,rf);
 **inplace\_merge** : (lf,cf,rf,cmp) 对 $(lf,cf]$ 和 $(cf,rf)$ 就地归并排序 
 
 **merge** : (lf1, rf1, lf2, rf2, res, cmp) 归并排序并放到结果迭代器
-
-**random\_shuffle** : 打乱元素(传入首尾迭代器)
 
 
 
@@ -13279,6 +13410,20 @@ void write(ll x)
 ```
 
 更快的读写：
+
+- 短板 (仅快读)
+
+```c++
+#define gc() (is == it ? it = (is = in) + fread(in, 1, Q, stdin), (is == it ? EOF : *is++) : *is++)
+const int Q = (1 << 24) + 1;
+char in[Q], *is = in, *it = in, c;
+void read(long long &n) {
+    for (n = 0; (c = gc()) < '0' || c > '9';);
+    for (; c <= '9' && c >= '0'; c = gc()) n = n * 10 + c - 48;
+}
+```
+
+- 长版
 
 ```c++
 #include <bits/stdc++.h>
