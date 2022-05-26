@@ -6,7 +6,7 @@
 
 ![image-20220325120131181](img/image-20220325120131181.png)
 
-<div align="center" style="font-size:18px">Last built at Apr. 7, 2022</div>
+<div align="center" style="font-size:18px">Last built at May. 25, 2022</div>
 
 <div STYLE="page-break-after: always;"></div>
 
@@ -8662,6 +8662,8 @@ signed main()
 
 ### 连通性
 
+#### 连通分量
+
 无向图求连通分量：并查集 / DFS $O(n+m)$
 
 有向图求强联通分量：Tarjan 算法  $O(n+m)$
@@ -8861,6 +8863,105 @@ signed main()
         for (auto &i : res)
             printf("%lld - %lld\n", i.first - 1, i.second - 1);
         putchar('\n');
+    }
+    return 0;
+}
+```
+
+
+
+#### 2-SAT
+
+> 洛谷P4782 有 $n$ 个布尔值变量 $x$ 和 $m$ 个要满足的条件 $x_i$ 为 $a$ 或 $x_j$ 为 $b$ ，构造一组解或报告无解 $1\le n,m\le10^6$ 
+
+对每个变量 $x$ ，存两个点 $x,\lnot x$ 分别表示 $x$ 取 $1/0$ ，编号为 $i,i+n$​ 。在建图后，同一强连通分量内变量值一定相等。若 $x,\lnot x$ 在同一 SCC ，那么一定无解。当 $x$ 所在 SCC 的拓扑序在 $\lnot x$ 所在 SCC 拓扑序之后的话令 $x$ 为真。复杂度 $O(n+m)$ 
+
+```c++
+#include <bits/stdc++.h>
+using namespace std;
+#define sc(x) scanf("%lld", &x)
+typedef long long ll;
+#define mn 2000010
+ll n, m, hd[mn], cnt, st, low[mn], dfn[mn], ins[mn], scc, c[mn];
+stack<ll> s;
+struct edge
+{
+    ll to, nx;
+} e[mn * 2];
+void tarjan(ll u)
+{
+    low[u] = dfn[u] = ++st, ins[u] = true;
+    s.push(u);
+    for (ll i = hd[u], v; i; i = e[i].nx)
+    {
+        v = e[i].to;
+        if (!dfn[v])
+        {
+            tarjan(v);
+            low[u] = min(low[u], low[v]);
+        }
+        else if (ins[v])
+        {
+            low[u] = min(low[u], dfn[v]);
+        }
+    }
+    if (low[u] == dfn[u])
+    {
+        ++scc;
+        do
+        {
+            c[u] = scc;
+            u = s.top();
+            s.pop();
+            ins[u] = false;
+        } while (low[u] != dfn[u]);
+    }
+}
+signed main()
+{
+    sc(n), sc(m);
+    auto adde = [&](ll u, ll v)
+    { e[++cnt] = {v, hd[u]}, hd[u] = cnt; };
+    for (ll i = 1, a, va, b, vb; i <= m; ++i)
+    {
+        sc(a), sc(va), sc(b), sc(vb);
+        if (va && vb)
+        {
+            adde(a + n, b), adde(b + n, a);
+        }
+        else if (!va && vb)
+        {
+            adde(a, b), adde(b + n, a + n);
+        }
+        else if (va && !vb)
+        {
+            adde(a + n, b + n), adde(b, a);
+        }
+        else if (!va && !vb)
+        {
+            adde(a, b + n), adde(b, a + n);
+        }
+        // i.e. adde(a+n*va,b+n*(vb^1)),adde(b+n*vb,a+n*(va^1))
+    }
+    for (ll i = 1; i <= 2 * n; ++i)
+    {
+        if (!dfn[i])
+        {
+            tarjan(i);
+        }
+    }
+    for (ll i = 1; i <= n; ++i)
+    {
+        if (c[i] == c[i + n])
+        {
+            printf("IMPOSSIBLE");
+            return 0;
+        }
+    }
+    printf("POSSIBLE\n");
+    for (ll i = 1; i <= n; ++i)
+    { // tarjan逆拓扑序
+        printf("%d ", c[i] < c[i + n]);
     }
     return 0;
 }
@@ -12280,6 +12381,641 @@ signed main()
 
 
 
+### 莫队
+
+#### 普通
+
+> 洛谷P3901-静态 $n$ 长数列 $a(1\le n,a_i\le10^5)$ ，有 $m(1\le m\le10^5)$ 次询问，问区间内是否每个数互不相同
+
+复杂度 $O(n\sqrt m)$ ，三种正确的循环位置： `l--,r--,r++,l++`  ， `l--,r++,r--,l++` ， `l--,r++,l++,r--` (前两步先扩大区间(`l--,r++`)，后两步缩小区间(`l++,r--`))
+
+```c++
+#include <bits/stdc++.h>
+using namespace std;
+#define sc(x) scanf("%lld", &x)
+typedef long long ll;
+#define mn 100010
+ll n, m, x, bin[mn], ans[mn], sq, a[mn], sum;
+struct query
+{
+    ll l, r, i;
+    bool operator<(const query &x) const
+    {
+        if (l / sq != x.l / sq)
+            return l < x.l;
+        if (l / sq & 1)
+            return r < x.r;
+        return r > x.r;
+    }
+} q[mn];
+void add(ll i)
+{
+    sum += bin[a[i]]++ == 0;
+}
+void del(ll i)
+{
+    sum -= --bin[a[i]] == 0;
+}
+signed main()
+{
+    sc(n), sc(m), sq = sqrt(n);
+    for (ll i = 1; i <= n; ++i)
+    {
+        sc(a[i]);
+    }
+    for (ll i = 1; i <= m; ++i)
+    {
+        sc(q[i].l), sc(q[i].r), q[i].i = i;
+    }
+    sort(q + 1, q + 1 + m);
+    for (ll i = 1, l = 1, r = 0; i <= m; ++i)
+    {
+        while (l > q[i].l)
+            add(--l);
+        while (r < q[i].r)
+            add(++r);
+        while (l < q[i].l)
+            del(l++);
+        while (r > q[i].r)
+            del(r--);
+        ans[q[i].i] = sum == (q[i].r - q[i].l + 1);
+    }
+    for (ll i = 1; i <= m; ++i)
+    {
+        printf("%s\n", ans[i] ? "Yes" : "No");
+    }
+    return 0;
+}
+```
+
+
+
+#### 带修
+
+> 洛谷1903 有 $n$ 长序列 $a(a_i\le10^6)$ ，有 $m(n,m\le 133333)$ 次操作：`Q l r` 表示询问区间 $[l,r]$ 内不同数值数； `R p c` 表示将 $a_p$ 修改为 $c$ 。
+
+复杂度 $O(n^\frac53)$ 
+
+```c++
+#include <bits/stdc++.h>
+using namespace std;
+#define sc(x) scanf("%lld", &x)
+typedef long long ll;
+#define mn 133340
+ll n, m, sq, a[mn], a0[mn], ans[mn], m1, m2, sum, bin[1000010];
+struct query1
+{
+    ll l, r, i, c;
+    bool operator<(const query1 &x) const
+    {
+        if (l / sq == x.l / sq)
+        {
+            return r / sq == x.r / sq ? i < x.i : r < x.r;
+        }
+        return l < x.l;
+    }
+} q1[mn];
+struct query2
+{
+    ll i, f, t;
+} q2[mn];
+void add(ll i)
+{
+    sum += bin[i]++ == 0;
+}
+void del(ll i)
+{
+    sum -= --bin[i] == 0;
+}
+ll l = 1, r;
+void addt(ll t)
+{
+    if (l <= q2[t].i && q2[t].i <= r)
+        del(q2[t].f), add(q2[t].t);
+    a0[q2[t].i] = q2[t].t;
+}
+void delt(ll t)
+{
+    if (l <= q2[t].i && q2[t].i <= r)
+        del(q2[t].t), add(q2[t].f);
+    a0[q2[t].i] = q2[t].f;
+}
+signed main()
+{
+    sc(n), sc(m), sq = pow(n, 2. / 3);
+    for (ll i = 1; i <= n; ++i)
+    {
+        sc(a[i]), a0[i] = a[i];
+    }
+    char ch[5] = {};
+    for (ll i = 1, x, y; i <= m; ++i)
+    {
+        scanf("%s%lld%lld", ch, &x, &y);
+        if (ch[0] == 'Q')
+        {
+            ++m1, q1[m1] = {x, y, m1, m2 + 1};
+        }
+        else
+        {
+            ++m2, q2[m2] = {x, a[x], y}, a[x] = y;
+        }
+    }
+    sort(q1 + 1, q1 + 1 + m1);
+    for (ll i = 1, t = 1; i <= m1; ++i)
+    {
+        while (t < q1[i].c)
+            addt(t++);
+        while (t > q1[i].c)
+            delt(--t);
+        while (l > q1[i].l)
+            add(a0[--l]);
+        while (r < q1[i].r)
+            add(a0[++r]);
+        while (l < q1[i].l)
+            del(a0[l++]);
+        while (r > q1[i].r)
+            del(a0[r--]);
+        ans[q1[i].i] = sum;
+    }
+    for (ll i = 1; i <= m1; ++i)
+    {
+        printf("%lld\n", ans[i]);
+    }
+    return 0;
+}
+```
+
+
+
+#### 树上
+
+子树：
+
+> 例题洛谷U41492：$n(n\le 10^5)$ 个节点的树，每个节点有不同的颜色( $10^5$ 种)，问每个节点为根的子树中，所有节点有多少种不同的颜色；$m(m\le 10^5)$ 次询问，每次问一棵子树
+
+```c++
+#include <bits/stdc++.h>
+using namespace std;
+#define sc(x) scanf("%lld", &x)
+typedef long long ll;
+#define mn 100010
+ll n, m, sq, ans[mn], bin[mn], sum, a[mn], hd[mn], cnt;
+ll dfn[mn], st, mx[mn], id[mn];
+struct query
+{
+    ll l, r, i;
+    bool operator<(const query &x) const
+    {
+        if (l / sq != x.l / sq)
+            return l < x.l;
+        return l / sq & 1 ? r < x.r : r > x.r;
+    }
+} q[mn];
+struct edge
+{
+    ll to, nx;
+} e[mn * 2];
+signed main()
+{
+    sc(n), sq = sqrt(n);
+    auto adde = [&](ll u, ll v)
+    { e[++cnt] = {v, hd[u]}, hd[u] = cnt; };
+    for (ll i = 1, u, v; i < n; ++i)
+    {
+        sc(u), sc(v), adde(u, v), adde(v, u);
+    }
+    for (ll i = 1; i <= n; ++i)
+    {
+        sc(a[i]);
+    }
+    auto dfs = [&](auto self, ll u, ll fa) -> ll
+    {
+        dfn[u] = ++st, mx[u] = st, id[st] = a[u];
+        for (ll i = hd[u], v; i; i = e[i].nx)
+        {
+            if ((v = e[i].to) != fa)
+            {
+                mx[u] = max(mx[u], self(self, v, u));
+            }
+        }
+        return mx[u];
+    };
+    dfs(dfs, 1, 0);
+
+    sc(m);
+    for (ll i = 1, x; i <= m; ++i)
+    {
+        sc(x), q[i].l = dfn[x], q[i].r = mx[x], q[i].i = i;
+    }
+    sort(q + 1, q + 1 + m);
+    auto add = [&](ll i)
+    { sum += bin[id[i]]++ == 0; };
+    auto del = [&](ll i)
+    { sum -= --bin[id[i]] == 0; };
+    for (ll i = 1, l = 1, r = 0; i <= n; ++i)
+    { 
+        while (l > q[i].l)
+            add(--l);
+        while (r < q[i].r)
+            add(++r);
+        while (l < q[i].l)
+            del(l++);
+        while (r > q[i].r)
+            del(r--);
+        ans[q[i].i] = sum;
+    }
+    for (ll i = 1; i <= m; ++i)
+    {
+        printf("%lld\n", ans[i]);
+    }
+    return 0;
+}
+```
+
+
+
+链：
+
+> SP10707 有 $n\le4\times10^4$ 节点树，每个点一种颜色 $\le2\times10^9$，有 $m\le10^5$ 次询问，问 $u,v$ 路径上不同颜色数
+
+```c++
+#include <bits/stdc++.h>
+using namespace std;
+#define sc(x) scanf("%lld", &x)
+typedef long long ll;
+#define mn 40010
+#define mm 100010
+#define mlg 17
+ll n, m, sq;
+ll a[mn], b[mn], bs;
+ll hd[mn], cnt;
+struct edge
+{
+    ll to, nx;
+} e[mn * 2];
+ll ocnt, ord[mn * 2], st[mn], nd[mn], fa[mn][mlg], dep[mn], lg[mn];
+struct query
+{
+    ll l, r, i, c;
+    bool operator<(const query &x) const
+    {
+        if (l / sq != x.l / sq)
+            return l < x.l;
+        return l / sq & 1 ? r < x.r : r > x.r;
+    }
+} q[mm];
+ll bin[mn * 2], sum, vis[mn], ans[mm];
+signed main()
+{
+    sc(n), sc(m), sq = sqrt(n);
+
+    for (ll i = 1; i <= n; ++i)
+    {
+        sc(a[i]), b[i] = a[i];
+    }
+    sort(b + 1, b + 1 + n);
+    bs = unique(b + 1, b + 1 + n) - (b + 1);
+    for (ll i = 1; i <= n; ++i)
+    {
+        a[i] = lower_bound(b + 1, b + 1 + bs, a[i]) - b;
+    }
+
+    auto adde = [&](ll u, ll v)
+    {e[++cnt]={v,hd[u]};hd[u]=cnt; };
+    for (ll i = 1, u, v; i < n; ++i)
+    {
+        sc(u), sc(v), adde(u, v), adde(v, u);
+    }
+    for (ll i = 1; i <= n; ++i)
+    {
+        lg[i] = lg[i / 2] + 1;
+    }
+    auto dfs = [&](auto self, ll u) -> void
+    {
+        ord[++ocnt] = u;
+        st[u] = ocnt;
+        for (ll i = hd[u], v; i; i = e[i].nx)
+        {
+            if ((v = e[i].to) != fa[u][0])
+            {
+                dep[v] = dep[u] + 1;
+                fa[v][0] = u;
+                for (ll i = 1; i <= lg[dep[v]]; ++i)
+                {
+                    fa[v][i] = fa[fa[v][i - 1]][i - 1];
+                }
+                self(self, v);
+            }
+        }
+        ord[++ocnt] = u;
+        nd[u] = ocnt;
+    };
+    dfs(dfs, 1);
+
+    auto lca = [&](ll u, ll v)
+    {
+        if (dep[u] < dep[v])
+        {
+            swap(u, v);
+        }
+        while (dep[u] > dep[v])
+        {
+            u = fa[u][lg[dep[u] - dep[v]] - 1];
+        }
+        if (u == v)
+        {
+            return u;
+        }
+        for (ll i = lg[dep[u]] - 1; i >= 0; --i)
+        {
+            if (fa[u][i] != fa[v][i])
+            {
+                u = fa[u][i], v = fa[v][i];
+            }
+        }
+        return fa[u][0];
+    };
+
+    for (ll i = 1, l, r, c; i <= m; ++i)
+    {
+        sc(l), sc(r), c = lca(l, r), q[i].i = i;
+        if (st[l] > st[r])
+        {
+            swap(l, r);
+        }
+        if (l == c)
+        {
+            q[i].l = st[l], q[i].r = st[r];
+        }
+        else
+        {
+            q[i].l = nd[l], q[i].r = st[r], q[i].c = c;
+        }
+    }
+
+    sort(q + 1, q + 1 + m);
+    auto work = [&](ll i)
+    {
+        if (vis[i])
+        {
+            sum -= --bin[a[i]] == 0;
+        }
+        else
+        {
+            sum += bin[a[i]]++ == 0;
+        }
+        vis[i] ^= 1;
+    };
+    for (ll i = 1, l = 1, r = 0; i <= m; ++i)
+    {
+        while (l < q[i].l)
+            work(ord[l++]);
+        while (l > q[i].l)
+            work(ord[--l]);
+        while (r < q[i].r)
+            work(ord[++r]);
+        while (r > q[i].r)
+            work(ord[r--]);
+        if (q[i].c)
+            work(q[i].c);
+        ans[q[i].i] = sum;
+        if (q[i].c)
+            work(q[i].c);
+    }
+    for (ll i = 1; i <= m; ++i)
+    {
+        printf("%lld\n", ans[i]);
+    }
+    return 0;
+}
+```
+
+
+
+#### 回滚
+
+> AT1219 给定长为 $n$ 的数组 $a(1\le a_i\le10^9)$ 和 $q(1\le n,q\le10^5)$ 次询问，每次问 $[l,r]$ 内最大重要度。数字 $x$ 重要度等于 $x$ 乘以它的出现次数
+
+复杂度 $O(n\sqrt m)$ ，按顺序处理询问：
+
+- 如果询问左端点所属块 b 和上一个询问左端点所属块的不同，那么将莫队区间的左端点初始化为 b 的右端点加 1 , 将莫队区间的右端点初始化为 b 的右端点；
+- 如果询问的左右端点所属的块相同，那么直接扫描区间回答询问；
+- 如果询问的左右端点所属的块不同：
+  - 如果询问的右端点大于莫队区间的右端点，那么不断扩展右端点直至莫队区间的右端点等于询问的右端点；
+  - 不断扩展莫队区间的左端点直至莫队区间的左端点等于询问的左端点；
+  - 回答询问；
+  - 撤销莫队区间左端点的改动，使莫队区间的左端点回滚到 b 的右端点加 1。
+
+```c++
+#include <bits/stdc++.h>
+using namespace std;
+#define sc(x) scanf("%lld", &x)
+typedef long long ll;
+#define mn 100010
+ll n, x[mn], t[mn], m, k, ans[mn], bin[mn], cnt[mn];
+ll sq, bn, bel[mn], lf[mn], rf[mn];
+struct query
+{
+    ll l, r, i;
+    bool operator<(const query &x) const
+    { //一定要这么排序
+        return bel[l] == bel[x.l] ? r < x.r : bel[l] < bel[x.l];
+    }
+} q[mn];
+void del(ll v) { --bin[v]; }
+void add(ll v, ll &tmp) { tmp = max(tmp, (++bin[v]) * t[v]); }
+signed main()
+{
+    sc(n), sc(m), sq = sqrt(n), bn = n / sq;
+    for (ll i = 1; i <= n; ++i)
+    {
+        sc(x[i]), t[i] = x[i];
+    }
+    for (ll i = 1; i <= m; ++i)
+    {
+        sc(q[i].l), sc(q[i].r), q[i].i = i;
+    }
+    for (ll i = 1; i <= bn; ++i) //一定要这么分块，不能/sq，不然会炸
+        lf[i] = (i - 1) * sq + 1, rf[i] = i * sq;
+    if (rf[bn] < n)
+        ++bn, lf[bn] = rf[bn - 1] + 1, rf[bn] = n;
+    for (ll i = 1; i <= bn; ++i)
+        for (ll j = lf[i]; j <= rf[i]; ++j)
+            bel[j] = i;
+    sort(q + 1, q + 1 + m);
+    sort(t + 1, t + 1 + n);
+    k = unique(t + 1, t + 1 + n) - (t + 1);
+    for (ll i = 1; i <= n; ++i)
+    { // x[i]是输入的a[i]排在第x[i]位,离散化压[1,1e9]到[1,1e5]
+        x[i] = lower_bound(t + 1, t + 1 + k, x[i]) - t;
+    }
+    ll l = 1, r = 0, la = 0, sum = 0, l2 = 0, sum2 = 0;
+    for (ll i = 1; i <= m; ++i)
+    {
+        if (bel[q[i].l] == bel[q[i].r])
+        { // 询问的左右端点同属于一个块则暴力扫描回答
+            for (ll j = q[i].l; j <= q[i].r; ++j)
+            {
+                ++cnt[x[j]]; //入桶
+            }
+            for (ll j = q[i].l; j <= q[i].r; ++j)
+            { //按题意计算
+                ans[q[i].i] = max(ans[q[i].i], t[x[j]] * cnt[x[j]]);
+            }
+            for (ll j = q[i].l; j <= q[i].r; ++j)
+            {
+                --cnt[x[j]]; //清理记忆
+            }
+            continue;
+        }
+        if (bel[q[i].l] != la) // 访问到了新的块则重新初始化莫队区间
+        {
+            while (r > rf[bel[q[i].l]])
+                del(x[r--]);
+            while (l < rf[bel[q[i].l]] + 1)
+                del(x[l++]);
+            sum = 0, la = bel[q[i].l];
+        }
+        while (r < q[i].r) // 扩展右端点
+            add(x[++r], sum);
+        l2 = l, sum2 = sum;
+        while (l2 > q[i].l) // 扩展左端点
+            add(x[--l2], sum2);
+        ans[q[i].i] = sum2;
+        while (l2 < l) // 回滚
+            del(x[l2++]);
+    }
+    for (ll i = 1; i <= m; ++i)
+    {
+        printf("%lld\n", ans[i]);
+    }
+    return 0;
+}
+```
+
+
+
+> 洛谷5906 给定长为 $n$ 的序列 $a(1\le a_i\le2\times10^9)$ 和 $q(1\le n,q\le2\times10^5)$ 个询问，每次问 $[l,r]$ 内相同数的最远间隔距离，特别的如果没有相同数输出 $0$ 
+
+```c++
+#include <bits/stdc++.h>
+using namespace std;
+#define sc(x) scanf("%lld", &x)
+typedef long long ll;
+#define mn 200010
+ll n, x[mn], t[mn], m, k, ans[mn];
+ll lc[mn], rc[mn], cnt[mn], cls[mn], cln;
+ll sq, bn, bel[mn], lf[mn], rf[mn];
+struct query
+{
+    ll l, r, i;
+    bool operator<(const query &x) const
+    { //一定要这么排序
+        return bel[l] == bel[x.l] ? r < x.r : bel[l] < bel[x.l];
+    }
+} q[mn];
+signed main()
+{
+    sc(n), sq = sqrt(n), bn = n / sq;
+    for (ll i = 1; i <= n; ++i)
+    {
+        sc(x[i]), t[i] = x[i];
+    }
+    sc(m);
+    for (ll i = 1; i <= m; ++i)
+    {
+        sc(q[i].l), sc(q[i].r), q[i].i = i;
+    }
+    for (ll i = 1; i <= bn; ++i) //一定要这么分块，不能/sq，不然会炸
+        lf[i] = (i - 1) * sq + 1, rf[i] = i * sq;
+    if (rf[bn] < n)
+        ++bn, lf[bn] = rf[bn - 1] + 1, rf[bn] = n;
+    for (ll i = 1; i <= bn; ++i)
+        for (ll j = lf[i]; j <= rf[i]; ++j)
+            bel[j] = i;
+    sort(q + 1, q + 1 + m);
+    sort(t + 1, t + 1 + n);
+    k = unique(t + 1, t + 1 + n) - (t + 1);
+    for (ll i = 1; i <= n; ++i)
+    { // x[i]是输入的a[i]排在第x[i]位,离散化压[1,1e9]到[1,1e5]
+        x[i] = lower_bound(t + 1, t + 1 + k, x[i]) - t;
+    }
+    for (ll i = 1, j = 1; j <= bn; ++j)
+    {
+        ll br = rf[j], l = br + 1, r = l - 1, sum = 0, sum2 = 0, l2 = 0;
+        cln = 0;
+        for (; bel[q[i].l] == j; ++i)
+        {
+            if (bel[q[i].l] == bel[q[i].r])
+            { // 询问的左右端点同属于一个块则暴力扫描回答
+                for (ll j = q[i].l; j <= q[i].r; ++j)
+                {
+                    cnt[x[j]] = 0;
+                }
+                for (ll j = q[i].l; j <= q[i].r; ++j)
+                { //按题意计算
+                    if (!cnt[x[j]])
+                    {
+                        cnt[x[j]] = j;
+                    }
+                    else
+                    {
+                        ans[q[i].i] = max(ans[q[i].i], j - cnt[x[j]]);
+                    }
+                }
+                continue;
+            }
+            while (r < q[i].r) // 扩展右端点
+            {
+                ++r;
+                rc[x[r]] = r;
+                if (!lc[x[r]])
+                {
+                    lc[x[r]] = r;
+                    cls[++cln] = x[r];
+                }
+                sum = max(sum, r - lc[x[r]]);
+            }
+            l2 = l, sum2 = sum;
+            while (l2 > q[i].l) // 扩展左端点
+            {
+                --l2;
+                if (rc[x[l2]])
+                {
+                    sum2 = max(sum2, rc[x[l2]] - l2);
+                }
+                else
+                {
+                    rc[x[l2]] = l2;
+                }
+            }
+            ans[q[i].i] = sum2;
+            while (l2 < l) // 回滚
+            {
+                if (rc[x[l2]] == l2)
+                {
+                    rc[x[l2]] = 0;
+                }
+                ++l2;
+            }
+        }
+        for (ll k = 1; k <= cln; ++k)
+        {
+            lc[cls[k]] = rc[cls[k]] = 0;
+        }
+    }
+    for (ll i = 1; i <= m; ++i)
+    {
+        printf("%lld\n", ans[i]);
+    }
+    return 0;
+}
+```
+
+
+
+
+
 ### 高精度
 
 #### C++
@@ -13139,6 +13875,8 @@ string eight(one, 1, 16);
 - `replace(首迭代器, 尾迭代器, 待替换字符, 替换成的字符)` 批量替换
 - `count(首迭代器, 尾迭代器, 字符)` 字符出现次数统计
 
+stringstream：从里面读出数据类比 cin ，用 `ss >> v` ；把数据塞进去用 `<<` 
+
 
 
 ##### vector
@@ -13196,11 +13934,13 @@ erase(p, q)删除区间[p,q)的元素
 
 想要元素可变尝试设置结构体/类成员属性为 `mutable` 。
 
+逆序 set <类型, greater<类型> >
+
 可以set<类型> var{数组, 数组+len}来获取数组的set化
 
 insert(sp, se)方法植入闭区间
 
-erase(元素值)方法
+erase(元素值)方法。可以删除不存在的值，将会忽略操作
 
 erase(迭代器)方法 ，如x.end()
 
