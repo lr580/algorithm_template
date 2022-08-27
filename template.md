@@ -6,7 +6,7 @@
 
 ![image-20220325120131181](img/image-20220325120131181.png)
 
-<div align="center" style="font-size:18px">Last built at May. 25, 2022</div>
+<div align="center" style="font-size:18px">Last built at Aug. 27, 2022</div>
 
 <div STYLE="page-break-after: always;"></div>
 
@@ -317,7 +317,7 @@ $$
 
 
 
-常用复杂度对 $10^8$ ：$n!(n=11),2^n(n=26),n^3(n=464),n^2\log n(n=3000,n\log n(n=4.5\times10^6)$
+常用复杂度对 $10^8$ ：$n!(n=11),2^n(n=26),n^3(n=464),n^2\log n(n=3000),n\log n(n=4.5\times10^6)$
 
 
 
@@ -1066,30 +1066,72 @@ signed main()
 }
 ```
 
-筛法求因数数 (d) 、因数和 (f) ( $g_i$ 表示 $i$ 的最小值因子的 $p^0+p^1+\cdots+p^k$ )：
+> SCNUOJ1745 求 $\sum_{i=1}^n\varphi(i^k)\cdot\sigma(i^k)\bmod(10^9+7)$ ，$1\le n,k\le10^6$
+
+对素数 $p$ 和正整数 $k$ ，有 $\varphi(p^k)=p^k-p^{k-1},\sigma(p^k)=\dfrac{p^k-1}{p-1}$
 
 ```c++
-// C++ Version
-void pre() {
-  d[1] = 1, g[1] = f[1] = 1;
-  for (int i = 2; i <= n; ++i) {
-    if (!v[i]) v[i] = 1, p[++tot] = i, d[i] = 2, num[i] = 1, g[i] = i + 1, f[i] = i + 1;
-    for (int j = 1; j <= tot && i <= n / p[j]; ++j) {
-      v[p[j] * i] = 1;
-      if (i % p[j] == 0) {
-        num[i * p[j]] = num[i] + 1;
-        d[i * p[j]] = d[i] / num[i * p[j]] * (num[i * p[j]] + 1);
-        g[i * p[j]] = g[i] * p[j] + 1;
-        f[i * p[j]] = f[i] / g[i] * g[i * p[j]];
-        break;
-      } else {
-        num[i * p[j]] = 1;
-        d[i * p[j]] = d[i] * 2;
-        f[i * p[j]] = f[i] * f[p[j]];
-        g[i * p[j]] = 1 + p[j];
-      }
+#include <bits/stdc++.h>
+using namespace std;
+typedef long long ll;
+#define sc(x) scanf("%lld", &x)
+#define mn 1000002
+ll n, k, p[mn], pri[mn], e[mn], pe[mn], g[mn], cnt, ans = 1, mod = 1e9 + 7;
+void euler(ll n)
+{ // e[i]是i质因数分解得到的最大的幂a_i,pe[i]是对应最大的(p^e[i])
+    for (ll i = 2; i <= n; ++i)
+    {
+        if (!p[i])
+        {
+            p[i] = i, pri[++cnt] = i, pe[i] = i, e[i] = 1;
+        }
+        for (ll j = 1; i * pri[j] <= n; ++j)
+        {
+            p[i * pri[j]] = pri[j];
+            if (pri[j] == p[i])
+            {
+                e[i * pri[j]] = e[i] + 1;
+                pe[i * pri[j]] = pe[i] * pri[j];
+                break;
+            }
+            e[i * pri[j]] = 1;
+            pe[i * pri[j]] = pri[j];
+        }
     }
-  }
+}
+ll qpow(ll a, ll b)
+{
+    ll res = 1;
+    for (; b > 0; b >>= 1)
+    {
+        if (b & 1)
+        {
+            res = res * a % mod;
+        }
+        a = a * a % mod;
+    }
+    return res;
+}
+signed main()
+{
+    sc(n), sc(k);
+    g[1] = 1;
+    euler(n);
+    for (ll i = 2; i <= n; ++i)
+    {
+        if (pe[i] == i)
+        {
+            g[i] = (qpow(p[i], e[i] * k + 1) - 1 + mod) % mod * qpow(p[i] - 1, mod - 2) % mod;
+            g[i] = g[i] * (qpow(p[i], e[i] * k) - qpow(p[i], e[i] * k - 1) + mod) % mod;
+        }
+        else
+        {
+            g[i] = g[i / pe[i]] * g[pe[i]] % mod;
+        }
+        ans = (ans + g[i]) % mod;
+    }
+    printf("%lld", ans);
+    return 0;
 }
 ```
 
@@ -2866,9 +2908,9 @@ $$
 
 
 
-### 杂项
+### 多项式
 
-#### 快速傅里叶变换
+#### FFT
 
 系数表示法：$F(x)=y=\sum_{i=0}^na_ix^i$，其中$\{a_i\}$是每一项的系数。
 
@@ -2958,6 +3000,215 @@ signed main()
 
 
 
+#### NTT
+
+快速数论变换，FNTT，简称为NTT number theory transform
+
+FFT 在模意义下的一种实现，功能上与 FFT 类似。FFT 的计算量大且存在浮点误差。
+
+欧拉定理：$a\in Z,m\in N^*$，若 $(a,m)=1$，则 $a^{\varphi(m)}\equiv 1\bmod m$
+
+阶：满足 $a^n\equiv1\bmod m$ 的最小正整数 $n$，记作 $\delta_m(a)$
+
+原根：$m\in N_+,a\in Z$，若 $(a,m)=1,\delta_m(a)=\varphi(m)$，则 $a$ 是模 $m$ 的原根
+
+$998244353$ 的原根是 $3$，$10^9+7$ 的原根是 $5$
+
+> 洛谷P3803
+
+```c++
+#include <bits/stdc++.h>
+using namespace std;
+#define sc(x) scanf("%lld", &x)
+typedef long long ll;
+const ll mn = 3e6 + 10, p = 998244353, g = 3, gi = 332748118;
+ll n, m, lim = 1, l, r[mn], a[mn], b[mn]; // 2^l=lim
+ll qpow(ll a, ll b)
+{
+    ll r = 1;
+    for (; b; b >>= 1)
+    {
+        if (b & 1)
+        {
+            r = r * a % p;
+        }
+        a = a * a % p;
+    }
+    return r;
+}
+void ntt(ll *a, ll type)
+{
+    for (ll i = 0; i < lim; ++i)
+    {
+        if (i < r[i])
+        {
+            swap(a[i], a[r[i]]);
+        }
+    }
+    for (ll mid = 1; mid < lim; mid <<= 1)
+    {
+        ll wn = qpow(type == 1 ? g : gi, (p - 1) / (mid << 1));
+        for (ll j = 0; j < lim; j += (mid << 1))
+        {
+            ll w = 1;
+            for (ll k = 0; k < mid; ++k, w = w * wn % p)
+            {
+                ll x = a[j + k], y = w * a[j + k + mid] % p;
+                a[j + k] = (x + y) % p;
+                a[j + k + mid] = (x - y + p) % p;
+            }
+        }
+    }
+}
+signed main()
+{
+    sc(n), sc(m);
+    for (ll i = 0; i <= n; ++i)
+    {
+        sc(a[i]);
+    }
+    for (ll i = 0; i <= m; ++i)
+    {
+        sc(b[i]);
+    }
+    while (lim <= n + m)
+    {
+        ++l, lim <<= 1;
+    }
+    for (ll i = 0; i < lim; ++i)
+    {
+        r[i] = (r[i >> 1] >> 1 | ((i & 1) << (l - 1)));
+    }
+    ntt(a, 1), ntt(b, 1);
+    for (ll i = 0; i < lim; ++i)
+    {
+        a[i] = a[i] * b[i] % p;
+    }
+    ntt(a, -1);
+    ll inv = qpow(lim, p - 2);
+    for (ll i = 0; i <= n + m; ++i)
+    {
+        printf("%lld ", a[i] * inv % p);
+    }
+    return 0;
+}
+```
+
+
+
+#### 分治 FFT
+
+> SCNUOJ1806-求 $\prod_{i=1}^n(1+a_ix)$ 的 $x^k$ 系数对 $998244353$ 取模，$1\le k\le n\le10^5,1\le a_i\le10^9$
+
+```c++
+#include <bits/stdc++.h>
+using namespace std;
+using ll = long long;
+using pii = pair<int, int>;
+using pll = pair<ll, ll>;
+const ll mod = 998244353;
+
+ll qui(ll a, ll x)
+{
+    ll ret = 1;
+    while (x)
+    {
+        if (x & 1)
+            ret = ret * a % mod;
+        a = a * a % mod;
+        x >>= 1;
+    }
+    return ret;
+}
+
+using Poly = vector<ll>;
+const int BIT = 20;
+int p[1 << BIT];
+const ll maxn = 1e5 + 10;
+ll fac[maxn], inv[maxn];
+
+Poly operator*(const Poly &a, const Poly &b)
+{
+    int n = a.size() - 1, m = b.size() - 1;
+    int L, l = 0;
+    for (L = 1; L <= n + m; l++, L = L << 1)
+        ;
+
+    vector<int> p(L);
+
+    for (int i = 1; i < L; i++)
+        p[i] = ((p[i >> 1] >> 1) | ((i & 1) << (l - 1)));
+    auto u = a, v = b;
+    u.resize(L, 0), v.resize(L, 0);
+    auto ntt = [&L, &l, &p](Poly &g, int type)
+    {
+        for (int i = 0; i < L; i++)
+            if (i < p[i])
+                swap(g[i], g[p[i]]);
+        for (int i = 1; i < L; (i <<= 1))
+        {
+            ll wn = qui(3, (mod - 1) / (i << 1));
+            for (int j = 0; j < L; j += (i << 1))
+            {
+                ll w = 1;
+                for (int k = j; k < j + i; w = w * wn % mod, k++)
+                {
+                    assert(k + i < L);
+                    assert(k < L);
+                    ll t = g[k + i] * w % mod;
+                    g[k + i] = (g[k] - t + mod) % mod;
+                    g[k] = (g[k] + t) % mod;
+                }
+            }
+        }
+        if (type == 1)
+            return;
+        reverse(g.begin() + 1, g.begin() + L);
+        ll ni = qui(L, mod - 2);
+        for (int i = 0; i < L; i++)
+            g[i] = g[i] * ni % mod;
+    };
+    ntt(u, 1), ntt(v, 1);
+
+    Poly g(L, 0);
+    for (int i = 0; i < L; i++)
+        g[i] = u[i] * v[i] % mod;
+    ntt(g, -1);
+
+    return g;
+}
+
+signed main()
+{
+    cin.tie(0)->sync_with_stdio(false);
+    int n, k;
+    cin >> n >> k;
+
+    vector<int> b(n + 1);
+    for (int i = 1; i <= n; i++)
+        cin >> b[i];
+
+    function<Poly(int, int)> calc = [&](int l, int r)
+    {
+        if (l >= r)
+        {
+            assert(l == r);
+            return Poly{1, b[l]};
+        }
+        int mid = (l + r) / 2;
+        return calc(l, mid) * calc(mid + 1, r);
+    };
+
+    Poly ep = calc(0, n);
+    cout << ep[k];
+    return 0;
+}
+```
+
+
+
+
+
 #### 拉格朗日插值法
 
 > 洛谷P4781-给定由 n 个点确定的多项式 $f(x)$，求 $f(k)\bmod998244353$ , $x_i$ 各异
@@ -3001,6 +3252,8 @@ signed main()
 ```
 
 
+
+### 杂项
 
 #### 高斯消元
 
@@ -3781,7 +4034,7 @@ signed main()
 
 维护操作：① 区间每个数与 $t$ 取 $\min$ ② 输出区间和 ③ 输出区间最大值
 
-对每个节点区间：维护该区间最大值 $mx$、最大值出现次数 $se$ 、严格次大值 $cnt$ 
+对每个节点区间：维护该区间最大值 $mx$、最大值出现次数 $cnt$ 、严格次大值 $se$ 
 
 对操作 $1$ ：
 
@@ -3793,7 +4046,7 @@ signed main()
 
 处理 `pushup` ：
 
-- 若左右子区间最值一样， $cnt$ 翻倍， $se$ 取左右 $se$ 较大者， $mx$ 任取左右(都一样)
+- 若左右子区间最值一样， $cnt$ 取左右子之和， $se$ 取左右 $se$ 较大者， $mx$ 任取左右(都一样)
 - 否则， $mx,cnt$ 取大者， $se$ 让小区间 $mx$ 和大区间 $se$ 取最值
 
 处理 `pushdown` ：
@@ -8678,6 +8931,8 @@ signed main()
 
 
 
+##### 强连通分量
+
 > 洛谷P2863-给定有向图，求点数大于 $1$ 的强连通分量的个数
 
 ```c++
@@ -8748,6 +9003,8 @@ signed main()
 
 
 
+##### 割点
+
 > 洛谷P3388-无向图(不保证连通)求割点数和按编号顺序输出每个割点
 
 ```c++
@@ -8802,6 +9059,8 @@ signed main()
 ```
 
 
+
+##### 桥
 
 > UVA796-求有向图桥数量并按字典序输出每个桥的端点
 
@@ -8865,6 +9124,54 @@ signed main()
         putchar('\n');
     }
     return 0;
+}
+```
+
+
+
+#### 圆方树
+
+圆方树（Block forest 或 Round-square tree）是一种将图变成树的方法从而把一般图上的某些问题转化到树上考虑
+
+在圆方树中，原来的每个点对应一个 **圆点**，每一个点双对应一个 **方点**。
+所以共有 $n+c$ 个点，其中 $n$ 是原图点数， $c$ 是原图点双连通分量的个数。
+
+而对于每一个点双连通分量，它对应的方点向这个点双连通分量中的每个点连边。
+每个点双形成一个“菊花图”，多个“菊花图”通过原图中的割点连接在一起（因为点双的分隔点是割点）
+
+如果原图连通，则“圆方树”才是一棵树，如果原图有 $k$ 个连通分量，则它的圆方树也会形成 $k$ 棵树形成的森林。如果原图中某个连通分量只有一个点，则需要具体情况具体分析，我们在后续讨论中不考虑孤立点。
+
+点双是不存在割点的分量，一个点可能属于多个点双。使用 tarjan 算法求点双及每个点双包含的点。那么每个点双上的点都是圆点，连向一个新增的方点
+
+```c++
+ll dfn[mn], low[mn], st, stk[mn], stop, cn;
+vector<ll> c[mn]; //点双
+void tarjan(ll u)
+{
+    dfn[u] = low[u] = ++st;
+    stk[++stop] = u;
+    for (ll i = hd[u]; i; i = e[i].nx)
+    {
+        ll v = e[i].to;
+        if (!dfn[v])
+        {
+            tarjan(v);
+            low[u] = min(low[u], low[v]);
+            if (low[v] >= dfn[u])
+            { //找出新的点双上的所有点
+                c[++cn].push_back(u);
+                for (ll w = 0; w != v;)
+                {
+                    w = stk[stop--];
+                    c[cn].push_back(w);
+                }
+            }
+        }
+        else
+        {
+            low[u] = min(low[u], dfn[v]);
+        }
+    }
 }
 ```
 
@@ -13812,7 +14119,11 @@ distribution 范围支持负数和超过 int 的范围(即 long long)。
 ll m = unique(a + 1, a + 6) - (a + 1);
 ```
 
-**nth\_element** : (a,a+k,a+n,cmp); 使容器a+k所在元素左边都小于它，右边都大于它(a+k通常移位)
+**nth\_element** : (a,a+k,a+n,cmp); 使容器a+k所在元素左边都小于它，右边都大于它(a+k通常移位)，不返回值
+
+```c++
+nth_element(a + 1, a + k, a + n + 1); //使得a[k]归位
+```
 
 **partial\_sort** : 保证\[lf,cf)有序，\[cf,rf\]按本来的相对顺序。
 
@@ -13826,7 +14137,11 @@ partial_sort(lf,cf,rf);
 
 **max\_element** : 返回首个最大元素所在位置迭代器
 
-**inplace\_merge** : (lf,cf,rf,cmp) 对 $(lf,cf]$ 和 $(cf,rf)$ 就地归并排序 
+**inplace\_merge** : (lf,cf,rf,cmp) 对 $[lf,cf)$ 和 $[cf,rf)$ 就地归并排序 
+
+```c++
+inplace_merge(a + lf, a + cf + 1, a + rf + 1);
+```
 
 **merge** : (lf1, rf1, lf2, rf2, res, cmp) 归并排序并放到结果迭代器
 
@@ -13846,8 +14161,6 @@ string eight(one, 1, 16);
 ```
 
 常用方法：(复杂度都是暴力实现的复杂度)
-
-- `substr(int start[, int len])` 从下标 start 开始截长度len的子串
 
 - `append(string s)` 或 `push_back(char c)` 末尾增加，等效于 `+=`  
 
