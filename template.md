@@ -6,7 +6,7 @@
 
 ![image-20220325120131181](img/image-20220325120131181.png)
 
-<div align="center" style="font-size:18px">Last built at Aug. 27, 2022</div>
+<div align="center" style="font-size:18px">Last built at Oct. 18, 2022</div>
 
 <div STYLE="page-break-after: always;"></div>
 
@@ -788,6 +788,8 @@ $$
 
 > 齐肯多夫定理：任何正整数可以表示为若干个不连续的 Fibonacci 数之和
 
+模数为 $p$，则 $f\bmod p$ 的循环节长度 $\pi(p)\le 6p$。
+
 
 
 牛顿法求函数零点：$x_{i+1}=x_i-\dfrac{f(x_i)}{f'(x_i)}$
@@ -843,7 +845,7 @@ signed main()
 
 - 线性运算：若 $a,b,c,d\in Z,m\in N^*,a\equiv b(\bmod m),c\equiv d(\bmod m)$ 则：
 
-  $a\pm c\equiv b\pm d(\bmod m),ac\equiv bd(\equiv m)$
+  $a\pm c\equiv b\pm d(\bmod m),ac\equiv bd(\bmod m)$
 
 - 若 $a,b\in Z,k,m\in N^*,a\equiv b(\bmod m)$ 则 $ak\equiv bk(\bmod mk)$
 
@@ -893,7 +895,7 @@ signed main()
 
 
 
-#### 素数筛
+#### 素数
 
 ##### 素性测试
 
@@ -909,57 +911,7 @@ bool isprime(ll p)
 }
 ```
 
-**Miller Rabin算法**，复杂度 $O(k\log^3 n)$ ，$k$ 是设定参数，能够以较高准确率判定是否为素数：
-
-```c++
-#include <bits/stdc++.h>
-using namespace std;
-#define sc(x) scanf("%lld", &x)
-typedef long long ll;
-#define test_time 9
-ll qpow(ll a, ll b, ll p)
-{
-    ll r = 1;
-    for (; b; b >>= 1)
-    {
-        if (b & 1)
-            r = r * a % p;
-        a = a * a % p;
-    }
-    return r;
-}
-bool millerRabin(int n)
-{
-    if (n < 3 || n % 2 == 0)
-        return n == 2;
-    ll a = n - 1, b = 0;
-    while (a % 2 == 0)
-        a /= 2, ++b;
-    // test_time 为测试次数,建议设为不小于 8
-    // 的整数以保证正确率,但也不宜过大,否则会影响效率
-    for (ll i = 1, j; i <= test_time; ++i)
-    {
-        ll x = rand() % (n - 2) + 2, v = qpow(x, a, n);
-        if (v == 1)
-            continue;
-        for (j = 0; j < b; ++j)
-        {
-            if (v == n - 1)
-                break;
-            v = v * v % n;
-        }
-        if (j >= b)
-            return 0; //不是素数
-    }
-    return 1; //是素数
-}
-signed main()
-{
-    ll x;
-    while (EOF != scanf("%lld", &x))
-        printf("%d\n", millerRabin(x));
-}
-```
+**Miller Rabin算法**，复杂度 $O(k\log^3 n)$ ，$k$ 是设定参数，能够以较高准确率判定是否为素数，建议设 $10$，见 `pollard-rho` 代码。
 
 
 
@@ -1191,6 +1143,129 @@ signed main()
 	return printf("%lld", ans) & 0;
 }
 ```
+
+
+
+##### pollard-rho算法
+
+质因数分解的朴素复杂度是 $O(\sqrt n)$，在预处理素数表的情况下质因数分解复杂度为 $O(\sqrt{\dfrac n{\ln n}})$。注意不能只预处理 $\sqrt n$，以防大质数乘小质数情况(此时对大质数可以除法求出，然后做素性测试)和本身是大质数。
+
+若 $x|n,1 < x < n$(即 $1$ 和自身外的因子)，则 $x$ 是非平凡因子。能以 $O(n^{0.25})$ 分解出随机一个非平凡因数。 
+
+> P4718 给定 $t(\le 350)$ 个 $n(1 < n\le10^{18})$，判断 $n$ 为质数或输出它的最大质因子
+
+```c++
+#include <bits/stdc++.h>
+using namespace std;
+#define sc(x) scanf("%lld", &x)
+typedef long long ll;
+ll qpow(ll a, ll b, ll p)
+{
+    ll r = 1;
+    for (; b; b >>= 1)
+    {
+        if (b & 1)
+            r = (__int128)r * a % p;
+        a = (__int128)a * a % p;
+    }
+    return r;
+}
+bool millerRabin(ll p)
+{ // 判断素数
+    if (p < 2)
+        return 0;
+    if (p == 2)
+        return 1;
+    if (p == 3)
+        return 1;
+    ll d = p - 1, r = 0;
+    while (!(d & 1))
+        ++r, d >>= 1; // 将d处理为奇数
+    for (ll k = 0; k < 10; ++k)
+    {
+        ll a = rand() % (p - 2) + 2;
+        ll x = qpow(a, d, p);
+        if (x == 1 || x == p - 1)
+            continue;
+        for (int i = 0; i < r - 1; ++i)
+        {
+            x = (__int128)x * x % p;
+            if (x == p - 1)
+                break;
+        }
+        if (x != p - 1)
+            return 0;
+    }
+    return 1;
+}
+ll pollard_rho(ll x)
+{
+    ll s = 0, t = 0, c = (ll)rand() % (x - 1) + 1;
+    ll step = 0, goal = 1, val = 1;
+    for (goal = 1;; goal <<= 1, s = t, val = 1)
+    {
+        for (step = 1; step <= goal; ++step)
+        {
+            t = ((__int128)t * t + c) % x; //随机数生成器
+            val = ((__int128)val * abs(t - s)) % x;
+            if (step % 127 == 0)
+            {
+                ll d = __gcd(val, x);
+                if (d > 1)
+                    return d;
+            }
+        }
+        ll d = __gcd(val, x);
+        if (d > 1)
+            return d;
+    }
+}
+ll mx;
+void fac(ll x)
+{
+    if (x <= mx || x < 2)
+        return;
+    if (millerRabin(x))
+    {
+        mx = max(mx, x); //最大质因子
+        return;
+    }
+    ll p = x;
+    while (p >= x) //直到找到平凡
+    {
+        p = pollard_rho(x);
+    }
+    while (x % p == 0)
+    {
+        x /= p;
+    }
+    fac(x), fac(p); // x*p=raw x
+}
+signed main()
+{
+    ll t, n;
+    cin.tie(0)->ios::sync_with_stdio(false);
+    cin >> t;
+    while (t--)
+    {
+        srand(time(0));
+        cin >> n;
+        mx = 0;
+        fac(n);
+        if (mx == n)
+        {
+            cout << "Prime\n";
+        }
+        else
+        {
+            cout << mx << '\n';
+        }
+    }
+    return 0;
+}
+```
+
+
 
 
 
@@ -1453,6 +1528,36 @@ signed main()
 		ans = 1LL * ans * a % m;
 	printf("%d", ans);
 	return 0;
+}
+```
+
+
+
+**线性快速幂**：同底数和模数，即对变化的 $x$ 求 $a^x\bmod p$，可以时空 $O(\sqrt p)$ 预处理并 $O(1)$ 计算快速幂。
+
+对 $a^b\bmod p$，令 $s=\sqrt p$ 或 $2^k$(如 $k=16$)，可以将 $b$ 拆成 $\lfloor\dfrac bs\rfloor s+(b\bmod s)$，线性预处理出 $a^i,a^{is},0\le i\le s$。即计算 $(a^{\lfloor\frac bs\rfloor s}\times a^{b\ \bmod \ s})\bmod s$。
+
+> LOJ 162 求 $n(\le5\times10^6)$ 次 $x^a\bmod 998244352(1 \le a < p)$
+
+```c++
+#include <bits/stdc++.h> //LOJ 162
+using namespace std;
+using ll = long long;
+const ll mn = 65536, mod = 998244352;
+ll x, n, a, pw[mn + 10], pw2[mn + 10];
+signed main()
+{
+    cin.tie(0)->ios::sync_with_stdio(false);
+    cin >> x >> n;
+    pw[0] = pw2[0] = 1;
+    for (ll i = 1; i <= mn; ++i) pw[i] = pw[i - 1] * x % mod;
+    for (ll i = 1; i <= mn; ++i) pw2[i] = pw2[i - 1] * pw[mn] % mod;
+    for (ll i = 1; i <= n; ++i)
+    {
+        cin >> a;
+        cout << (pw2[a / mn] * pw[a % mn] % mod) << ' ';
+    }
+    return 0;
 }
 ```
 
@@ -6275,6 +6380,304 @@ signed main()
 
 
 
+#### 可撤销并查集
+
+> 洛谷5787 $n(1\le n\le10^5)$ 点 $m(1\le m\le2\times10^5)$ 边无向图，每条边生存周期是 $[l,r)(1\le l < r\le10^5)$，问每个时刻图是不是二分图。
+
+二分图判断：可撤销种类并查集 + 染色法。
+
+对节点 $i$，拆分为两个节点分属 $S,T$。若存在一个点，使得拆分的两点并在一起了，那么就不是二分图。
+
+按时间轴建立线段树，第 $i$ 个线段树节点维护时间区间内存在的所有边(从 $1$ 编号)，那么每次加一条边，会向最多 $\log k$ 个节点加边。
+
+然后按线段树顺序遍历节点，先序时把线段树节点的所有边在并查集上合并，即对边 $(u,v)$ 入图的话，将 $(u,v+n)$ 与 $(u+n,v)$ 在并查集合并，然后每次合并时，按秩合并，树高小的合到大的，并记录进行合并的操作顺序，然后记录这个节点一开始是在哪个操作记号，在再次回到该节点时(后序)，逐个撤销掉并查集操作，进行复原。
+
+设最大生存时间是 $k$，空间复杂度是 $O(m\log k)$，时间复杂度是 $O(k\log k+4k+m\log k+2n\log n)=O(m\log k+n\log n)$
+
+```c++
+#include <bits/stdc++.h>
+using namespace std;
+#define sc(x) scanf("%d", &x)
+using ll = int;
+using trip = tuple<ll, ll, ll>; //感觉pair就行
+struct stk
+{
+    vector<trip> a;
+    ll top;
+    void push(trip v) { a[++top] = v; }
+    trip pop() { return a[top--]; }
+} s;
+signed main()
+{
+    ll n, m, k;
+    sc(n), sc(m), sc(k);
+    using edge = pair<ll, ll>;
+    vector<vector<edge>> e(4 * k + 10, vector<edge>());
+#define lfs p << 1
+#define rfs p << 1 | 1
+#define mkcf ll cf = (lf + rf) >> 1
+    auto insert = [&](auto self, ll p, ll lf, ll rf, ll lc, ll rc, edge v) -> void
+    {
+        if (lf >= lc && rf <= rc)
+        {
+            e[p].push_back(v);
+            return;
+        }
+        mkcf;
+        if (lc <= cf)
+        {
+            self(self, lfs, lf, cf, lc, rc, v);
+        }
+        if (rc >= cf + 1)
+        {
+            self(self, rfs, cf + 1, rf, lc, rc, v);
+        }
+    };
+    for (ll i = 1, x, y, l, r; i <= m; ++i)
+    {
+        sc(x), sc(y), sc(l), sc(r), ++l;
+        insert(insert, 1, 1, k, l, r, {x, y});
+    }
+    vector<ll> fa(2 * n + 10), h(2 * n + 10, 1);
+    for (ll i = 1; i <= 2 * n; ++i)
+    {
+        fa[i] = i;
+    }
+    auto findf = [&](ll x)
+    {
+        while (x != fa[x])
+        {
+            x = fa[x] = fa[fa[x]];
+        }
+        return x;
+    };
+    ll cnt = 0;
+    for (ll i = 1; i <= 4 * k; ++i)
+    {
+        cnt += e[i].size();
+    }
+    s.a.resize(cnt * 2 + 10); //我也不知道怎么定的,cnt都行
+    auto merge = [&](ll x, ll y)
+    {
+        ll fx = findf(x), fy = findf(y);
+        if (h[fx] > h[fy])
+        {
+            swap(fx, fy);
+        }
+        s.push({fx, fy, h[fx] == h[fy]});
+        fa[fx] = fy, h[fy] += h[fx] == h[fy];
+    };
+    auto solve = [&](auto self, ll p, ll lf, ll rf) -> void
+    {
+        bool ok = true;
+        ll lastTop = s.top;
+        for (edge x : e[p])
+        {
+            ll u = x.first, v = x.second;
+            if (findf(u) == findf(v))
+            {
+                ok = false;
+                for (ll i = lf; i <= rf; ++i)
+                {
+                    printf("No\n");
+                }
+                break;
+            }
+            merge(u, v + n), merge(u + n, v);
+        }
+        if (ok)
+        {
+            if (lf == rf)
+            {
+                printf("Yes\n");
+                return;
+            }
+            mkcf;
+            self(self, lfs, lf, cf), self(self, rfs, cf + 1, rf);
+        }
+        while (s.top > lastTop)
+        {
+            trip nd = s.pop();
+            ll x, y, dt;
+            tie(x, y, dt) = nd;
+            h[fa[x]] -= dt;
+            fa[x] = x;
+        }
+    };
+    solve(solve, 1, 1, k);
+    return 0;
+}
+```
+
+> 实现版本 2：CF813F(每次更改一条边 $(x,y)(x < y)$，若本来有就删否则加)，$n,m\le 10^5,m$ 是操作次数
+
+```c++
+#include <bits/stdc++.h>
+const int N = 200000 + 10;
+int n, m, ans[N];
+struct E
+{
+    int u, v;
+    E(int a, int b) : u(a), v(b) {}
+};
+std::map<int, int> g[N];
+
+int L[N << 2], R[N << 2];
+std::vector<E> tag[N << 2];
+#define lc (o << 1)
+#define rc ((o << 1) | 1)
+void build(int o, int l, int r)
+{
+    L[o] = l;
+    R[o] = r;
+    if (l == r)
+        return;
+    int mid = (l + r) >> 1;
+    build(lc, l, mid);
+    build(rc, mid + 1, r);
+}
+// 把一条边拆到logm个区间上去.
+// 可以说线段树只是用来保证复杂度的...
+void query(int o, int l, int r, const E &e)
+{
+    if (L[o] > r || R[o] < l)
+        return;
+    if (l <= L[o] && R[o] <= r)
+    {
+        tag[o].push_back(e);
+        return;
+    }
+    query(lc, l, r, e);
+    query(rc, l, r, e);
+}
+
+// merged tree(root=x)->tree(root=y)
+struct P
+{
+    int x, y;
+    P(int a, int b) : x(a), y(b) {}
+};
+int fa[N], size[N], dis[N];
+inline int getpar(int x)
+{
+    while (fa[x] != x)
+        x = fa[x];
+    return x;
+}
+
+// 到并查集根所经过的边数mod2.
+// mod2意义下的加法即为xor.
+// 用来查询x和根是不是相同颜色.
+inline int getdis(int x)
+{
+    int d = 0;
+    while (fa[x] != x)
+    {
+        d ^= dis[x];
+        x = fa[x];
+    }
+    return d;
+}
+/// 按照size合并.
+inline int solve(int x, int y, std::stack<P> &stk)
+{
+    int dx = getdis(x), dy = getdis(y);
+    x = getpar(x);
+    y = getpar(y);
+    if (x == y)
+        return (dx ^ dy);
+    if (size[x] > size[y])
+    {
+        std::swap(x, y);
+        std::swap(dx, dy);
+    }
+    size[y] += size[x];
+    fa[x] = y;
+    dis[x] = (dx ^ dy ^ 1);
+    stk.push(P(x, y));
+    return 1;
+}
+// 撤销(x->y)的合并.拆出来,size改回去.dis改成0
+inline void back(P p)
+{
+    int x = p.x, y = p.y;
+    size[y] -= size[x];
+    dis[fa[x] = x] = 0;
+}
+// 递归线段树,进入区间[l,r]时
+// 保证时间轴上[l,r]范围内一直可用的边都被加入了
+void dfs(int o, int flag)
+{
+    std::stack<P> stk;
+    for (auto e : tag[o])
+        flag &= solve(e.u, e.v, stk);
+    if (L[o] == R[o])
+        ans[L[o]] = flag;
+    else
+    {
+        dfs(lc, flag);
+        dfs(rc, flag);
+    }
+    // 撤销操作...不然从爸爸进入兄弟节点的时候开始讲到的那个性质会被破坏.
+    // 注意撤销顺序...
+    while (!stk.empty())
+    {
+        back(stk.top());
+        stk.pop();
+    }
+}
+
+int read()
+{
+    int x = 0;
+    char c;
+    do
+    {
+        c = getchar();
+    } while (!isdigit(c));
+    do
+    {
+        x = x * 10 + c - '0';
+        c = getchar();
+    } while (isdigit(c));
+    return x;
+}
+int main()
+{
+    n = read();
+    m = read();
+    build(1, 1, m);
+    int x, y;
+    for (int i = 1; i <= m; i++)
+    {
+        x = read();
+        y = read();
+        if (x > y)
+            std::swap(x, y);
+        if (g[x][y] == 0)
+            g[x][y] = i;
+        else
+        {
+            query(1, g[x][y], i - 1, E(x, y));
+            g[x][y] = 0;
+        }
+    }
+    for (int i = 1; i <= n; i++)
+    {
+        size[fa[i] = i] = 1;
+        for (auto p : g[i])
+            if (p.second > 0)
+                query(1, p.second, m, E(i, p.first));
+    }
+    dfs(1, 1);
+    for (int i = 1; i <= m; i++)
+        puts(ans[i] ? "YES" : "NO");
+    return 0;
+}
+```
+
+
+
 #### 可持久化并查集
 
 > 洛谷U208135-给定 $n(1\le n\le10^5)$ 个集合，第 $i$ 个集合初始只有数 $i$ ，维护 $m(1\le m\le2\times10^5)$ 次操作：
@@ -8072,7 +8475,7 @@ signed main()
 
 #### SPFA
 
-~~(已死算法)~~队列优化的 SPFA ，用途是判负环。最坏情况仍然是 $O(nm)$ (堆/栈优化可以被卡指数级复杂度)。记录最短路经过了多少条边，当经过了至少 n 条边时，说明 s 点可以抵达一个负环。在没有负权边时最好使用 Dijkstra 算法。下面是负环模板：
+~~(已死算法)~~队列优化的 SPFA(某些随机图跑得很快) ，用途是判负环。最坏情况仍然是 $O(nm)$ (<u>堆/栈优化</u>可以被卡指数级复杂度)。记录最短路经过了多少条边，当经过了至少 n 条边时，说明 s 点可以抵达一个负环。在没有负权边时最好使用 Dijkstra 算法。下面是负环模板：
 
 ```c++
 #include <bits/stdc++.h>
@@ -8378,6 +8781,103 @@ signed main()
 	return 0;
 }
 ```
+
+
+
+#### 差分约束
+
+对 $n$ 个变量 $x_i$ 和 $m$ 个不等式 $x_i-x_j\le c_k,c_k\in R$，求一组解 $x$ 使得每个不等式都满足，或者判断无解。
+
+将其变为 $x_i\le x_j+c_k$，联想单源最短路三角不等式，所以对每个约束条件构造 $j\to i$ 的权为 $c_k$ 的有向边，且建立超级源点 $x_0$ 向每个点连权为 $0$ 的边。若负环无解，否则最短路数组 $-d$ 是一组解。注意到若 $x$ 是合法解，则 $x+C$ 也是合法解。用 Bellman-Ford / SPFA 即可，都是 $O(nm)$。
+
+构造技巧：
+
+1. 如果有约束条件 $x_i=y_i$，等价于两个约束条件 $x_i\le y_i+0,y_i\le x_i+0$
+2. 如果有约束条件 $\dfrac{x_i}{x_j}\le c_k$，等价于 $\log x_i-\log x_j\le\log c_k$
+
+> P1260-给定 $n$ 个变量 $t$ 和 $m$ 个不等式 $t_i-t_j\le b$。问能否构造出 $t$ 或输出无解。输出构造非负解且至少一个 $0$。$n\le 10^3,m\le 5\times10^3,b\in(-100,100)$。
+
+```c++
+#include <bits/stdc++.h>
+using namespace std;
+using ll = long long;
+const ll mn = 5e3 + 10, inf = 1e9;
+ll n, d[mn], m, vis[mn], cnt[mn];
+vector<pair<ll, ll>> e[mn];
+signed main()
+{
+    cin.tie(0)->ios::sync_with_stdio(false);
+    cin >> n >> m;
+    for (ll i = 1, a, b, c; i <= m; ++i)
+    {
+        cin >> a >> b >> c;
+        e[a].push_back({b, c});
+    }
+    for (ll i = 1; i <= n; ++i)
+    {
+        e[0].push_back({i, 0});
+    }
+    fill_n(d, n + 3, inf);
+    d[0] = 0, vis[0] = true;
+    queue<ll> q;
+    q.push(0);
+    while (!q.empty())
+    {
+        ll u = q.front();
+        vis[u] = false;
+        q.pop();
+        for (auto pr : e[u])
+        {
+            ll v = pr.first, w = pr.second;
+            if (d[u] + w < d[v])
+            {
+                d[v] = d[u] + w;
+                if (!vis[v])
+                {
+                    if (++cnt[v] >= n + 1)
+                    {
+                        printf("NO SOLUTION\n");
+                        return 0;
+                    }
+                    vis[v] = true;
+                    q.push(v);
+                }
+            }
+        }
+    }
+    for (ll u = 1; u <= n; ++u)
+    {
+        cout << -d[u] << '\n';
+        for (auto pr : e[u])
+        {
+            ll v = pr.first, w = pr.second;
+            assert(-d[u] - (-d[v]) <= w);
+        }
+    }
+    return 0;
+}
+```
+
+> 附：差分约束 P5960 模板题代码 (输入输出与本题类似，但任意解即可)
+>
+> ```c++
+> struct edge { ll u, v, w; } e[MAXN];
+> ll d[MAXN], n, m, c0, c1, y;
+> signed main()
+> {
+> 	scanf("%d%d", &n, &m);
+> 	repe(i, 1, m) scanf("%d%d%d", &c0, &c1, &y), e[i] = { c1,c0,y };
+> 	repe(i, 1, n) d[i] = (i == 1 ? 0 : 0x3f3f3f3f);
+> 	rep(i, 1, n) repe(j, 1, m) 
+> 		d[e[j].v] = min(d[e[j].u] + e[j].w, d[e[j].v]);
+> 	repe(i, 1, m) if (d[e[i].v] > d[e[i].u] + e[i].w)
+> 		return !printf("NO");
+> 	repe(i, 1, n) printf("%d ", d[i]);
+> 	return 0;
+> }
+> ```
+
+
 
 
 
@@ -9129,6 +9629,227 @@ signed main()
 
 
 
+##### 边双连通分量
+
+定义为无向图上没有桥的极大连通图。
+
+> 牛客暑假7-L 给定带互异边权 $[-10^9,10^9]$ 的无向连通图 $3\le n\le m\le10^5$，求环上边权最大最小值差最大的差值，并以任意顺序时针输出该环
+
+找环 $O(n)$，就是在边双上找最大和最小。然后用网络流输出方案。
+
+```c++
+#include <bits/stdc++.h>
+using namespace std;
+#define sc(x) scanf("%lld", &x)
+typedef long long ll;
+const ll mn = 1e5 + 10;
+ll n, m, hd[mn], cnt, w[mn], eu[mn], ev[mn];
+struct edge
+{
+    ll to, nx, idx, w = 0, isbridge = false;
+} e[mn * 2], e2[mn * 2];
+ll st, dfn[mn], low[mn], dcnt, vis[mn];
+vector<ll> dcc[mn]; //边双
+ll hd2[mn], cnt2, h[mn], d[mn], cur[mn];
+signed main()
+{
+    sc(n), sc(m);
+    auto adde = [&](ll u, ll v, ll w, ll idx)
+    {
+        e[++cnt] = {v, hd[u], idx};
+        hd[u] = cnt;
+        ::w[idx] = w, eu[idx] = u, ev[idx] = v;
+    };
+    for (ll i = 1, u, v, w; i <= m; ++i)
+    {
+        sc(u), sc(v), sc(w), adde(u, v, w, i), adde(v, u, w, i);
+    }
+    auto tarjan = [&](auto self, ll u, ll fa) -> void
+    {
+        dfn[u] = low[u] = ++st;
+        for (ll i = hd[u]; i; i = e[i].nx)
+        {
+            ll v = e[i].to, idx = e[i].idx;
+            if (!dfn[v])
+            {
+                self(self, v, u);
+                low[u] = min(low[u], low[v]);
+                if (dfn[u] < low[v])
+                {
+                    e[idx].isbridge = true;
+                }
+            }
+            else if (v != fa)
+            {
+                low[u] = min(low[u], dfn[v]);
+            }
+        }
+    };
+    tarjan(tarjan, 1, 0);
+    auto dfs = [&](auto self, ll u) -> void
+    {
+        vis[u] = true;
+        for (ll i = hd[u]; i; i = e[i].nx)
+        {
+            ll v = e[i].to, idx = e[i].idx;
+            if (!e[idx].isbridge)
+            {
+                dcc[dcnt].push_back(idx);
+                if (!vis[v])
+                {
+                    self(self, v);
+                }
+            }
+        }
+    };
+    for (ll i = 1; i <= n; ++i)
+    {
+        if (!vis[i])
+        {
+            ++dcnt;
+            dfs(dfs, i);
+        }
+    }
+    ll res = -1, id = 0;
+    for (ll i = 1; i <= dcnt; ++i)
+    {
+        sort(dcc[i].begin(), dcc[i].end());
+        dcc[i].erase(unique(dcc[i].begin(), dcc[i].end()), dcc[i].end());
+        sort(dcc[i].begin(), dcc[i].end(), [&](ll u, ll v)
+             { return w[u] < w[v]; });
+        if (dcc[i].size() >= 2)
+        {
+            ll x = w[dcc[i].back()] - w[dcc[i].front()];
+            if (x > res)
+            {
+                res = x, id = i;
+            }
+        }
+    }
+    printf("%lld\n", res);
+
+    //网络流是有向图，所以要重建图
+    memset(hd2, -1, sizeof hd2);
+    ll s = n + 1, t = n + 2, mxi = dcc[id].back(), mii = dcc[id].front();
+    auto adde2 = [&](ll u, ll v, ll w = 1)
+    {
+        e2[cnt2] = {v, hd2[u], 0, w};
+        hd2[u] = cnt2++;
+    };
+    adde2(s, eu[mxi]), adde2(eu[mxi], s, 0); //注意顺序
+    adde2(s, ev[mxi]), adde2(ev[mxi], s, 0);
+    adde2(eu[mii], t), adde2(t, eu[mii], 0);
+    adde2(ev[mii], t), adde2(t, ev[mii], 0);
+    for (auto i : dcc[id])
+    {
+        if (i != mxi && i != mii)
+        {
+            adde2(eu[i], ev[i]), adde2(ev[i], eu[i]);
+        }
+    }
+
+    auto dinic_dfs = [&](auto self, ll u, ll limit) -> ll
+    {
+        // printf("<%lld %lld\n", u, limit);
+        if (u == t)
+        {
+            return limit;
+        }
+        ll flow = 0;
+        for (ll i = cur[u]; i != -1 && flow < limit; i = e2[i].nx)
+        {
+            cur[u] = i; //输出路径
+            ll v = e2[i].to;
+            if (d[v] == d[u] + 1 && e2[i].w)
+            {
+                ll dlt = self(self, v, min(e2[i].w, limit - flow));
+                if (!dlt)
+                {
+                    d[v] = -1;
+                }
+                e2[i].w -= dlt;
+                e2[i].idx += dlt;
+                e2[i ^ 1].w += dlt;
+                e2[i ^ 1].idx -= dlt;
+                flow += dlt;
+            }
+        }
+        return flow;
+    };
+    auto dinic_bfs = [&]() -> bool
+    {
+        memset(d, -1, sizeof d);
+        queue<ll> q;
+        q.push(s);
+        d[s] = 0, cur[s] = hd2[s];
+        while (!q.empty())
+        {
+            ll u = q.front();
+            q.pop();
+            for (ll i = hd2[u]; i != -1; i = e2[i].nx)
+            {
+                ll v = e2[i].to;
+                // printf("?%lld %lld\n", u, v);
+                if (d[v] == -1 && e2[i].w)
+                {
+                    d[v] = d[u] + 1, cur[v] = hd2[v];
+                    if (v == t)
+                    {
+                        return true;
+                    }
+                    q.push(v);
+                }
+            }
+        }
+        return false;
+    };
+    auto dinic = [&]()
+    {
+        ll res = 0;
+        while (dinic_bfs())
+        {
+            res += dinic_dfs(dinic_dfs, s, 1e18);
+        }
+        return res;
+    };
+    dinic();
+
+    vector<ll> res1, res2;
+    auto dfs2 = [&](auto self, ll u, vector<ll> &res) -> void
+    {
+        res.push_back(u);
+        for (ll i = hd2[u]; i != -1; i = e2[i].nx)
+        {
+            ll v = e2[i].to;
+            if (e2[i].idx > 0)
+            {
+                e2[i].idx--;
+                self(self, v, res);
+                break;
+            }
+        }
+    };
+    dfs2(dfs2, s, res1);
+    dfs2(dfs2, s, res2);
+    reverse(res2.begin(), res2.end());
+    printf("%lld\n", res1.size() + res2.size() - 4);
+    auto print = [&](vector<ll> &res)
+    {
+        for (auto i : res)
+        {
+            if (i != s && i != t)
+            {
+                printf("%lld ", i);
+            }
+        }
+    };
+    print(res1), print(res2);
+    return 0;
+}
+```
+
+
+
 #### 圆方树
 
 圆方树（Block forest 或 Round-square tree）是一种将图变成树的方法从而把一般图上的某些问题转化到树上考虑
@@ -9842,7 +10563,163 @@ signed main()
 }
 ```
 
+> 牛客2022暑假集训10-E 有 $n(1\le n\le400)$ 人 $m(1\le m\le400)$ 稿。若 $a_{ij}=1$ 则第 $i$ 人可读第 $j$ 稿。每人只能读一篇稿。问是否存在分配方案使得每人都能读稿(不能输出 `-1`)，在此前提下输出使得最大化每篇稿被读次数的方案。
+>
 
+最小费用最大流。不考虑费用时显然源点向每个人连一条流量为 $1$ 的边，每个人向他能读的稿连流量为 $1$ 的边，而每篇稿子向汇点连流量为入度的边。显然，题意无解即有人没读到，即流量不为 $n$。所有有解都是没人读一篇稿，接下来就是稿的分配了，要使得每稿尽可能多人。但这样建图只能最大化流量，即使得总流量最大，而总流量最大不能保证最小流量最大。为此，将流向汇点的流量为入度的边拆分为若干条流量为 $1$，代价递增的边。这样可以在总流量最大的情况下，让分配更加地平均。
+
+```c++
+#include <bits/stdc++.h>
+using namespace std;
+using ll = long long;
+
+template <const int mn, class ty = int>
+struct MinCostMaxFlow
+{
+    const ty inf = numeric_limits<ty>::max();
+    struct edge
+    {
+        int v;
+        ty cap, cost;
+        int rev;
+    };
+    vector<edge> g[mn];
+    ty sum{}, dis[mn]{};
+    int n, s, t, aug[mn]{};
+    ty flow{}, cost{};
+    bool augment()
+    {
+        fill(dis, dis + n + 1, inf);
+        priority_queue<pair<int, int>> q;
+        dis[t] = 0;
+        q.push({dis[t], t});
+        for (int u, v; !q.empty() && q.top().first != inf;)
+        {
+            u = q.top().second;
+            q.pop();
+            for (auto e : g[u])
+            {
+                v = e.v;
+                if (g[v][e.rev].cap && dis[v] > dis[u] - e.cost)
+                {
+                    dis[v] = dis[u] - e.cost;
+                    q.push({dis[v], v});
+                }
+            }
+        }
+        sum += dis[s];
+        for (int u = 1; u <= n; ++u)
+        {
+            for (auto &e : g[u])
+            {
+                e.cost += dis[e.v] - dis[u];
+            }
+        }
+        return dis[s] != inf;
+    }
+
+    ty dfs(int u, ty lim)
+    {
+        if (u == t)
+        {
+            cost += lim * sum;
+            return lim;
+        }
+        ty f = 0;
+        aug[u] = 1;
+        for (auto &e : g[u])
+        {
+            int v = e.v;
+            if (!e.cost && e.cap && !aug[v])
+            {
+                ty t = dfs(v, min(lim - f, e.cap));
+                e.cap -= t;
+                g[v][e.rev].cap += t;
+                f += t;
+                if (f == lim)
+                {
+                    break;
+                }
+            }
+        }
+        if (f == lim)
+        {
+            aug[u] = 0;
+        }
+        return f;
+    }
+
+    void add(int u, int v, ty cap, ty cost)
+    {
+        g[u].push_back({v, cap, cost, (int)g[v].size()});
+        g[v].push_back({u, 0, -cost, (int)g[u].size() - 1});
+    }
+
+    pair<ty, ty> solve(int _n, int _s, int _t)
+    {
+        n = _n, s = _s, t = _t, flow = cost = 0;
+        do
+        {
+            ty f;
+            do
+            {
+                memset(aug, 0, (n + 1) << 2);
+                f = dfs(s, inf);
+                flow += f;
+            } while (f > 0);
+        } while (augment());
+        return {flow, cost};
+    }
+};
+
+const ll mn = 405;
+MinCostMaxFlow<mn * 2, int> d;
+signed main()
+{
+    cin.tie(0)->ios::sync_with_stdio(false);
+    int n, m;
+    char a[mn];
+    cin >> n >> m;
+    int s = n + m + 1, t = s + 1;
+    for (ll i = 1; i <= n; ++i)
+    {
+        cin >> (a + 1);
+        d.add(s, i, 1, 0);
+        for (ll j = 1; j <= m; ++j)
+        {
+            if (a[j] == '1')
+            {
+                d.add(i, n + j, 1, 0);
+            }
+        }
+    }
+    for (ll i = 1; i <= m; ++i)
+    {
+        for (ll j = 1; j <= n; ++j)
+        {
+            d.add(n + i, t, 1, j);
+        }
+    }
+    auto f = d.solve(t, s, t);
+    if (f.first != n)
+    {
+        cout << -1;
+        return 0;
+    }
+    for (ll i = 1; i <= n; ++i)
+    {
+        for (auto e : d.g[i])
+        {
+            if (!e.cap && e.v > n)
+            {
+                cout << (e.v - n) << ' ';
+                break;
+            }
+        }
+    }
+    return 0;
+}
+```
 
 
 
@@ -10672,9 +11549,10 @@ char s[mn], ch;
 int p[mn], n, ans, r, c;
 signed main()
 {
-    s[0] = '#', s[++n] = '#';
+    s[0] = '^', s[++n] = '#';
     while (EOF != (ch = getchar()))
         s[++n] = ch, s[++n] = '#';
+    s[n + 1] = '?'; // 多次询问清尾
     for (int i = 1; i <= n; ++i)
     {
         if (i <= r)
@@ -10894,6 +11772,8 @@ signed main()
 
 ### 后缀数组
 
+#### 基础
+
 下标从 $1$ 开始，后缀 $i$ 表示以第 $i$ 个字符开头的后缀。后缀间大小比较依据是字典序
 
 数组 `sa[i]` 表示将所有后缀排序后第 $i$ 小后缀的编号
@@ -11001,14 +11881,493 @@ for (i = 1, k = 0; i <= n; ++i) {
 应用：
 
 - 字符串匹配：模式串 $T$ 若出现必然是主串 $S$ 后缀的前缀，二分 $sa$ ，复杂度为 $O(|T|\log|S|)$ ，可以一并求出出现次数和位置
+- 求两字符串的最长公共子串：将其拼接起来，求 height数组最值(取得 height 的两项要求一个在左原串一个在右)
 - 求循环同构串里字典序最小的 (最小表示法算法的第二解法) (可以离散化)
 - 两子串的最长公共前缀 $lcp(sa[i],sa[j])=\min(height[i+1..j])$ 
 - 比较两个子串的大小关系： $A=S[a..b],B=S[c..d]$ ，若 $lcp(a,c)\ge \min(|A|,|B|)，A < B\Leftrightarrow |A|<|B|$ ，否则 $A < B\Leftrightarrow rk[a] < rk[c]$ 
 - 本质不同的子串的数目 $\dfrac{n(n+1)}2-\sum_{i=2}^nheight[i]$
-- 出现至少 k 次的子串的最大长度：
-- 出现至少 k 次意味着后缀排序后有至少连续 k 个后缀的 LCP 是这个子串。所以，求出每相邻 k-1 个 height 的最小值，再求这些最小值的最大值就是答案。可以使用单调队列 $O(n)$ 解决
+- 出现至少 k 次的子串的最大长度：出现至少 k 次意味着后缀排序后有至少连续 k 个后缀的 LCP 是这个子串。所以，求出每相邻 k-1 个 height 的最小值，再求这些最小值的最大值就是答案。可以使用单调队列 $O(n)$ 解决
 - 是否有某字符串在文本串中至少不重叠地出现了两次：可以二分目标串的长度 |s|，将 h 数组划分成若干个连续 LCP 大于等于 |s| 的段，利用 RMQ 对每个段求其中出现的数中最大和最小的下标，若这两个下标的距离满足条件，则一定有长度为 |s| 的字符串不重叠地出现了两次
 - 连续的若干个相同子串：枚举连续串的长度 |s| ，按照 |s| 对整个串进行分块，对相邻两块的块首进行 LCP 与 LCS 查询
+
+
+
+#### LCP
+
+> 例：求 LCP 和 LCS(两前缀的最长公共后缀)
+
+```c++
+#include <bits/stdc++.h>
+using namespace std;
+using ll = long long;
+const ll mn = 1e6 + 10;
+struct suffixArray
+{
+    ll n, m; // m是字符集(char)大小
+    ll sa[mn], rk[mn * 2], hei[mn], ct[mn], s2[mn], r1[mn];
+    char *s;
+    void calcSA()
+    {
+        for (ll i = 0; i <= m; ++i)
+        {
+            ct[i] = 0;
+        }
+        for (ll i = n + 1; i <= n * 2; ++i)
+        {
+            rk[i] = 0;
+        }
+        for (ll i = 1; i <= n; ++i)
+        {
+            rk[i] = s[i];
+            ct[rk[i]]++;
+        }
+        for (ll i = 1; i <= m; ++i)
+        {
+            ct[i] += ct[i - 1];
+        }
+        for (ll i = n; i >= 1; --i)
+        {
+            sa[ct[rk[i]]--] = i;
+        }
+        ll mx = m;
+        for (ll j = 1, k = 0; k < n; j *= 2, mx = k)
+        {
+            ll p = 0;
+            for (ll i = n - j + 1; i <= n; ++i)
+            {
+                s2[++p] = i;
+            }
+            for (ll i = 1; i <= n; ++i)
+            {
+                if (sa[i] > j)
+                {
+                    s2[++p] = sa[i] - j;
+                }
+            }
+            for (ll i = 0; i <= mx; ++i)
+            {
+                ct[i] = 0;
+            }
+            for (ll i = 1; i <= n; ++i)
+            {
+                ct[rk[s2[i]]]++;
+            }
+            for (ll i = 1; i <= mx; ++i)
+            {
+                ct[i] += ct[i - 1];
+            }
+            for (ll i = n; i >= 1; --i)
+            {
+                sa[ct[rk[s2[i]]]--] = s2[i];
+            }
+            r1[sa[1]] = k = 1;
+            for (ll i = 2; i <= n; ++i)
+            {
+                if (rk[sa[i - 1]] == rk[sa[i]] && rk[sa[i - 1] + j] == rk[sa[i] + j])
+                {
+                    r1[sa[i]] = k;
+                }
+                else
+                {
+                    r1[sa[i]] = ++k;
+                }
+            }
+            for (ll i = 1; i <= n; ++i)
+            {
+                rk[i] = r1[i];
+            }
+        }
+    }
+    void calcHeight()
+    {
+        memset(hei, 0, sizeof hei);
+        for (ll i = 1, j; i <= n; ++i)
+        {
+            if (rk[i] == 1)
+            {
+                continue;
+            }
+            j = max(hei[rk[i - 1]] - 1, 0LL);
+            while (s[i + j] == s[sa[rk[i] - 1] + j])
+            {
+                ++j;
+            }
+            hei[rk[i]] = j;
+        }
+    }
+    ll t1[mn][20], lg2[mn];
+    void initLCP()
+    {
+        for (ll i = 2; i <= n; ++i)
+        {
+            lg2[i] = lg2[i / 2] + 1;
+        }
+        for (ll i = 1; i <= n; ++i)
+        {
+            t1[i][0] = hei[i];
+        }
+        for (ll j = 1; j <= 20; ++j)
+        {
+            for (ll i = 1; i + (1 << j) - 1 <= n; ++i)
+            {
+                t1[i][j] = min(t1[i][j - 1], t1[i + (1 << (j - 1))][j - 1]);
+            }
+        }
+    }
+    void build(char *t)
+    {
+        s = t, n = strlen(s + 1), m = 'z';
+        calcSA();
+        calcHeight();
+        initLCP();
+    }
+    ll lcp(ll x, ll y)
+    {
+        ll l = rk[x], r = rk[y];
+        if (l > r)
+        {
+            swap(l, r);
+        }
+        ++l;
+        ll k = lg2[r - l + 1]; // or __lg(r-l+1);
+        return min(t1[l][k], t1[r - (1 << k) + 1][k]);
+    }
+} s1, s2;
+char s[mn];
+ll n, t, l, r;
+signed main()
+{
+    cin.tie(0)->ios::sync_with_stdio(false);
+    cin >> s + 1;
+    n = strlen(s + 1);
+    s1.build(s);
+    reverse(s + 1, s + 1 + n);
+    s2.build(s);
+    for (cin >> t; t; --t)
+    {
+        cin >> l >> r;
+        cout << s1.lcp(l, r) << ' ' << s2.lcp(n - l + 1, n - r + 1) << '\n';
+    }
+    return 0;
+}
+```
+
+用单调栈线性求 $\sum_{1\le i < j\le n}lcp(i,j)$，意义：任选两个不同位置子串，子串相同的方案数。一种实现：
+
+```c++
+ll lc[mn], rc[mn];
+ll calcLCPsum()
+{
+    stack<ll> a;
+    ll sum = 0;
+    for (ll i = 1; i <= n + 1; ++i)
+    {
+        while (!a.empty() && hei[a.top()] > hei[i])
+        {
+            ll j = a.top();
+            a.pop();
+            rc[j] = i - j;
+        }
+        a.push(i);
+    }
+    stack<ll> b;
+    for (ll i = n; i >= 0; --i)
+    {
+        while (!b.empty() && hei[b.top()] >= hei[i])
+        {
+            ll j = b.top();
+            b.pop();
+            lc[j] = j - i;
+        }
+        b.push(i);
+    }
+    for (ll i = 1; i <= n; ++i)
+    {
+        sum += hei[i] * lc[i] * rc[i];
+    }
+    return sum;
+}
+```
+
+
+
+#### SA-IS
+
+时空复杂度 $O(n)$
+
+> 例：牛客2022暑假3H，长为 $n(n\le 10^5)$ 的 $A$ 串对应权值序列 $v(|v_i|\le10^9)$，有 $k$ 个询问，每次问长为 $m(m,k\le10^5,mk\le10^6)$ 的 $B$ 串所有子串能匹配到所有 $A$ 的子串区间里，区间和最大值
+
+后缀数组求高度数组 lcp，即第 $i$ 大后缀与第 $i+1$ 大后缀的最长公共前缀，在其上面建立 ST 表，可求任意两后缀的 LCP 为 $query_{\min}(rank_x, rank_y - 1)$，假设 $rank_x < rank_y$。
+
+对 $B_i$ 的每个位置 $j(1\le j\le m)$，求 $j$ 开始的最长子串，且在 A 出现过，即找到最长 $len$，满足 $B[j..j+len-1]$ 是 $A$ 子串。再找 $j$ 为左端点，长在 $len$ 内所有区间权值和最大值，即 $\max(\sum_{k=j}^lv_k)(j\le l\le j+len-1)$。这部分对数组 $v$ 前缀和数组建 ST 表，求 $[j,j+len-1]$ 区间最大值。
+
+将 $A$ 和所有 $B_i$ 以 `$` 或其他不在字符集的分割符连起来得到 $S$，对 $S$ 跑后缀数组，维护每个 $B_i$ 在 $S$ 的起始下标，第 $i$ 个字符对应原来哪个串。(注意 $A,B$ 间用别的分割符)
+
+按字典序遍历所有后缀，可以知道当前后缀对应哪个 $B_i$ 或 $A$，若当前后缀对应 $B_i$，找到离它最近的属于 $A$ 的后缀，求 $lcp$ 即上文的 $len$。
+
+```c++
+#include <bits/stdc++.h>
+using namespace std;
+#define sc(x) scanf("%lld", &x)
+typedef long long ll;
+const ll mn = 1.2e6 + 5;
+char s[mn];
+// begin SA-IS
+ll sa[mn], rk[mn], lcp[mn];
+ll str[mn * 2], ty[mn * 2], p[mn], cnt[mn], cur[mn];
+#define pushs(x) sa[cur[str[x]]--] = x
+#define pushl(x) sa[cur[str[x]]++] = x
+void sais(ll n, ll m, ll *str, ll *ty, ll *p)
+{
+    ll n1 = ty[n - 1] = 0, ch = rk[0] = -1, *s1 = str + n;
+    for (ll i = n - 2; ~i; --i)
+    {
+        ty[i] = str[i] == str[i + 1] ? ty[i + 1] : str[i] > str[i + 1];
+    }
+    for (ll i = 1; i < n; ++i)
+    {
+        rk[i] = ty[i - 1] && !ty[i] ? (p[n1] = i, n1++) : -1;
+    }
+
+    auto induce_sort = [&](ll *v)
+    {
+        fill_n(sa, n, -1);
+        fill_n(cnt, m, 0);
+        for (ll i = 0; i < n; ++i)
+        {
+            cnt[str[i]]++;
+        }
+        for (ll i = 1; i < m; ++i)
+        {
+            cnt[i] += cnt[i - 1];
+        }
+        for (ll i = 0; i < m; ++i)
+        {
+            cur[i] = cnt[i] - 1;
+        }
+        for (ll i = n1 - 1; ~i; --i)
+        {
+            pushs(v[i]);
+        }
+        for (ll i = 1; i < m; ++i)
+        {
+            cur[i] = cnt[i - 1];
+        }
+        for (ll i = 0; i < n; ++i)
+        {
+            if (sa[i] > 0 && ty[sa[i] - 1])
+            {
+                pushl(sa[i] - 1);
+            }
+        }
+        for (ll i = 0; i < m; ++i)
+        {
+            cur[i] = cnt[i] - 1;
+        }
+        for (ll i = n - 1; ~i; --i)
+        {
+            if (sa[i] > 0 && !ty[sa[i] - 1])
+            {
+                pushs(sa[i] - 1);
+            }
+        }
+    };
+    induce_sort(p);
+    for (ll i = 0, x, y; i < n; ++i)
+    {
+        if (~(x = rk[sa[i]]))
+        {
+            if (ch < 1 || p[x + 1] - p[x] != p[y + 1] - p[y])
+            {
+                ++ch;
+            }
+            else
+            {
+                for (ll j = p[x], k = p[y]; j <= p[x + 1]; ++j, ++k)
+                {
+                    if ((str[j] << 1 | ty[j]) != (str[k] << 1 | ty[k]))
+                    {
+                        ++ch;
+                        break;
+                    }
+                }
+            }
+            s1[y = x] = ch;
+        }
+    }
+    if (ch + 1 < n1)
+    {
+        sais(n1, ch + 1, s1, ty + n, p + n1);
+    }
+    else
+    {
+        for (ll i = 0; i < n1; ++i)
+        {
+            sa[s1[i]] = i;
+        }
+    }
+    for (ll i = 0; i < n1; ++i)
+    {
+        s1[i] = p[sa[i]];
+    }
+    induce_sort(s1);
+}
+ll cti(ll n)
+{
+    ll m = *max_element(s, s + n);
+    fill_n(rk, m + 1, 0);
+    for (ll i = 0; i < n; ++i)
+    {
+        rk[s[i]] = 1;
+    }
+    for (ll i = 0; i < m; ++i)
+    {
+        rk[i + 1] += rk[i];
+    }
+    for (ll i = 0; i < n; ++i)
+    {
+        str[i] = rk[s[i]] - 1;
+    }
+    return rk[m];
+}
+void make_sa(ll n)
+{
+    // s[n] 一定要比 s 中所有字符 ascii 值小, s[n+1] 倒无所谓
+    s[n] = '!', s[n + 1] = '\0';
+    ll m = cti(++n);
+    sais(n, m, str, ty, p);
+    for (ll i = 0; i < n; ++i)
+    {
+        rk[sa[i]] = i;
+    }
+    for (ll i = 0, h = lcp[0] = 0; i < n - 1; ++i)
+    {
+        ll j = sa[rk[i] - 1];
+        while (i + h < n && j + h < n && s[i + h] == s[j + h])
+        {
+            ++h;
+        }
+        lcp[rk[i] - 1] = h;
+        if (lcp[rk[i] - 1])
+        {
+            --h;
+        }
+    }
+    s[n] = '\0';
+}
+// end SA-IS
+const ll mm = 1e5 + 5, mlg = 20;
+ll st[mm][mlg], lg[mm], prf[mm];
+void build_st(ll n)
+{
+    for (ll i = 1; i <= n; ++i)
+    {
+        st[i][0] = prf[i];
+    }
+    for (ll k = 1, len = 2; len <= n; len <<= 1, ++k)
+    {
+        for (ll i = 1; i + len - 1 <= n; ++i)
+        {
+            st[i][k] = max(st[i][k - 1], st[i + len / 2][k - 1]);
+        }
+    }
+}
+ll query(ll x, ll y)
+{
+    ll k = lg[y - x + 1];
+    return max(st[x][k], st[y - (1 << k) + 1][k]);
+}
+ll v[mm], bg_pos[mm], ans[mm], maps[mn], n, m, k;
+signed main()
+{
+    lg[1] = 0;
+    for (ll i = 2; i < mm; ++i)
+    {
+        lg[i] = lg[i >> 1] + 1;
+    }
+    sc(n), sc(m), sc(k), scanf("%s", s);
+    for (ll i = 1; i <= m; ++i)
+    {
+        sc(v[i]);
+    }
+
+    ll tot = n - 1;
+    for (ll i = 1; i <= k; ++i)
+    {
+        ++tot;
+        s[tot] = '$', maps[tot] = -1;
+        bg_pos[i] = tot + 1;
+        scanf("%s", s + tot + 1);
+        for (ll j = tot + 1; j <= tot + m; ++j)
+        {
+            maps[j] = i;
+        }
+        tot += m;
+    }
+    s[n] = '#';
+    ++tot;
+    make_sa(tot);
+
+    // printf("%s\n", s);
+    // for (ll i = 0; i <= tot; ++i)
+    // {
+    //     printf("%3lld %3lld %3lld %s\n", i, sa[i], lcp[i], s + sa[i]);
+    // }
+
+    for (ll i = 1; i <= m; ++i)
+    {
+        prf[i] = prf[i - 1] + v[i];
+    }
+    build_st(m);
+
+    ll mi = 0;
+    for (ll i = 1; i <= tot; ++i)
+    {
+        ll j = maps[sa[i]];
+        if (j == 0)
+        {
+            mi = lcp[i];
+        }
+        else
+        {
+            if (j > 0 && mi > 0) //不是分隔符，有公共
+            {
+                ll idx = sa[i] - bg_pos[j] + 1; // B_j起始下标
+                ll mx = query(idx, idx + mi - 1);
+                ans[j] = max(ans[j], mx - prf[idx - 1]);
+            }
+            mi = min(mi, lcp[i]);
+        }
+    }
+
+    mi = 0;
+    for (ll i = tot; i; --i)
+    {
+        ll j = maps[sa[i]];
+        if (j == 0)
+        {
+            mi = lcp[i - 1];
+        }
+        else
+        {
+            if (j > 0 && mi > 0) //不是分隔符，有公共
+            {
+                ll idx = sa[i] - bg_pos[j] + 1; // B_j起始下标
+                ll mx = query(idx, idx + mi - 1);
+                ans[j] = max(ans[j], mx - prf[idx - 1]);
+            }
+            mi = min(mi, lcp[i - 1]);
+        }
+    }
+    for (ll i = 1; i <= k; ++i)
+    {
+        printf("%lld\n", ans[i]);
+    }
+    return 0;
+}
+```
+
+
 
 
 
@@ -14264,6 +15623,38 @@ find()有，返回迭代器，无，返回末尾end()
 交集set_intersection
 
 差set_difference
+
+重载 unset: 模板添加一个类,重载 \=\= 方法与返回 size\_t 的 () 方法
+
+```c++
+#include <bits/stdc++.h>
+using namespace std;
+unordered_set<int> s = {1, 1, 4, 5, 1, 4};
+struct node
+{
+    int x, y, z;
+    bool operator==(const node &r) const
+    {
+        return x == r.x && y == r.y && z == r.z;
+    }
+    size_t operator()(const node &r) const
+    {
+        return r.x * 1e9 + r.y * 1e5 + r.z;
+    }
+};
+unordered_set<node, node> s2;
+int main()
+{
+    printf("%d\n", s.size());
+    s2.insert({1, 2, 3});
+    s2.insert({1, 2, 3});
+    s2.insert({1, 2, 4});
+    printf("%d\n", s2.size());
+    return 0;
+}
+```
+
+
 
 
 
