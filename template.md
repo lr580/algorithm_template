@@ -6,7 +6,7 @@
 
 ![image-20220325120131181](img/image-20220325120131181.png)
 
-<div align="center" style="font-size:18px">Last built at Oct. 18, 2022</div>
+<div align="center" style="font-size:18px">Last built at Oct. 20, 2022</div>
 
 <div STYLE="page-break-after: always;"></div>
 
@@ -284,6 +284,50 @@ signed main()
 
 ##### 其他
 
+###### 分拆数
+
+若 $n,r\in\Z^+$，正整数 $n_1,\cdots,n_r$ 满足 $n=\sum_{i=1}^rn_i$ 则为 $n$ 的一个 $r$ 拆分。
+
+分拆数 $p_n$ 是自然数 $n$ 的分拆方法数，有 $p_0=p_1=1,p_2=2,p_3=3,p_4=5,p_5=7,p_6=11,p_7=15,p_8=22$。
+
+将 $n$ 拆分为恰有 $k$ 部分的分拆称为 $k$ 部分分拆，记作 $p(n,k)$。初始值为 $p(0,0)=1$。当且仅当 $n\ge k$ 有解。
+$$
+p(n,k)=p(n-1,k-1)+p(n-k,k)
+$$
+$k$ 部分拆数的生成函数为：
+$$
+\sum_{n,k=0}^\infty p(n,k)x^ny^k=\dfrac1{1-xy}\dfrac1{1-x^2y}\dfrac1{1-x^3y}\cdots
+$$
+互异分拆数 $pd_n$，自然数 $n$ 各部分不相同的分拆数。如 $pd_0=pd_1=pd_2=1,pd_3=pd_4=2,pd_5=3,pd_6=4,pd_7=5,pd_8=6$
+$$
+pd(n,k)=pd(n-k,k-1)+pd(n-k,k)
+$$
+计算可以压缩第二维，使得时间复杂度 $O(nk)$ 空间复杂度 $O(n)$。
+
+奇分拆数 $po_n$，拆分出各部分都是奇数的拆分方法数。有：$po_n=pd_n$。
+
+最左边是互异拆分的生成函数，最右边是奇分拆数的生成函数。
+
+
+$$
+\prod_{i=1}^\infty(1+x^i)=\dfrac{\prod_{i=1}^\infty(1-x^{2i})}{\prod_{i=1}^\infty(1-x^{i})}=\prod_{i=1}^\infty\dfrac1{1-x^{2i-1}}
+$$
+互异偶分拆数 $pde_n$ 与互异奇分拆数 $pdo_n$ 满足 $pd_n=pde_n+pdo_n$。
+
+广义五边形数为 $a_{2i}=\dfrac{i(3i-1)}2$，$a_{2i+1}=\dfrac{i(3i+1)}2$。
+
+递推式：$p_n=p_{n-1}+p_{n-2}-p_{n-5}-p_{n-7}+\cdots$。即下标是五边形数，且两正两负交替。
+
+那么可以简化为：
+$$
+p_i=\sum_{j=1}^{a_j\le i}(-1)^{\lfloor\frac{j+1}{2}\rfloor+1}p_{i-a_{j}}
+$$
+可以计算到 $n=5\times10^4$ 的 $O(n^2)$。
+
+
+
+###### 贝尔数
+
 **贝尔数**：$n$ 元素集合划分方法数(开首是 $B_0=B_1=1,B_2=2,B_3=5,B_4=15$ )
 $$
 B_{n+1}=\sum_{k=0}^n\begin{pmatrix}n\\k\end{pmatrix}B_k,\quad B_n=\sum_{k=0}^nS(n,k)
@@ -291,6 +335,8 @@ $$
 可以用贝尔三角形 $a_{1,1}=1,a_{n,1}=a_{n-1,n-1},a_{n,m}=a_{n,m-1}+a_{n-1,m-1}$ 求 $B_i=a_{i,i}$
 
 
+
+###### 欧拉数
 
 **欧拉数**：$n$ 元素排列有 $m$ 个元素大于上一个元素 $A(n,m)$ ，如 $A(3,1)=4$ 。
 
@@ -778,17 +824,39 @@ $$
 
 **斐波那契数列**：f(47)刚好爆int, f(93)刚好爆long long
 
+通项 $f_n=\left(\left(\dfrac{1+\sqrt 5}2\right)^n-\left(\dfrac{1-\sqrt 5}2\right)^n\right)\div\sqrt 5$。约等于去掉减式的最近整数
+
+快速倍增 $[\matrix{F_{n-1}&F_n}]=[\matrix{F_{n-2}&F_{n-1}}]\cdot[\matrix{0&1\\1&1}]$，则 $F_{2k}=F_k(2F_{k+1}-F_k),F_{2k+1}=F^2_{k+1}+F^2_k$。
+
+- 卡西尼性质 $f_{n-1}f_{n+1}-f^2_n=(-1)^n$
+
+- 附加性质 $f(n+m)=f(n+1)f(m)+f(n)f(m-1)$
+
+  令 $m=n$ 得 $f_{2n}=f_n(f_{n+1}+f_{n-1})$，
+
+  可推导出 $f_n|f_{nk}$，且可逆即 $\forall f_a|f_b,a|b$
+
+- $\gcd(f_m,f_n)=f_{\gcd(m,n)}$
+
 - $\sum_{i=1}^nf(n)=f(n+2)-1$
+
 - $\sum_{i=1}^nf^2(i)=f(n)\times f(n+1)$
-- $f(n+m)=f(n+1)f(m)+f(n)f(m-1)$
-- $f(n)^2=(-1)^{n+1}+f(n-1)f(n+1)$
+
 - $f(n+1)<2f(n)<f(n+2)$
+
 - $f(n+2)<3f(n)$
+
 - $4f(n)<3f(n+1)\Rightarrow f(n)<f(n+1)<3f(n-1)$
 
 > 齐肯多夫定理：任何正整数可以表示为若干个不连续的 Fibonacci 数之和
 
-模数为 $p$，则 $f\bmod p$ 的循环节长度 $\pi(p)\le 6p$。
+模数为 $p$，则 $f\bmod p$ 的循环节长度 $\pi(p)\le 6p$。(皮萨诺周期)
+
+- $\pi(2)=3,\pi(5)=20$
+- 若模数 $a,b$ 互质，则 $\pi(ab)=\gcd(\pi(a),\pi(b))$
+- 对奇素数 $p\equiv1,4\pmod5$，$p-1|\pi(p)$
+- 对奇素数 $p\equiv2,3\pmod5$，$2p+2|\pi(p)$
+- 若 $\pi(p^{k-1})|m$，则 $\pi(p^k)|mp$。若 $\pi(p^{k-1})=m$ 则 $\pi(p^k)=mp$
 
 
 
@@ -3209,7 +3277,6 @@ signed main()
 #include <bits/stdc++.h>
 using namespace std;
 using ll = long long;
-using pii = pair<int, int>;
 using pll = pair<ll, ll>;
 const ll mod = 998244353;
 
@@ -8794,6 +8861,8 @@ signed main()
 
 1. 如果有约束条件 $x_i=y_i$，等价于两个约束条件 $x_i\le y_i+0,y_i\le x_i+0$
 2. 如果有约束条件 $\dfrac{x_i}{x_j}\le c_k$，等价于 $\log x_i-\log x_j\le\log c_k$
+3. 反向差分约束，即全部改为 $x_i\ge x_j+c_k$ 连 $j\to i$ 的 $c_k$ 才能有超级源点的图，求最大的可以跑 SPFA 最长路(类似于工程图最晚)，一般用于求最小解
+4. 要求 $\max(x_v-x_u)$，等价于求 $u$ 到 $v$ 的最短路；要求 $\min(x_v-x_u)$ 求 $u$ 到 $v$ 最长路(建的图可能不一样)
 
 > P1260-给定 $n$ 个变量 $t$ 和 $m$ 个不等式 $t_i-t_j\le b$。问能否构造出 $t$ 或输出无解。输出构造非负解且至少一个 $0$。$n\le 10^3,m\le 5\times10^3,b\in(-100,100)$。
 
@@ -8811,7 +8880,7 @@ signed main()
     for (ll i = 1, a, b, c; i <= m; ++i)
     {
         cin >> a >> b >> c;
-        e[a].push_back({b, c});
+        e[b].push_back({a, c});
     }
     for (ll i = 1; i <= n; ++i)
     {
@@ -8829,7 +8898,7 @@ signed main()
         for (auto pr : e[u])
         {
             ll v = pr.first, w = pr.second;
-            if (d[u] + w < d[v])
+            if (d[v] > d[u] + w)
             {
                 d[v] = d[u] + w;
                 if (!vis[v])
@@ -8845,13 +8914,14 @@ signed main()
             }
         }
     }
+    ll mi = *min_element(d + 1, d + 1 + n);
     for (ll u = 1; u <= n; ++u)
     {
-        cout << -d[u] << '\n';
+        cout << d[u] - mi << '\n';
         for (auto pr : e[u])
         {
             ll v = pr.first, w = pr.second;
-            assert(-d[u] - (-d[v]) <= w);
+            assert(d[v] <= d[u] + w);
         }
     }
     return 0;
@@ -9629,6 +9699,86 @@ signed main()
 
 
 
+##### 点双连通分量
+
+> P8435 $n(\le5\times10^5)$ 点 $m(\le2\times10^6)$ 边无向图，找出点双数量，输出每个点双的点
+
+点双定义见下文圆方树
+
+```c++
+#include <bits/stdc++.h>
+using namespace std;
+using ll = long long;
+const ll mn = 5e5 + 10;
+ll n, m, dfn[mn], low[mn], st, stk[mn], stop, cn;
+vector<ll> c[mn], g[mn];
+void tarjan(ll u, ll fa)
+{
+    ll son = 0;
+    dfn[u] = low[u] = ++st;
+    stk[++stop] = u;
+    for (auto v : g[u])
+    {
+        if (!dfn[v])
+        {
+            ++son;
+            tarjan(v, u);
+            low[u] = min(low[u], low[v]);
+            if (low[v] >= dfn[u])
+            {
+                c[++cn].push_back(u);
+                for (ll w = 0; w != v;)
+                {
+                    w = stk[stop--];
+                    c[cn].push_back(w);
+                }
+            }
+        }
+        else
+        {
+            low[u] = min(low[u], dfn[v]);
+        }
+    }
+    if (!fa && !son)
+    {
+        c[++cn].push_back(u);
+    }
+}
+signed main()
+{
+    cin.tie(0)->ios::sync_with_stdio(false);
+    cin >> n >> m;
+    for (ll i = 1, u, v; i <= m; ++i)
+    {
+        cin >> u >> v;
+        g[u].push_back(v), g[v].push_back(u);
+    }
+    for (ll i = 1; i <= n; ++i)
+    {
+        if (!dfn[i])
+        {
+            stop = 0, tarjan(i, 0);
+        }
+    }
+    cout << cn << '\n';
+    for (ll i = 1; i <= cn; ++i)
+    {
+        cout << c[i].size() << ' ';
+        for (auto u : c[i])
+        {
+            cout << u << ' ';
+        }
+        cout << '\n';
+    }
+    return 0;
+}
+
+```
+
+
+
+
+
 ##### 边双连通分量
 
 定义为无向图上没有桥的极大连通图。
@@ -9863,38 +10013,6 @@ signed main()
 如果原图连通，则“圆方树”才是一棵树，如果原图有 $k$ 个连通分量，则它的圆方树也会形成 $k$ 棵树形成的森林。如果原图中某个连通分量只有一个点，则需要具体情况具体分析，我们在后续讨论中不考虑孤立点。
 
 点双是不存在割点的分量，一个点可能属于多个点双。使用 tarjan 算法求点双及每个点双包含的点。那么每个点双上的点都是圆点，连向一个新增的方点
-
-```c++
-ll dfn[mn], low[mn], st, stk[mn], stop, cn;
-vector<ll> c[mn]; //点双
-void tarjan(ll u)
-{
-    dfn[u] = low[u] = ++st;
-    stk[++stop] = u;
-    for (ll i = hd[u]; i; i = e[i].nx)
-    {
-        ll v = e[i].to;
-        if (!dfn[v])
-        {
-            tarjan(v);
-            low[u] = min(low[u], low[v]);
-            if (low[v] >= dfn[u])
-            { //找出新的点双上的所有点
-                c[++cn].push_back(u);
-                for (ll w = 0; w != v;)
-                {
-                    w = stk[stop--];
-                    c[cn].push_back(w);
-                }
-            }
-        }
-        else
-        {
-            low[u] = min(low[u], dfn[v]);
-        }
-    }
-}
-```
 
 
 
@@ -10723,9 +10841,9 @@ signed main()
 
 
 
-### 其他
+### 杂项
 
-欧拉路
+#### 欧拉图
 
 欧拉路径：经过每条边一次且仅一次的路径(起点不为终点)
 
@@ -10854,6 +10972,40 @@ signed main()
     return 0;
 }
 ```
+
+
+
+#### 哈密顿图
+
+哈密顿通路：经过图中所有顶点一次且仅一次的通路
+
+哈密顿回路：经过图中所有顶点一次且仅一次的回路
+
+具有哈密顿回路的图为哈密顿图
+
+具有哈密顿通路，不具有哈密顿回路的图为半哈密顿图
+
+设 $p(x)$ 是图 $x$ 的连通分支数，对哈密顿图任意非空子集 $V_1$，均有 $p(G-V_1)\le |V_1|$。对半哈密顿图有 $p(G-V_1)\le |V_1|+1$
+
+完全图 $K_{2m+1}(m\ge1)$ 含 $m$ 条边不重的哈密顿回路，且加起来含完全图中所有边。完全图 $K_{2m}(m\ge 2)$ 含 $m-1$ 条边不重的哈密顿回路，删掉全部回路后所得图含 $m$ 条互不相邻边。
+
+充分条件：对无向简单图 $G(|V|\ge 2)$，若任意不相邻顶点 $v_i,v_j$ 度数满足 $d(v_i)+d(v_j)\ge n-1$ 则存在哈密顿通路。若 $|V|\ge $3 且满足 $d(v_i)+d(v_j)\ge n$ 则存在哈密顿回路。若任意顶点均有 $d(v_i)\ge\dfrac n2$ 则存在哈密顿回路。
+
+$n\ge 2$ 阶竞赛图具有哈密顿通路，含竞赛图子图也具有哈密顿通路。强联通竞赛图有哈密顿回路。含强联通竞赛图作为子图具有哈密顿回路。
+
+已经证明“判断一个图存不存在哈密顿回路”是NPC。
+
+
+
+#### 竞赛图
+
+兰道定理：判定竞赛图。设比分序列是竞赛图出度排序后的序列 $s$，序列能是竞赛图当且仅当
+$$
+\forall1\le k\le n,\sum_{i=1}^ks_i\ge\dbinom k2
+$$
+且 $k=n$ 时必须取等。注意并不是说 $s$ 每个还原图都是竞赛图，只是证明存在至少一种正确。
+
+竞赛图如果存在环，至少是三元环。
 
 
 

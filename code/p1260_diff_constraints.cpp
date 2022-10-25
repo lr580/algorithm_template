@@ -11,7 +11,7 @@ signed main()
     for (ll i = 1, a, b, c; i <= m; ++i)
     {
         cin >> a >> b >> c;
-        e[a].push_back({b, c});
+        e[b].push_back({a, c});
     }
     for (ll i = 1; i <= n; ++i)
     {
@@ -29,7 +29,7 @@ signed main()
         for (auto pr : e[u])
         {
             ll v = pr.first, w = pr.second;
-            if (d[u] + w < d[v])
+            if (d[v] > d[u] + w)
             {
                 d[v] = d[u] + w;
                 if (!vis[v])
@@ -45,13 +45,14 @@ signed main()
             }
         }
     }
+    ll mi = *min_element(d + 1, d + 1 + n);
     for (ll u = 1; u <= n; ++u)
     {
-        cout << -d[u] << '\n';
+        cout << d[u] - mi << '\n';
         for (auto pr : e[u])
         {
             ll v = pr.first, w = pr.second;
-            assert(-d[u] - (-d[v]) <= w);
+            assert(d[v] <= d[u] + w);
         }
     }
     return 0;
