@@ -6,7 +6,7 @@
 
 ![image-20220325120131181](img/image-20220325120131181.png)
 
-<div align="center" style="font-size:18px">Last built at Oct. 20, 2022</div>
+<div align="center" style="font-size:18px">Last built at Nov. 11, 2022</div>
 
 <div STYLE="page-break-after: always;"></div>
 
@@ -82,6 +82,8 @@ $i$ 数错位排列数公式： $d[0]=d[1]=0,d[2]=1$
 $$
 d[n]=(n-1)(d[n-1]+d[n-2])=n!(1-\dfrac{1}{1!}+-\dfrac{1}{2!}+\cdots+(-1)^n\dfrac1{n!})
 $$
+$d_n=(n-1)(d_{n-1}+d_{n-2})=nd_{n-1}+(-1)^n$。且增长速度 $\lim_{n\to\infty}\dfrac{d_n}{n}=\dfrac1e$
+
 $n$ 个数有 $m$ 个乱的情况数： $C_n^md[m]$ 
 
 $n$ 人围圈排列数 $Q_n^n=(n-1)!$ ，部分圆排列公式 $Q_n^r=\dfrac{A_n^r}r$
@@ -917,7 +919,7 @@ signed main()
 
 - 若 $a,b\in Z,k,m\in N^*,a\equiv b(\bmod m)$ 则 $ak\equiv bk(\bmod mk)$
 
-- 若 $a,b\in Z,d,m\in N^*,d|a,d|b,d|m,a\equiv b(\bmod m)$ 则 $\dfrac ad\equiv\dfrac bc(\bmod \dfrac md)$
+- 若 $a,b\in Z,d,m\in N^*,d|a,d|b,d|m,a\equiv b(\bmod m)$ 则 $\dfrac ad\equiv\dfrac bd(\bmod \dfrac md)$
 
 - 若 $a,b\in Z,d,m\in N^*,d|m,a\equiv b(\bmod m)$ 则 $a\equiv b(\bmod d)$ 
 
@@ -980,6 +982,8 @@ bool isprime(ll p)
 ```
 
 **Miller Rabin算法**，复杂度 $O(k\log^3 n)$ ，$k$ 是设定参数，能够以较高准确率判定是否为素数，建议设 $10$，见 `pollard-rho` 代码。
+
+> $100$ 内质数为  $25$ 个 `2,3,5,7,11,13,17,19,23,29,31,37,41,43,47,53,59,61,67,71,73,79,83,89,97`
 
 
 
@@ -1410,6 +1414,177 @@ int main(){
 }
 ```
 
+```c++
+#include <bits/stdc++.h>
+#define lowbit(x) ((x) & -(x))
+typedef unsigned long long ull;
+typedef unsigned int uint;
+typedef long long ll;
+using namespace std;
+
+ull count_primes(ull x)
+{
+    if (x <= 1)
+        return 0;
+
+    const int eps = 128;
+    const int eps_bit = 8;
+
+    uint S2 = sqrtl(x);
+    uint S3 = powl(x, 1.0 / 3);
+    uint S4 = sqrtl(S2);
+    uint B = std::max(2ull, std::min(ull(S2), ull(S3 * std::max(1.0, pow(log(x), 3) * 0.001))));
+    uint U = x / B + eps;
+
+    uint a, b, t;
+    register uint p, q, r, u, v;
+    ll sum = 0;
+
+    vector<char> mu(B + 1);
+    mu[1] = 1;
+    for (a = 2; a <= B; ++a)
+        if (!mu[a])
+            for (b = a; b <= B; b += a)
+                mu[b] = mu[b] < 0 ? 1 : -1;
+    for (a = 2; a * a <= B; ++a)
+        if (mu[a * a])
+            for (b = a * a; b <= B; b += a * a)
+                mu[b] = 0;
+
+    vector<int> pi(U), primes(uint(U / log(U) * 1.25506)), md(U);
+    uint count = 0;
+    md[1] = 1 << 30, primes[0] = 1;
+    for (a = 6; a < U; a += 3)
+        md[a] = 3;
+    for (a = 4; a < U; a += 2)
+        md[a] = 2;
+    for (a = 4; a * a < U; ++a)
+        if (!md[a])
+        {
+            for (b = a * a; b < U; b += 6 * a)
+                if (!md[b])
+                    md[b] = a;
+            for (b = a * (a + (3 - a % 3) * 2); b < U; b += 6 * a)
+                if (!md[b])
+                    md[b] = a;
+        }
+    for (a = 2; a < U; ++a)
+        pi[a] = md[a] ? pi[a - 1] : (primes[++count] = md[a] = a, pi[a - 1] + 1);
+
+    sum += pi[B] - 1;
+    for (p = pi[B] + 1; primes[p] <= S2; ++p)
+        sum -= pi[x / primes[p]] - p + 1;
+    for (a = 1; a <= B; ++a)
+        if (mu[a])
+            sum += mu[a] * (x / a);
+    for (p = sqrtl(x / primes[pi[B]]) + 1; p <= B; ++p)
+        if (pi[p] != pi[p - 1])
+            sum += pi[B] - pi[std::max(uint(x / p / p), p)];
+
+    for (p = S4 + 1; p <= S3; ++p)
+        if (pi[p] != pi[p - 1])
+        {
+            uint L = p + 1, R = std::min((ull)B, x / p / p);
+            sum += (ll)(2 - pi[p]) * (pi[R] - pi[L - 1]);
+            ull m = x / p;
+            for (u = L; u <= R; u = v + 1)
+            {
+                t = pi[m / primes[pi[u - 1] + 1]];
+                v = m / primes[t];
+                if (v > R)
+                    v = R;
+                sum += (ll)(pi[v] - pi[u - 1]) * t;
+            }
+        }
+
+    vector<int> bit(U);
+    vector<int> nxt(B + 2);
+    for (q = 1; q <= B; ++q)
+        nxt[q] = q + !mu[q];
+    nxt[B + 1] = B + 1;
+    for (r = 1; r <= U - eps; ++r)
+        bit[r] = r;
+    for (p = 1; p <= S4; ++p)
+        if (pi[p] != pi[p - 1])
+        {
+            ull m = x / p;
+            if (p <= eps_bit)
+            {
+                for (q = std::max(p, B / p) + 1; q <= B; ++q)
+                {
+                    while (q != nxt[q])
+                        q = nxt[q] = nxt[nxt[q]];
+                    if (q > B)
+                        break;
+                    if (md[q] <= p)
+                    {
+                        nxt[q] = q + 1;
+                        continue;
+                    }
+                    sum -= mu[q] * bit[m / q];
+                }
+                for (r = 1; r < U; ++r)
+                    bit[r] = md[r] > p;
+                if (pi[p] < count && primes[pi[p] + 1] > eps_bit)
+                {
+                    for (r = 1; r < U; ++r)
+                        if (r + lowbit(r) < U)
+                            bit[r + lowbit(r)] += bit[r];
+                }
+                else
+                {
+                    for (r = 1; r < U; ++r)
+                        bit[r] += bit[r - 1];
+                }
+            }
+            else
+            {
+                for (q = std::max(p, B / p) + 1; q <= B; ++q)
+                {
+                    while (q != nxt[q])
+                        q = nxt[q] = nxt[nxt[q]];
+                    if (q > B)
+                        break;
+                    if (md[q] <= p)
+                    {
+                        nxt[q] = q + 1;
+                        continue;
+                    }
+                    if (mu[q] == 1)
+                    {
+                        for (a = m / q; a; a -= lowbit(a))
+                            sum -= bit[a];
+                    }
+                    else
+                    {
+                        for (a = m / q; a; a -= lowbit(a))
+                            sum += bit[a];
+                    }
+                }
+                for (a = p; a < U; a += lowbit(a))
+                    --bit[a];
+                for (r = p * p; r < U; r += 6 * p)
+                    if (md[r] == p)
+                        for (a = r; a < U; a += lowbit(a))
+                            --bit[a];
+                for (r = p * (p + (3 - p % 3) * 2); r < U; r += 6 * p)
+                    if (md[r] == p)
+                        for (a = r; a < U; a += lowbit(a))
+                            --bit[a];
+            }
+        }
+
+    return sum;
+}
+
+int main()
+{
+    ull n;
+    cin >> n;
+    cout << count_primes(n);
+}
+```
+
 
 
 
@@ -1492,6 +1667,61 @@ signed main()
 }
 ```
 
+```c++
+#include <bits/stdc++.h>
+using namespace std;
+using ll = long long;
+ll exgcd(ll a, ll b, ll &x, ll &y)
+{
+    if (!b)
+    {
+        x = 1, y = 0;
+        return a;
+    }
+    ll d = exgcd(b, a % b, y, x);
+    y -= a / b * x;
+    return d;
+}
+ll t, a, b, c, x, y, xmi, xmx, ymi, ymx;
+signed main()
+{
+    cin.tie(0)->ios::sync_with_stdio(false);
+    cin >> t;
+    while (t--)
+    {
+        cin >> a >> b >> c;
+        ll g = exgcd(a, b, x, y);
+        if (c % g)
+        {
+            cout << "-1\n";
+            continue;
+        }
+        a /= g, b /= g, c /= g;
+        x *= c, y *= c;
+        x = (x % b + b) % b;
+        x = x == 0 ? b : x;
+        y = (c - a * x) / b;
+        if (y > 0)
+        {
+            xmi = x, ymx = y;
+            y %= a;
+            y = y == 0 ? a : y;
+            x = (c - b * y) / a;
+            xmx = x, ymi = y;
+            cout << (xmx - xmi) / b + 1 << ' ';
+            cout << xmi << ' ' << ymi << ' ' << xmx << ' ' << ymx << '\n';
+        }
+        else
+        {
+            cout << x << ' ' << y % a + a << '\n';
+        }
+    }
+    return 0;
+}
+```
+
+
+
 
 
 #### 取模公式
@@ -1553,6 +1783,110 @@ signed main()
 	return 0;
 }
 ```
+
+**扩展卢卡斯定理：**
+
+求 $C_n^m\bmod p$，将 $p$ 质因数分解为 $p_1^{\alpha_1}p_2^{\alpha_2}\cdots$，用中国剩余定理求方程组 $C_n^m\bmod p_1^{\alpha_i}$ 的最小解 $x$。如果 $p_i^{\alpha_1}$ 都是素数且较小可以预处理阶乘，直接对每个子算式上 lucas，否则用下述代码：
+
+不考虑 exCRT 复杂度时，预处理 $n!\div n内p所有倍数乘积\bmod p$ 复杂度为 $O(p+T\log p)$
+
+> 洛谷P4720-求 $C_n^m\bmod p,1\le m\le n\le 10^{18},2\le p\le 10^6$。
+
+```c++
+#include <bits/stdc++.h>
+using namespace std;
+using ll = long long;
+void exgcd(ll a, ll b, ll &x, ll &y)
+{
+    if (!b)
+        x = 1, y = 0;
+    else
+        exgcd(b, a % b, y, x), y -= a / b * x;
+}
+ll inv(ll a, ll p)
+{
+    ll x, y;
+    exgcd(a, p, x, y);
+    return (x + p) % p;
+}
+ll qpow(ll a, ll b, ll p)
+{
+    ll r = 1;
+    for (; b; b >>= 1, a = a * a % p)
+        if (b & 1)
+            r = r * a % p;
+    return r;
+}
+ll CRT(int n, ll *a, ll *m)
+{
+    ll M = 1, p = 0;
+    for (int i = 1; i <= n; i++)
+        M = M * m[i];
+    for (int i = 1; i <= n; i++)
+    {
+        ll w = M / m[i], x, y;
+        exgcd(w, m[i], x, y);
+        p = (p + a[i] * w * x % M) % M;
+    }
+    return (p % M + M) % M;
+}
+ll calc(ll n, ll x, ll P)
+{
+    if (!n)
+        return 1;
+    ll s = 1;
+    for (ll i = 1; i <= P; i++)
+        if (i % x)
+            s = s * i % P;
+    s = qpow(s, n / P, P);
+    for (ll i = n / P * P + 1; i <= n; i++)
+        if (i % x)
+            s = i % P * s % P;
+    return s * calc(n / x, x, P) % P;
+}
+ll multilucas(ll n, ll m, ll x, ll P)
+{
+    if (n < m)
+        return 0;
+    int cnt = 0;
+    for (ll i = n; i; i /= x)
+        cnt += i / x;
+    for (ll i = m; i; i /= x)
+        cnt -= i / x;
+    for (ll i = n - m; i; i /= x)
+        cnt -= i / x;
+    return qpow(x, cnt, P) % P * calc(n, x, P) % P * inv(calc(m, x, P), P) %
+           P * inv(calc(n - m, x, P), P) % P;
+}
+ll exlucas(ll n, ll m, ll P)
+{
+    int cnt = 0;
+    ll p[20], a[20];
+    for (ll i = 2; i * i <= P; i++)
+    {
+        if (P % i == 0)
+        {
+            p[++cnt] = 1;
+            while (P % i == 0)
+                p[cnt] = p[cnt] * i, P /= i;
+            a[cnt] = multilucas(n, m, i, p[cnt]);
+        }
+    }
+    if (P > 1)
+        p[++cnt] = P, a[cnt] = multilucas(n, m, P, P);
+    return CRT(cnt, a, p);
+}
+signed main()
+{
+    cin.tie(0)->ios::sync_with_stdio(false);
+    ll n, m, p;
+    cin >> n >> m >> p;
+    cout << exlucas(n, m, p);
+    return 0;
+}
+```
+
+
 
 
 
@@ -1628,6 +1962,10 @@ signed main()
     return 0;
 }
 ```
+
+
+
+**威尔逊定理**：对素数 $p$ 有 $(p-1)!\equiv -1\pmod p$
 
 
 
@@ -1735,7 +2073,7 @@ signed main()
 
 #### 中国剩余定理
 
-CRT(Chnese Remainder Theorem) 求解如下方程最小正元 $x$ ：( $n_i$ 两两互质)
+CRT(Chnese Remainder Theorem) 求解如下方程最小正元 $x$ ：( $a_i$ 两两互质)
 
 $$
 \begin{cases}
@@ -1745,6 +2083,8 @@ x\equiv b_2(\mod a_2)\\
 x\equiv b_k(\mod a_k)\\
 \end{cases}
 $$
+
+设 $p=\prod a$，通解为 $x+kp$。方程组数为 $n$ 则复杂度为 $O(n\log n)$。(exCRT 同)
 
 > 洛谷P1495-输入不等式数 $n$ 和 $a_i,b_i$ ( $a_i$ 互质)，求最小 $x$
 
@@ -1782,6 +2122,10 @@ signed main()
 
 **拓展中国定理：** ( $a_i$ 不互质) 洛谷P4777- $n\le10^5,\gcd\le10^{18},1\le b_i,a_i\le10^{18}$
 
+设前 $i-1$ 个不定方程式的答案是 $ans$，前 $i-1$ 个模数的 $lcm$ 为 $m$，有：$ans+mx\equiv a_i\pmod{p_i}$，用 exgcd 求出新的 $x$，则新的 $ans+mx$ 为新答案。
+
+如果要求 $b_i x\equiv a_i\pmod{p_i}$，由于 $b_i$ 逆元不一定存在不能拉过去。转化为求不定方程 $b_i(ans+mx)\equiv a_i\pmod{p_i}$(那么初始值是 $an=0,m=1$ 从 $i=1$ 开始推) 
+
 ```c++
 #include <bits/stdc++.h>
 using namespace std;
@@ -1813,7 +2157,7 @@ signed main()
         x = (__int128)x * (c / gcc) % bg;
         ans += x * m, m *= bg, ans = (ans % m + m) % m;
     }
-    printf("%lld", (ans % m + m) % m);
+    printf("%lld", ans);
     return 0;
 }
 ```
@@ -1823,6 +2167,48 @@ signed main()
 #### BSGS
 
 求最小非负整数 $x$ ，满足 $a^x\equiv b(\bmod p), p$ 是质数， $O(\sqrt p)$  (洛谷P4195)
+
+```c++
+#include <bits/stdc++.h>
+using namespace std;
+using ll = long long;
+ll bsgs(ll a, ll b, ll p)
+{ // min x of a^x%p=b
+    if (a % p == 0 && b)
+    {
+        return -1;
+    }
+    if (b == 1)
+    {
+        return 0;
+    }
+    map<ll, ll> h;
+    ll m = sqrt(p) + 1, s = 1;
+    for (ll i = 1; i <= m; ++i)
+    {
+        h[b] = i;
+        s = s * a % p, b = b * a % p;
+    }
+    a = s;
+    for (ll i = 1; i <= m; ++i)
+    {
+        if (h.count(a))
+        {
+            return i * m - h[a] + 1;
+        }
+        a = a * s % p;
+    }
+    return -1;
+}
+signed main()
+{
+    ll a, b, p;
+    cin >> p >> a >> b;
+    ll ans = bsgs(a, b, p);
+    cout << (ans == -1 ? "no solution" : to_string(ans));
+    return 0;
+}
+```
 
 ```c++
 #include <bits/stdc++.h>
@@ -1861,8 +2247,12 @@ struct hasht
 ll a, b, p, m, s;
 signed main()
 {
-    scanf("%lld%lld%lld", &p, &a, &b);
+    scanf("%lld%lld%lld", &p, &a, &b);//a%=p,b%=p
     h.init();
+    if (a % p == 0 && b)
+    {
+        return printf("no solution"), 0;
+    }
     if (b == 1)
     {
         return !printf("0");
@@ -1891,112 +2281,65 @@ signed main()
 ```c++
 #include <bits/stdc++.h>
 using namespace std;
-typedef long long ll;
-#define mn 100000
-#define mod 1000007
-#define big 0xfffffffffffffa
-ll a, b, p, baby[mn + 3], giant[mn + 3], key[mod], comment[2][mod];
-ll stk[mod << 1 | 1];
-ll mhash(ll v)
+#define LL long long
+unordered_map<int, int> mp;
+int gcd(int a, int b) { return b ? gcd(b, a % b) : a; }
+int BSGS(int a, int n, int p, int ad)
 {
-    ll w = v * v % mod;
-    while (key[w] && key[w] != v)
-    {
-        (w += 1) %= mod;
-    }
-    if (!key[w])
-    {
-        stk[++stk[0]] = w;
-    }
-    return w;
+    mp.clear();
+    int m = ceil(sqrt(p));
+    int s = 1;
+    for (int i = 0; i < m; i++, s = 1ll * s * a % p)
+        mp[1ll * s * n % p] = i;
+    for (int i = 0, tmp = s, s = ad; i <= m; i++, s = 1ll * s * tmp % p)
+        if (mp.find(s) != mp.end())
+            if (1ll * i * m - mp[s] >= 0)
+                return 1ll * i * m - mp[s];
+    return -1;
 }
-ll phi(ll x)
+int exBSGS(int a, int n, int p)
 {
-    ll r = x;
-    for (ll i = 2; i * i <= x; ++i)
+    a %= p;
+    n %= p;
+    if (n == 1 || p == 1)
+        return 0;
+    int cnt = 0;
+    int d, ad = 1;
+    while ((d = gcd(a, p)) ^ 1)
     {
-        if (x % i == 0)
-        {
-            r = r / i * (i - 1);
-            while (x % i == 0)
-            {
-                x /= i;
-            }
-        }
+        if (n % d)
+            return -1;
+        cnt++;
+        n /= d;
+        p /= d;
+        ad = (1ll * ad * a / d) % p;
+        if (ad == n)
+            return cnt;
     }
-    if (x > 1)
-    {
-        r = r / x * (x - 1);
-    }
-    return r;
-}
-ll exbsgs()
-{
-    ll res = big, block = ceil(sqrt(2 * phi(p)));
-    baby[0] = 1;
-    for (ll i = 1; i <= block; ++i)
-    {
-        baby[i] = baby[i - 1] * a % p;
-    }
-    comment[0][mhash(1)] = 0;
-    giant[0] = 1;
-    for (ll i = 1; i <= block; ++i)
-    {
-        giant[i] = giant[i - 1] * baby[block] % p;
-        ll now = mhash(giant[i]);
-        if (!comment[0][now])
-        {
-            comment[0][now] = i;
-        }
-        else if (!comment[1][now])
-        {
-            comment[1][now] = i;
-        }
-    }
-    for (ll i = 0; i <= block; ++i)
-    {
-        ll now = mhash(b * baby[i] % p);
-        ll t0 = comment[0][now], t1 = comment[1][now];
-        if (t0 && giant[t0 - 1] * baby[block - i] % p == b)
-        {
-            res = min(res, t0 * block - i);
-        }
-        else if (t1 && giant[t1 - 1] * baby[block - i] % p == b)
-        {
-            res = min(res, t1 * block - i);
-        }
-    }
-    return res;
+    LL ans = BSGS(a, n, p, ad);
+    if (ans == -1)
+        return -1;
+    return ans + cnt;
 }
 signed main()
 {
-    while (scanf("%lld%lld%lld", &a, &p, &b) != EOF)
+    int a = read(), p = read(), n = read();
+    while (a || p || n)
     {
-        if (!p && !a && !b)
-        {
-            break;
-        }
-        b %= p, a %= p;
-        while (stk[0])
-        {
-            key[stk[stk[0]]] = 0;
-            comment[0][stk[stk[0]]] = 0;
-            comment[1][stk[stk[0]]] = 0;
-            --stk[0];
-        }
-        ll res = exbsgs();
-        if (res == big)
-        {
-            printf("No Solution\n");
-        }
+        int ans = exBSGS(a, n, p);
+        if (~ans)
+            printf("%d\n", ans);
         else
-        {
-            printf("%lld\n", res);
-        }
+            puts("No Solution");
+        a = read();
+        p = read();
+        n = read();
     }
     return 0;
 }
 ```
+
+BSGS 的结构是一条链(exBSGS cnt 部分)加一条环。可以用 BSGS 求环长的依据：有环必然存在 $a^p\equiv a\pmod p$ 即 $a^{p-1}\equiv 1\pmod p$，故环长为 $p-1$。
 
 
 
@@ -3426,6 +3769,60 @@ signed main()
 
 
 ### 杂项
+
+#### 矩阵加速
+
+常见建模：
+$$
+f_i=af_{i-1}+bf_{i-2}
+\Rightarrow
+\begin{pmatrix}
+a&b\\1&0
+\end{pmatrix}
+\begin{pmatrix}
+f_{i-1}\\f_{i-2}
+\end{pmatrix}
+=
+\begin{pmatrix}
+f_i\\f_{i-1}
+\end{pmatrix}
+$$
+
+$$
+f_i=af_{i-1}+b^i
+\Rightarrow
+\begin{pmatrix}
+a&1\\0&b
+\end{pmatrix}
+\begin{pmatrix}
+f_{i-1}\\b^{i-1}
+\end{pmatrix}
+=
+\begin{pmatrix}
+f_i\\b^i
+\end{pmatrix}
+$$
+
+$$
+f_i=af_{i-1}+i^3
+\Rightarrow
+\begin{pmatrix}
+a&1&0&0&0\\
+0&1&3&3&1\\
+0&0&1&2&1\\
+0&0&0&1&1\\
+0&0&0&0&1
+\end{pmatrix}
+\begin{pmatrix}
+f_{i-1}\\i^3\\i^2\\i\\1
+\end{pmatrix}
+=
+\begin{pmatrix}
+f_i\\(i+1)^3\\(i+1)^2\\i+1\\1
+\end{pmatrix}
+$$
+
+
 
 #### 高斯消元
 
@@ -6439,6 +6836,77 @@ signed main()
 
 
 
+> P2294-有 $t(< 100)$ 组询问，每次给定 $n(< 100)$ 个月和 $m(< 10^3)$ 条账本，账本表示 $[u,v]$ 月份收入和为 $w$。问账本是否矛盾。
+
+解法一：差分约束。
+
+设前 $i$ 个月收入之和为 $s_i$，则每条账本为：$s_v-s_{u-1}=w$，即：
+$$
+\begin{cases}
+s_{u-1}&\le s_v-w\\
+s_v&\le s_{u-1}+w
+\end{cases}
+$$
+直接建图，建出来的图不一定是连通的，则可以对每个非连通子图都跑一次 SPFA，如果存在一个子图有负环就 false，否则 true。不管跑最短路还是最长路都能过(分别设不同的无穷初始值)，记得初始化全(不要漏了 `cnt` 等数组)。
+
+解法二：并查集。
+
+若已知 $s_a-s_b,s_b-s_c$，且发现新的 $s_a-s_c$，需要判断新的是否符合原有的。维护带权并查集，设 $c_u=s_{fa}-s_u$。当我们发现输入的 $a,b$ 在同一个并查集时，有 $c_a-c_b=s_{fa}-s_a-s_{fa}+s_b$，故判断原有的 $c_u-c_v$ 是否与 $w$ 相等即可。
+
+初始设 $c=0$，合并两并查集 $u,v$ 时，设 $fa_v$ 并到 $fa_u$ 去，因为已知 $s_v-s_u=w$，且原有 $c_u=s_{fa_u}-s_u,c_v=s_{fa_v}-s_v$。要求出新的 $s_{fa_u}-s_{fa_v}=(c_u+s_u)-(c_v+s_v)$ $=c_u-c_v-(s_v-s_u)$ $=c_u-c_v-w$。(类比向量加减法)
+
+对于路径压缩，设已知 $c_u=s_r-s_u,c_v=s_u-s_v$，需要更新 $s_r-s_v$，等于 $c_u+c_v$，即直接求边权和即可。
+
+```c++
+#include<bits/stdc++.h>
+int fa[105],cha[105];  
+int find(int x)
+{  
+    if(x!=fa[x])
+    {
+        int t=find(fa[x]);
+        cha[x]+=cha[fa[x]];
+        fa[x]=t;  
+    }  
+    return fa[x];  
+}  
+int main()  
+{  
+    int T,n,m,i,x,y,z,flag;  
+    scanf("%d",&T);  
+    while (T--) 
+    {  
+        flag=0;  
+        scanf("%d%d",&n,&m);  
+        for(i=0;i<=n;i++)
+        {  
+            fa[i]=i;  
+            cha[i]=0;  
+        }  
+        for(i=1;i<=m;i++)  
+        {  
+            scanf("%d%d%d",&x,&y,&z);  
+            x--;  
+            if(find(x)!=find(y))  
+            {  
+                cha[fa[y]]=cha[x]-cha[y]-z;  
+                fa[fa[y]]=fa[x];
+            }  
+            else  
+            if(cha[x]-cha[y]!=z) flag=1;  
+        }  
+        if(flag==0) printf("true\n"); else printf("false\n");  
+    }  
+    return 0;  
+}
+```
+
+解法三：贪心
+
+先按左端点为第一排序关键字，再排右端点，作为比较依据动态维护一个堆。之后就开始两两比较，如果左端点相等，就比较右端点，如果相等，就比较值，如果值不同，就直接输出false，否则输出true，如果右端点不等，就把相同的部分抵消掉，把新的区间再压入优先队列。直到不能操作，就输出true。
+
+
+
 其他例题： 
 
 - (洛谷P2661)出度均 $1$ 无自环 $n$ 点有向图，求最小环长度
@@ -8246,7 +8714,44 @@ signed main()
 
 #### 杂项
 
-最小距离和
+##### 随机游走
+
+> 给定一棵树，树的某个结点上有一个硬币，在某一时刻硬币会等概率地移动到邻接结点上，问硬币移动到邻接结点上的期望距离。
+
+设 $f(u)$ 为 $u$ 节点走到父节点 $p_u$ 的期望距离，有：
+$$ {r}
+f(u)=\sum_{(u,t)\in E}w(u,t)+\sum_{v\in son_u}f(v)
+$$
+若 $w=1$ 则即 $u$ 子树所有节点的度数和，即 $u$ 子树大小的二倍减一。
+
+设 $g(u)$ 代表 $p_u$ 走向子节点 $u$ 的期望距离，有：
+$$
+g(u)=g(p_u)+f(p_u)-f(u)
+$$
+显然初始值是 $f_{leaf}=1,g_{root}=0$。
+
+```c++
+vector<int> G[maxn];
+void dfs1(int u, int p) {
+  f[u] = G[u].size();
+  for (auto v : G[u]) {
+    if (v == p) continue;
+    dfs1(v, u);
+    f[u] += f[v];
+  }
+}
+void dfs2(int u, int p) {
+  if (u != 1) g[u] = g[p] + f[p] - f[u];
+  for (auto v : G[u]) {
+    if (v == p) continue;
+    dfs2(v, u);
+  }
+}
+```
+
+
+
+##### 最小距离和
 
 > 例题P1364：给定 $n(1\le n\le100)$ 节点二叉树(输入为 $w,u,v$ 为第 $i$ 个节点点权和左右儿子( $0$ 是无子))，求最小距离和(以某点为原点各点点权乘以路径长)( $1\le w\le10^5$ )
 
@@ -8378,7 +8883,7 @@ for (k = 1; k <= n; k++)
 
 第 $k$ 次循环时，表示只经过前 $k$ 个节点时，最短路的大小。记录路径可以获得更小时设 `pre[i][j]=k` 。
 
-可以求最长路(输入负，输出再负一次)
+可以求最长路(输入负，输出再负一次)或者上述改为 max。
 
 应用：
 
@@ -8573,7 +9078,7 @@ void spfa()
     while (!q.empty())
         q.pop();
     d[1] = 0;
-    vis[1] = true;
+    vis[1] = true;//表示当前点是否在队列内
     q.push(1);
     int u;
     while (!q.empty())
@@ -8588,7 +9093,7 @@ void spfa()
                 d[e[i].to] = d[u] + e[i].d;
                 if (!vis[e[i].to])
                 {
-                    if (++cnts[e[i].to] >= n)
+                    if (++cnts[e[i].to] >= n)//该单源最短路的长度
                     {
                         printf("YES\n");
                         return;
@@ -8619,6 +9124,82 @@ int main()
         }
         spfa();
     }
+    return 0;
+}
+```
+
+求负环并输出方案：
+
+```c++
+#include <bits/stdc++.h>
+using namespace std;
+using ll = long long;
+const ll mn = 5e3 + 10, big = 1e18;
+ll n, m, d[mn], pr[mn];
+struct edge
+{
+    ll u, v, w;
+} e[mn * 2];
+bool spfa(ll s)
+{
+    fill_n(d, n + 3, 1e18);
+    d[s] = 0;
+    for (ll i = 1; i <= n; ++i)
+    {
+        for (ll j = 1; j <= m; ++j)
+        {
+            ll u = e[j].u, v = e[j].v, w = e[j].w;
+            if (d[v] > d[u] + w)
+            {
+                d[v] = d[u] + w;
+                pr[v] = j;
+            }
+        }
+    }
+    for (ll j = 1; j <= m; ++j)
+    {
+        ll u = e[j].u, v = e[j].v, w = e[j].w;
+        if (d[v] > d[u] + w)
+        {
+            ll a = u;
+            for (ll i = 1; i <= n; ++i)
+            {
+                a = e[pr[a]].u;
+            }
+            stack<ll> ans;
+            ans.push(a);
+            for (ll b = e[pr[a]].u; b != a; b = e[pr[b]].u)
+            {
+                ans.push(b);
+            }
+            cout << "exists\n"
+                 << ans.size() << '\n';
+            while (!ans.empty())
+            {
+                ll c = ans.top();
+                ans.pop();
+                cout << c << ' ';
+            }
+            return false;
+        }
+    }
+    cout << "not exists\n";
+    return true;
+}
+signed main()
+{
+    cin.tie(0)->ios::sync_with_stdio(false);
+    cin >> n >> m;
+    for (ll i = 1, u, v, w; i <= m; ++i)
+    {
+        cin >> u >> v >> w;
+        e[i] = {u, v, w};
+    }
+    for (ll i = 1; i <= n; ++i)
+    {
+        e[++m] = {0, i, 0};
+    }
+    spfa(0);
     return 0;
 }
 ```
@@ -8861,8 +9442,8 @@ signed main()
 
 1. 如果有约束条件 $x_i=y_i$，等价于两个约束条件 $x_i\le y_i+0,y_i\le x_i+0$
 2. 如果有约束条件 $\dfrac{x_i}{x_j}\le c_k$，等价于 $\log x_i-\log x_j\le\log c_k$
-3. 反向差分约束，即全部改为 $x_i\ge x_j+c_k$ 连 $j\to i$ 的 $c_k$ 才能有超级源点的图，求最大的可以跑 SPFA 最长路(类似于工程图最晚)，一般用于求最小解
-4. 要求 $\max(x_v-x_u)$，等价于求 $u$ 到 $v$ 的最短路；要求 $\min(x_v-x_u)$ 求 $u$ 到 $v$ 最长路(建的图可能不一样)
+3. 反向差分约束，即全部改为 $x_i\ge x_j+c_k$ 连 $j\to i$ 的 $c_k$ 才能有超级源点的图，求最大的跑该不等式的 SPFA 最长路(类似于工程图最晚)，一般用于求最小解
+4. 要求 $\max(x_v-x_u)$，等价于求 $u$ 到 $v$ 的最短路；要求 $\min(x_v-x_u)$ 求 $u$ 到 $v$ 最长路(建的图不一样)
 
 > P1260-给定 $n$ 个变量 $t$ 和 $m$ 个不等式 $t_i-t_j\le b$。问能否构造出 $t$ 或输出无解。输出构造非负解且至少一个 $0$。$n\le 10^3,m\le 5\times10^3,b\in(-100,100)$。
 
@@ -9495,7 +10076,7 @@ signed main()
 
 求无向图桥：修改 low ，限定非树边不能是子到父的反向边时，如果 p 是 q 的父节点，并且  $low_q\ge dfn_p$ ，那么 $p\leftrightarrow q$ 是桥
 
-有向图环缩点重建图：枚举边，不在同一强连通分量的连新边
+有向图环缩点重建图：跑完 tarjan 后枚举边，不在同一强连通分量的在缩点图上连新边
 
 > 可以解决：求有向图可重复走边/点的最长路 (缩点图跑拓扑排序求最长路)
 
@@ -9509,14 +10090,13 @@ signed main()
 #include <bits/stdc++.h>
 using namespace std;
 typedef int ll;
-#define MAXN 20002
-#define MAXM 200002
+const ll MAXN = 2e4 + 10, MAXM = 2e5 + 10;
 struct edge
 {
     ll to, nx;
 } e[MAXM];
 ll hd[MAXN], cnt, n, m, dfn[MAXN], low[MAXN], co[MAXN], num[MAXN], conum, st;
-bool ud[MAXN], vis[MAXN];
+bool vis[MAXN];
 stack<ll> s;
 void adde(ll &u, ll &v)
 {
@@ -9534,7 +10114,7 @@ void tarjan(ll x)
 {
     dfn[x] = low[x] = ++st;
     s.push(x);
-    vis[x] = ud[x] = true;
+    vis[x] = true;
     for (ll i = hd[x]; i; i = e[i].nx)
     {
         ll toi = e[i].to;
@@ -9561,7 +10141,7 @@ signed main()
     while (m--)
         scanf("%d%d", &ui, &vi), adde(ui, vi);
     for (ll i = 1; i <= n; ++i)
-        if (!ud[i])
+        if (!dfn[i])
             tarjan(i);
     for (ll i = 1; i <= conum; ++i)
         if (num[i] > 1)
@@ -9612,7 +10192,7 @@ void tarjan(ll u, ll fa)
         }
         low[u] = min(low[u], dfn[toi]);
     }
-    if (child >= 2 && u == fa)
+    if (child >= 2) // u == fa
         cut[u] = true;
 }
 signed main()
@@ -13707,6 +14287,10 @@ int main()
 
 高维前缀和可以考虑压缩数组，叠前缀和时可以容斥原理，也可以逐维叠加，即以每个维度进行一次一维前缀和，其他维度不变。
 
+对 $a=(1,1,\cdots)$ 的 $k$ 阶前缀和 $s_n$ 是 $\dfrac{n(n+1)\cdots(n+k-1)}{k!}=C_{n+k-1}^k$。
+
+对任意 $a$ 的 $y$ 阶前缀和 $s_{y,x}=\sum_{i=1}^xC_{y+x-i-1}^{y-1}a_i=\sum_{i=1}^xC_{x-i}^{y-1}a_i$，可以 $O(x)$ 求。要求一段前缀和的和，可以求它更高一阶的两边界值。
+
 **常见应用：**
 
 一维前缀和/差分：
@@ -15768,6 +16352,8 @@ erase(元素值)方法。可以删除不存在的值，将会忽略操作
 
 erase(迭代器)方法 ，如x.end()
 
+对 multiset 而言，erase 元素值会删掉所有同值，迭代器则删单个
+
 find()有，返回迭代器，无，返回末尾end()
 
 并集set_union(Ab, Ae, Bp, Be, 输出迭代器)//algorithm
@@ -15848,7 +16434,7 @@ bitset<d> s2(str);
 
 priority_queue
 
-默认小根堆。定义大根堆：(或自行写结构体)
+默认大根堆。定义小根堆：(或自行写结构体)
 
 ```c++
 priority_queue<int, vector<int>,greater<int> > q;
@@ -16138,5 +16724,15 @@ public class Main {
 
 ```c++
 return ((ull)a*b-(ull)((ull)a/k*b)*k+k)%k; 
+```
+
+防炸 ll 不开 i128 的模乘：
+
+```c++
+LL mul(LL a, LL b, LL P){
+    LL L = a * (b >> 25LL) % P * (1LL << 25) % P;
+    LL R = a * (b & ((1LL << 25) - 1)) % P;
+    return (L + R) % P;
+}
 ```
 
