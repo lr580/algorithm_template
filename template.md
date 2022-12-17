@@ -6,7 +6,7 @@
 
 ![image-20220325120131181](img/image-20220325120131181.png)
 
-<div align="center" style="font-size:18px">Last built at Nov. 11, 2022</div>
+<div align="center" style="font-size:18px">Last built at Dec. 3, 2022</div>
 
 <div STYLE="page-break-after: always;"></div>
 
@@ -890,6 +890,15 @@ signed main()
 
 #### 基础性质
 
+设 $a,b,m\in Z^+$，有：$\lfloor\dfrac ab\rfloor=\lceil\dfrac{a+1}b\rceil-1$, $\lceil\dfrac ab\rceil=\lfloor\dfrac{a-1}b\rfloor+1$。
+$$
+\begin{align}
+ab\ge m\Leftrightarrow a\ge\lceil\dfrac mb\rceil \Leftrightarrow b\ge\lceil\dfrac ma\rceil\\
+ab > m\Leftrightarrow a > \lceil\dfrac mb\rceil \Leftrightarrow b > \lceil\dfrac ma\rceil\\
+ab\le m\Leftrightarrow a\le\lfloor\dfrac mb\rfloor \Leftrightarrow b\le\lfloor\dfrac ma\rfloor\\
+ab <  m\Leftrightarrow a < \lfloor\dfrac mb\rfloor\Leftrightarrow b < \lfloor\dfrac ma\rfloor
+\end{align}
+$$
 **整除**的性质：( $x|y$ 那么 $x$ 是 $y$ 倍数，$y$ 是 $x$ 因数(约数)， $x,y\in Z,x\neq 0$ )
 
 - $a|b\Leftrightarrow-a|b\Leftrightarrow a|-b\Leftrightarrow|a|\ |\ |b|$
@@ -8885,6 +8894,61 @@ for (k = 1; k <= n; k++)
 
 可以求最长路(输入负，输出再负一次)或者上述改为 max。
 
+输出方案：
+
+```c++
+#include <bits/stdc++.h>
+using namespace std;
+using ll = long long;
+const ll mn = 1e2 + 10;
+ll n, m, d[mn][mn], nx[mn][mn];
+signed main()
+{
+    ios::sync_with_stdio(false), cin.tie(0);
+    cin >> n >> m;
+    memset(d, 0x3f, sizeof d);
+    for (ll i = 1; i <= n; ++i)
+    {
+        d[i][i] = 0, nx[i][i] = i;
+    }
+    for (ll i = 1, u, v, w; i <= m; ++i)
+    {
+        cin >> u >> v >> w;
+        d[u][v] = w, nx[u][v] = v;
+    }
+    for (ll k = 1; k <= n; ++k)
+    {
+        for (ll i = 1; i <= n; ++i)
+        {
+            for (ll j = 1; j <= n; ++j)
+            {
+                if (d[i][j] > d[i][k] + d[k][j])
+                {
+                    d[i][j] = d[i][k] + d[k][j];
+                    nx[i][j] = nx[i][k];
+                }
+            }
+        }
+    }
+    ll q;
+    cin >> q;
+    for (ll u, v; q--;)
+    {
+        cin >> u >> v;
+        cout << u << ' ';
+        while (u != v)
+        {
+            cout << nx[u][v] << ' ';
+            u = nx[u][v];
+        }
+        cout << '\n';
+    }
+    return 0;
+}
+```
+
+
+
 应用：
 
 > hdu1599-给定 $n(\le100)$ 点和 $m(\le10^3)$ 双向带权路，从任一点出发经过共至少 $3$ 个不同点然后回到该点成一个环，求最小带权环，无环输出 `It's impossible.`
@@ -9047,7 +9111,7 @@ signed main()
 
 #### SPFA
 
-~~(已死算法)~~队列优化的 SPFA(某些随机图跑得很快) ，用途是判负环。最坏情况仍然是 $O(nm)$ (<u>堆/栈优化</u>可以被卡指数级复杂度)。记录最短路经过了多少条边，当经过了至少 n 条边时，说明 s 点可以抵达一个负环。在没有负权边时最好使用 Dijkstra 算法。下面是负环模板：
+队列优化的 SPFA(某些随机图跑得很快) ，用途是判负环。最坏情况仍然是 $O(nm)$ (<u>堆/栈优化</u>可以被卡指数级复杂度)。记录最短路经过了多少条边，当经过了至少 n 条边时，说明 s 点可以抵达一个负环。在没有负权边时最好使用 Dijkstra 算法。下面是负环模板：
 
 ```c++
 #include <bits/stdc++.h>
@@ -9683,7 +9747,7 @@ signed main()
     for (ll i = 1, fu, fv; i <= m && suc <= n - 1; ++i)
     {
         fu = findf(e[i].u), fv = findf(e[i].v);
-        if (fu != fv)
+        if (fu != fv) //sol += u,v
             fa[fu] = fv, ans += e[i].w, ++suc;
     }
     suc == n - 1 ? printf("%lld", ans) : printf("orz");
@@ -9706,6 +9770,62 @@ signed main()
 #### prim
 
 暴力 $O(n^2+m)$ ，二叉堆优化 $O((n+m)\log n)$ ， Fib 堆 $O(n\log n+m)$ 
+
+暴力：(适合完全图) (洛谷P1265 求坐标轴上点的最小生成树)
+
+```c++
+#include <bits/stdc++.h>
+using namespace std;
+using ll = long long;
+using db = double;
+const ll mn = 5e3 + 10;
+ll n, x[mn], y[mn], suc, vis[mn];
+db d[mn], ans;
+ll sol[mn]; //如果要输出方案
+signed main()
+{
+    cin >> n;
+    for (ll i = 1; i <= n; ++i)
+    {
+        cin >> x[i] >> y[i];
+        d[i] = 1e21;
+    }
+    d[1] = 0;
+    for (ll t = 1; t <= n - 1; ++t)
+    {
+        ll a = 0;
+        for (ll j = 1; j <= n; ++j)
+        {
+            if (!vis[j] && (!a || d[j] < d[a]))
+            {
+                a = j;
+            }
+        }
+        vis[a] = true;
+        for (ll b = 1; b <= n; ++b)
+        {
+            if (!vis[b])
+            {
+                db dis = sqrt((x[a] - x[b]) * (x[a] - x[b]) + (y[a] - y[b]) * (y[a] - y[b]));
+                if (dis < d[b])
+                {
+                    d[b] = dis;
+                    // sol[b] = a;
+                }
+            }
+        }
+    }
+    for (ll i = 1; i <= n; ++i)
+    {
+        ans += d[i];
+        // cout << i << ' ' << sol[i] << '\n'; [2,n] 有效
+    }
+    printf("%.2lf", ans);
+    return 0;
+}
+```
+
+二叉堆：
 
 ```c++
 #include <bits/stdc++.h>
@@ -9744,7 +9864,7 @@ signed main()
         for (ll i = hd[u], v; i; i = e[i].nx)
         {
             v = e[i].to;
-            if (e[i].w < d[v])
+            if (e[i].w < d[v]) //sol[v]=u;
                 d[v] = e[i].w, q.push({d[v], v});
         }
     }
@@ -11108,6 +11228,8 @@ signed main()
 
 最坏 $O(n^2m)$ ，二分图 $O(\sqrt nm)$ ，以下代码可解决自环
 
+若输出方案，
+
 ```c++
 #include <bits/stdc++.h>
 using namespace std;
@@ -11121,14 +11243,14 @@ struct edge
     ll to, v, nx;
 } e[me];
 bool vis[mn];
-void adde(ll &u, ll &v, const ll &w)
+void adde(ll u, ll v, ll w)
 {
     e[++cnt] = {v, w, hd[u]};
     hd[u] = cnt;
 }
 bool bfs()
 {
-    memset(dep, 0, (n + 2) * (sizeof n));
+    fill_n(dep, n + 2, 0);//总点数,与题意可能不一样
     q[lf = rf = 1] = s;
     dep[s] = 1;
     while (lf <= rf)
@@ -12151,7 +12273,7 @@ $$
 
 对子串 $S[l..r]$ ，有  $h(S[l..r])=h(S[1..r])-h(S[1..l-1])\times p^{r-l+1}$
 
-> 以字符串匹配为例 SCNUOJ1713
+> 以字符串匹配为例 SCNUOJ1713 求 $s$ 里 $t$ 的每个出现位置下标
 
 ```c++
 #include <bits/stdc++.h>
@@ -12299,6 +12421,8 @@ signed main()
     return 0;
 }
 ```
+
+回文子串数目：$\sum\lfloor\dfrac{p_i}2\rfloor$。
 
 
 
@@ -13719,6 +13843,26 @@ int main()
 
 
 ### 二分
+
+整数三分公式：(以求U型区间最小值/单调区间最小值为例)
+
+```c++
+while (lf < rf)
+{
+    ll lc = (2 * lf + rf) / 3, rc = (2 * rf + lf + 2) / 3;
+    ll lv = f(lc), rv = f(rc);
+    if (lv < rv)
+    {
+        rf = rc - 1;
+    }
+    else
+    {
+        lf = lc + 1;
+    }
+}
+```
+
+
 
 #### 最长单调序列
 
