@@ -6,7 +6,7 @@
 
 ![image-20220325120131181](img/image-20220325120131181.png)
 
-<div align="center" style="font-size:18px">Last built at Dec. 3, 2022</div>
+<div align="center" style="font-size:18px">Last built at Dec. 21, 2023</div>
 
 <div STYLE="page-break-after: always;"></div>
 
@@ -39,7 +39,7 @@
 
 ##### 排列组合
 
-元素依次排成一个圆圈的排列称作环排列，$S$的$r$环排列数等于$\dfrac{P(n,r)}r$
+元素依次排成一个圆圈的排列称作环排列，$S$ 的 $r$ 环排列数等于$\dfrac{P(n,r)}r$
 
 组合数性质：设正整数 $n,r$，有
 
@@ -147,10 +147,10 @@ $$
 常见应用：
 
 - 矩阵连乘： P=a1×a2×a3×……×an，依据乘法结合律，不改变其顺序，只用括号表示成对的乘积，试问有几种括号化的方案。h(n) 种
-- 一个栈(无穷大)的进栈序列为1，2，3，…，n，有多少个不同的出栈序列
-- 在一个凸多边形中，通过若干条互不相交的对角线，把这个多边形划分成若干个三角形方案数如n=6,f(6)=14
-- 给定n个节点，能构成多少不同的二叉搜索树
-- 给定n对括号，求括号正确配对的字符串数
+- 一个栈(无穷大)的进栈序列为 1，2，3，…，n，有多少个不同的出栈序列
+- 在一个凸多边形中，通过若干条互不相交的对角线，把这个多边形划分成若干个三角形方案数如 n=6,f(6)=14
+- 给定 n 个节点，能构成多少不同的二叉搜索树
+- 给定 n 对括号，求括号正确配对的字符串数
 - $2n$ 个黑白，使得前缀黑色小于白色的方案数
 - 圆上 $2n$ 点用 $n$ 条不相交线段连接的方案数
 - $n$ 人有 $50$ 元，$n$ 人有 $100$ 元买 $50$ 元物品，排队方案数使得 $2n$ 人都可找零
@@ -175,11 +175,13 @@ s_s(n+1,m)&=s_s(n,m-1)-n\cdot s_s(n,m)\\
 \end{align}
 $$
 
-> 例题：有n个仓库，每个仓库有两把钥匙，共2n把钥匙。同时又有n位官员。问如何放置钥匙使得所有官员都能够打开所有仓库？（只考虑钥匙怎么放到仓库中，而不考虑官员拿哪把钥匙。）那如果官员分成m个不同的部，部中的官员数量和管理的仓库数量一致。那么有多少方案使得，同部的所有官员可以打开所有本部管理的仓库，而无法打开其他部管理的仓库？（同样只考虑钥匙的放置。）
+> 例题：有 n 个仓库，每个仓库有两把钥匙，共 2n 把钥匙。同时又有 n 位官员。问如何放置钥匙使得所有官员都能够打开所有仓库？（只考虑钥匙怎么放到仓库中，而不考虑官员拿哪把钥匙。）那如果官员分成 m 个不同的部，部中的官员数量和管理的仓库数量一致。那么有多少方案使得，同部的所有官员可以打开所有本部管理的仓库，而无法打开其他部管理的仓库？（同样只考虑钥匙的放置。）
 >
 > 第一问就是打开将钥匙放入仓库构成一个环：1号仓库放2号钥匙，2号仓库放3号钥匙……n号仓库放1号钥匙。这种情况相当于钥匙和仓库编号构成一个圆排列方案数是$(n-1)!$种。
 >
 > 而第二问就对应的将n个元素分成m个圆排列，方案数就是第一类无符号Stirling数$s_u(n,m)$。如要要考虑官员的情况，只需再乘上$n!$即可。
+
+p5409/p5408
 
 
 
@@ -194,6 +196,8 @@ $$
 递推上与第一类的区别在于$m$还是$n$作系数和正负问题。
 
 求斯特林数，可以套用公式二，使用 $dp$ 。注意到初始状态是$S(n,1)=S(n,n)=1$ 。$S(n,0)=0^n$ 。求同一行( $n$ 相同)斯特林数可以用通项卷积，复杂度 $O(n\log n)$
+
+(p5396/p5395)
 
 
 
@@ -230,7 +234,7 @@ $$
 
 不定方程 $\sum_{i=1}^mx_i=n$ 非负整数解个数是 $C_{n+m-1}^{m-1}=C_{n+m-1}^n$
 
-正整数 $n$ 拆分为 $m$ 个正整数即 $a_1x_1+a_2x_2+\cdots+a_mx_m=n$ ，若不允许重复，生成函数为 $\prod_{i=1}^m(1+x^{a_i})$ ，若允许重复，为 $\prod_{i=1}^m\dfrac1{1-x^i}$ 。均取系数 $x^n$ 。不允许就先每个至少取 $1$ 所以乘 $x^m$ 
+正整数 $n$ 拆分为 $m$ 个正整数即 $a_1x_1+a_2x_2+\cdots+a_mx_m=n$ ，若不允许重复，生成函数为 $\prod_{i=1}^m(1+x^{a_i})$ ，若允许重复，为 $\prod_{i=1}^m\dfrac1{1-x^i}$ 。均取系数 $x^n$。不允许就先每个至少取 $1$ 所以乘 $x^m$ 
 
 > 例洛谷P2386- $m$ 个相同苹果放 $n$ 相同盘子,可空盘, 求方案数
 
@@ -282,6 +286,236 @@ signed main()
 }
 ```
 
+> P5824-$n$ 球 $m$ 盒 $(1\le n,m\le2\times 10^5)$，求放球方案对 $998244343$ 取模。
+
+1. 球互不同，盒互不同。$m^n$
+2. 球互不同，盒互不同，每盒最多装一个球。$A_m^n$
+3. 球互不同，盒互不同，每盒最少装一个球。容斥枚举空盒数 $\sum_{i=0}^m(-1)^iC_m^i(m-i)^n$
+4. 球互不同，盒相同。二项式反演求第二类斯特林数 $\sum_{i=1}^m S(n,i)$
+5. 球互不同，盒相同，每盒最多装一个球。$[n\le m]$
+6. 球互不同，盒相同，每盒最少装一个球。$S(n,m)$
+7. 球相同，盒互不同。隔板法 $C_{n+m-1}^{m-1}$
+8. 球相同，盒互不同，每盒最多装一个球。$C_m^n$
+9. 球相同，盒互不同，每盒最少装一个球。隔板法 $C_{n-1}^{m-1}$
+10. 球相同，盒相同。分拆数 $p(n,m)$，使用生成函数多项式求 $\exp$ 后求逆
+11. 球相同，盒相同，每盒最多装一个球。$[n\le m]$
+12. 球相同，盒相同，每盒最少装一个球。$p(n-m,m)$
+
+含：
+
+- 排列组合，快速幂，欧拉筛求线性 $i^k$
+- NTT，多项式的求逆、求导、积分、指数、对数
+- 求整行第二类斯特林数、求同 $k$ 部的整列分拆数
+
+的综合模板题：
+
+```c++
+// #pragma GCC optimize ("unroll-loops")
+#include<bits/stdc++.h>
+#define N 524293
+#define p 998244353
+using ll = long long;
+#define add(x,y) (x+y>=p?x+y-p:x+y)
+#define dec(x,y) (x<y?x-y+p:x-y)
+using namespace std;
+
+inline int power(int a,int t){
+    int res = 1;
+    while(t){
+        if(t&1) res = (ll)res*a%p;
+        a = (ll)a*a%p;
+        t >>= 1;
+    }
+    return res;
+}
+
+struct poly{
+    int a[N];
+    int t;
+    inline int operator [] (const int& x) const{ return a[x]; }
+    inline int& operator [] (const int& x){ return a[x]; }
+};
+
+int rev[N],rt[N],inv[N],fac[N],ifac[N],pw[N],pr[N>>1];
+int siz;
+
+void init(int n){
+    int w,lim = 1;
+    while(lim<=n) lim <<= 1,++siz;
+    for(int i=1;i!=lim;++i) rev[i] = (rev[i>>1]>>1)|((i&1)<<(siz-1));
+    inv[1] = rt[lim>>1] = 1;
+    w = power(3,(p-1)>>siz);
+    for(int i=(lim>>1)+1;i!=lim;++i) rt[i] = (ll)rt[i-1]*w%p;
+    for(int i=(lim>>1)-1;i;--i) rt[i] = rt[i<<1];
+    for(int i=2;i<=lim;++i) inv[i] = (ll)(p-p/i)*inv[p%i]%p;
+}
+
+inline int getlen(int n){
+	return 1<<(32-__builtin_clz(n));
+}
+
+inline void NTT(poly &f,int type,int lim){
+    if(type==1) reverse(f.a+1,f.a+lim);
+    static unsigned long long a[N];
+    int x,shift = siz-__builtin_ctz(lim);
+    for(int i=0;i!=lim;++i) a[rev[i]>>shift] = f[i];
+    for(int mid=1;mid!=lim;mid<<=1)
+    for(int j=0;j!=lim;j+=(mid<<1))
+    for(int k=0;k!=mid;++k){
+        x = a[j|k|mid]*rt[mid|k]%p;
+        a[j|k|mid] = a[j|k]-x+p;
+        a[j|k] += x;
+    }
+    for(int i=0;i!=lim;++i) f[i] = a[i]%p;
+    if(type==1) return;
+    x = inv[lim];
+    for(int i=0;i!=lim;++i) f[i] = (ll)f[i]*x%p;
+}
+
+poly inverse(poly f){
+	poly g,h,q;
+	memset(g.a,0,sizeof(g.a));
+	int lim = 1,n = f.t,top = 0;
+	int s[30];
+	while(n){
+		s[++top] = n;
+		n >>= 1;
+	}
+	g[0] = power(f[0],p-2);
+	while(top--){
+		g.t = n = s[top+1];
+		while(lim<=(n<<1)) lim <<= 1;
+		memcpy(h.a,f.a,(n+1)<<2);
+		memcpy(q.a,g.a,(n+1)<<2);
+		memset(h.a+n+1,0,(lim-n)<<2);
+		NTT(g,1,lim),NTT(h,1,lim);
+		for(int i=0;i!=lim;++i) g[i] = (ll)g[i]*g[i]%p*h[i]%p;
+		NTT(g,-1,lim);
+		for(int i=0;i<=n;++i) g[i] = dec(add(q[i],q[i]),g[i]);
+		memset(g.a+n+1,0,(lim-n)<<2);
+	}
+	return g;
+} 
+
+inline poly deriv(poly f){ //多项式求导
+	for(int i=0;i!=f.t;++i) f[i] = (ll)f[i+1]*(i+1)%p;
+	f[f.t] = 0;
+	return f;
+}
+
+inline poly integ(poly f){ //多项式积分
+	for(int i=f.t;i;--i) f[i] = (ll)f[i-1]*inv[i]%p;
+	f[0] = 0;
+	return f;
+}
+
+inline poly log(poly f){
+	poly g = inverse(f);
+	f = deriv(f);
+	int lim = getlen(f.t<<1);
+	NTT(f,1,lim),NTT(g,1,lim);
+	for(int i=0;i!=lim;++i) f[i] = (ll)f[i]*g[i]%p;
+	NTT(f,-1,lim);
+	memset(f.a+f.t+1,0,(lim-f.t)<<2);
+	return integ(f);
+}
+
+poly exp(poly f){
+	poly g,h;
+	memset(g.a,0,sizeof(g.a));
+	int n = f.t,lim = 1,top = 0;
+	int s[30];
+	while(n){
+		s[++top] = n;
+		n >>= 1;
+	}
+	g[0] = 1;
+	while(top--){
+		g.t = n = s[top+1];
+		while(lim<=(n<<1)) lim <<= 1;
+		memcpy(h.a,g.a,(n+1)<<2);
+		memset(h.a+n+1,0,(lim-n)<<2);
+		g = log(g);
+		for(int i=0;i<=n;++i) g[i] = dec(f[i],g[i]);
+		g[0] = add(g[0],1);
+		NTT(g,1,lim),NTT(h,1,lim);
+		for(int i=0;i!=lim;++i) g[i] = (ll)g[i]*h[i]%p;
+		NTT(g,-1,lim);
+		memset(g.a+n+1,0,(lim-n)<<2);
+	}
+	return g;
+}
+
+inline int C(int n,int m){
+    if(n<m) return 0;
+    return (ll)fac[n]*ifac[m]%p*ifac[n-m]%p;
+}
+
+inline int A(int n,int m){
+    if(n<m) return 0;
+    return (ll)fac[n]*ifac[n-m]%p;
+}
+
+void sieve(int lim,int k){
+    int cnt = 0;
+    pw[1] = 1; //利用积性函数求 pw[i]=i^k
+    for(int i=2;i<=lim;++i){
+        if(!pw[i]){
+            pr[++cnt] = i; //欧拉筛
+            pw[i] = power(i,k);
+        }
+        for(int j=1;j<=cnt&&i*pr[j]<=lim;++j){
+            pw[i*pr[j]] = (ll)pw[i]*pw[pr[j]]%p;
+            if(i%pr[j]==0) break;
+        }
+    }
+}
+
+int n,m,lim,sum;
+poly F,G;
+
+int main(){
+    scanf("%d%d",&n,&m);
+    lim = max(n,m);
+    sieve(lim,n);
+    printf("%d\n",pw[m]); // I1
+    init(lim<<1);
+    fac[0] = fac[1] = ifac[0] = ifac[1] = 1;
+    for(int i=2;i<=n+m;++i) ifac[i] = fac[i] = (ll)fac[i-1]*i%p;
+    ifac[n+m] = power(fac[n+m],p-2);
+    for(int i=n+m-1;i;--i) ifac[i] = (ll)ifac[i+1]*(i+1)%p;
+    printf("%d\n",A(m,n)); // II2
+    for(int i=0;i<=n;++i){
+        F[i] = (ll)pw[i]*ifac[i]%p;
+        G[i] = (i&1)?p-ifac[i]:ifac[i];
+    }
+    lim = getlen(n<<1);
+    NTT(F,1,lim),NTT(G,1,lim);
+    for(int i=0;i!=lim;++i) F[i] = (ll)F[i]*G[i]%p;
+    NTT(F,-1,lim);
+    memset(F.a+n+1,0,(lim-n+2)<<2);
+    printf("%lld\n",(ll)fac[m]*F[m]%p); // III3
+    for(int i=1;i<=m;++i) sum = add(sum,F[i]);
+    printf("%d\n",sum); // IV4
+    printf("%d\n",n<=m); // V5
+    printf("%d\n",F[m]);  // VI6
+    printf("%d\n",C(n+m-1,n)); // VII7
+    printf("%d\n",C(m,n)); // VIII8
+    printf("%d\n",C(n-1,m-1)); // IX9
+	F.t = n;
+	memset(F.a,0,sizeof(F.a));
+	for(int i=1;i<=m;++i){
+		for(int j=i;j<=n;j+=i)
+			F[j] = add(F[j],inv[j/i]);
+	}
+	F = exp(F);
+	printf("%d\n",F[n]); // X10
+	printf("%d\n",n<=m); // XI11
+	printf("%d\n",n<m?0:F[n-m]); // XII12
+	return 0;	
+}
+```
+
 
 
 ##### 其他
@@ -296,7 +530,7 @@ signed main()
 $$
 p(n,k)=p(n-1,k-1)+p(n-k,k)
 $$
-$k$ 部分拆数的生成函数为：
+$k$ 部分拆数的生成函数为：(p4389/p5824)
 $$
 \sum_{n,k=0}^\infty p(n,k)x^ny^k=\dfrac1{1-xy}\dfrac1{1-x^2y}\dfrac1{1-x^3y}\cdots
 $$
@@ -479,6 +713,10 @@ $$
 > 含部分初等数学
 
 $$
+\cot x=\dfrac 1{\tan x},\sec x=\dfrac 1{\cos x},\csc x=\dfrac{1}{\sin x}
+$$
+
+$$
 \tan\frac{x}{2}=\frac{1-\cos x}{\sin x}
 =\frac{\sin x}{1+\cos x}
 $$
@@ -526,9 +764,28 @@ e^x&=1+\dfrac1{1!}x+\dfrac1{2!}x^2+\cdots\\
 \end{align}
 $$
 
+求导公式：
 
 $$
-\ln(x+\sqrt{a^2+x^2})'=\frac 1{\sqrt{a^2+x^2}}
+\begin{align}
+(C)'&=0\\
+(x^\mu)'&=\mu x^{\mu-1}\\
+(\sin x)'&=\cos x\\
+(\cos x)'&=-\sin x\\
+(\tan x)'&=\sec^2 x\\
+(\cot x)'&=-\csc^2 x=-\csc x\cot x\\
+(\sec x)'&=\sec x\tan x\\
+(\csc x)'&=-\csc x\cot x\\
+(a^x)'&=a^x\ln a\ (a > 0,a\neq 1)\\
+(e^x)'&=e^x\\
+(\log_ax)'&=\dfrac1{x\ln a}\ (a > 0,a\neq 1)\\
+(\ln x)'&=\dfrac1x\\
+(\arcsin x)'&=\dfrac1{\sqrt{ 1-x^2}}\\
+(\arccos x)'&=-\dfrac1{\sqrt{ 1-x^2}}\\
+(\arctan x)'&=\dfrac1{1+x^2}\\
+(\mathrm{arccot}\ x)'&=-\dfrac1{1+x^2}\\
+\ln(x+\sqrt{a^2+x^2})'&=\frac 1{\sqrt{a^2+x^2}}
+\end{align}
 $$
 
 $$
@@ -541,6 +798,25 @@ $$
 \end{align}
 $$
 
+积分公式：
+
+$$
+\begin{align}
+\int kdx&=kx+C\ (k\ 是常数)\\
+\int x^\mu dx&=\dfrac{x^{\mu+1}}{\mu+1}+C\ (\mu\neq -1)\\
+\int\dfrac{dx}x&=\ln |x|+C\\
+\int\dfrac{dx}{1+x^2}&=\arctan x+C\\
+\int\dfrac{dx}{\sqrt{1-x^2}}&=\arcsin x+C\\
+\int\cos xdx&=\sin x+C\\
+\int\sin xdx&=-\cos x+C\\
+\int\dfrac{dx}{\cos^2x}&=\int\sec^2 xdx=\tan x+C\\
+\int\dfrac{dx}{\sin^2x}&=\int\csc^2 xdx=-\cot x+C\\
+\int\sec x\tan xdx&=\sec x+C\\
+\int\csc x\cot xdx&=-\csc x+C\\
+\int e^xdx&=e^x+C\\
+\int a^xdx&=\dfrac{a^x}{\ln a}+C
+\end{align}
+$$
 
 $$
 \begin{align}
@@ -1348,8 +1624,6 @@ signed main()
 
 
 
-
-
 ##### Meissel-Lehmer算法
 
 作用：准确地求出 $\pi(x)$ 值和 $[1,x]$ 内各素数，时间复杂度为 $O(\dfrac{x^{\frac23}}{\log^2x})$ ，空间复杂度为 $O(x^\frac13\log^3x\log\log x)$
@@ -1596,8 +1870,6 @@ int main()
 
 
 
-
-
 #### 拓展欧几里得定理
 
 求下列关于$x,y$的不定方程的一组可行解：($a,b,x,y$都是整数)
@@ -1728,8 +2000,6 @@ signed main()
     return 0;
 }
 ```
-
-
 
 
 
@@ -2625,6 +2895,8 @@ int contains(Polygon g, Point p) //伪代码
 }
 ```
 
+p3454-任意多边形的对称轴数：边长平方-两边差积(内角)交替组成序列，化环为二倍链，使用字符串哈希求每个长为 $2n$ 的序列区间是否是回文串。(/KMP/mahacher)
+
 
 
 #### 极角排序
@@ -2781,6 +3053,8 @@ signed main()
 
 平面上能包含所有给定点的周长最小的凸多边形是凸包。(注意不是面积最小)。上凸壳是圆的第一第二象限逆时针方向朝向(含 $x$ 负半轴)，其余是下凸壳。
 
+##### Graham
+
 Graham算法：(洛谷P2742)
 
 ```c++
@@ -2834,6 +3108,8 @@ signed main()
     return 0;
 }
 ```
+
+##### Andrew
 
 Andrew算法：(洛谷P2742)
 
@@ -2892,6 +3168,8 @@ signed main()
     return 0;
 }
 ```
+
+##### 直径
 
 旋转卡壳模板-求凸包直径：(洛谷P1452)
 
@@ -2957,6 +3235,120 @@ signed main()
 ```
 
 如果每次以某个端点为原点进行极角排序，再枚举线段第二端点，配合单调栈，可以用 $O(n^2\log n)$ 实现枚举(但是处理概率连乘积乘除特别是 $1$ (对应概率为 $0$ )比较麻烦)，暂时没有什么好的实现方法
+
+##### 点与凸包相交
+
+取其中的一个点，他和其他点可以组成n-2个三角形，利用二分判断差积，判断他是在当前三角形内，还是在三角形左边，还是在三角形右边，或者是三角形外 (UVALive 7281)
+
+或者用另一个实现(下文)。
+
+```c++
+bool check(Point A,Point*p,int n )//判断点在凸包内模板 O（logn）
+{
+    int l=1,r=n-2,mid;
+    while(l<=r)
+    {
+        mid=(l+r)>>1;
+        double a1=Cross(p[mid]-p[0],A-p[0]);
+        double a2=Cross(p[mid+1]-p[0],A-p[0]);
+        if(a1>=0&&a2<=0)
+        {
+            if(Cross(p[mid+1]-p[mid],A-p[mid])>=0)return true;
+            return false;
+        }
+        else if(a1<0)
+        {
+            r=mid-1;
+        }
+        else
+        {
+            l=mid+1;
+        }
+    }
+    return false;
+}
+```
+
+##### 两凸包相交
+
+点集 $A,B$ 的闵可夫斯基和(Mincowski sum)是 $A+B=\{a+b|a\in A,b\in B\}$，即对 $a$ 每个点位置放一个 $B$ 的并。
+
+两凸包的闵可夫斯基和是凸包，可以 $O(n\log n)$ 求出。使用滑窗拼出然后复杂度在凸包重排。
+
+应用：判断凸多边形是否相交。(如果不凸，枚举一多边形每点 PIP $O(nm)$)
+
+判定：$\exists a\in A,b\in B,a=b$ 即 $a-b=0$，故设 $B=-B$，求 $A+B$ 的闵可夫斯基和，然后判断原点($B$ 左下角)是否在凸包内。
+
+> p4557-给定凸包(不全共线，点不同) $A,B(n,m\le 10^5)$，有 $q\le10^5$ 个询问，每次将 $B$ 每个点平移 $d(dx,dy)$，问移动后 $A,B$ 交不交。
+
+$A=B+d$ 可以转化为 $A-B=d$，所以对每个 $d$ 判断在不在闵可夫斯基和凸包即可。
+
+```c++
+#include <bits/stdc++.h>
+using namespace std;
+using ll = long long;
+const ll N=1e5+10;
+struct Node
+{
+	ll x,y;
+	Node operator - (Node A) {return (Node){x-A.x,y-A.y};}
+	Node operator + (Node A) {return (Node){x+A.x,y+A.y};}
+	ll operator * (Node A) const {return x*A.y-y*A.x;}
+	ll len() const {return x*x+y*y;}
+}A[N],C1[N],C2[N],s1[N],s2[N],bs;
+ll cmp1(const Node&A,const Node&B) {return A.y<B.y||(A.y==B.y&&A.x<B.x);}
+ll cmp2(const Node&A,const Node&B) {return A*B>0||(A*B==0&&A.len()<B.len());}
+ll n,m,sta[N],top,q,tot;
+void Convex(Node *A,ll &n)
+{
+	sort(A+1,A+n+1,cmp1);
+	bs=A[1];sta[top=1]=1;
+	for(ll i=1;i<=n;i++) A[i]=A[i]-bs;
+	sort(A+2,A+n+1,cmp2);
+	for(ll i=2;i<=n;sta[++top]=i,i++)
+		while(top>=2&&(A[i]-A[sta[top-1]])*(A[sta[top]]-A[sta[top-1]])>=0) top--;
+	for(ll i=1;i<=top;i++) A[i]=A[sta[i]]+bs;
+	n=top;A[n+1]=A[1];
+}
+void Minkowski()
+{
+	for(ll i=1;i<n;i++) s1[i]=C1[i+1]-C1[i];s1[n]=C1[1]-C1[n];
+	for(ll i=1;i<m;i++) s2[i]=C2[i+1]-C2[i];s2[m]=C2[1]-C2[m];
+	A[tot=1]=C1[1]+C2[1];
+	ll p1=1,p2=1;
+	while(p1<=n&&p2<=m) ++tot,A[tot]=A[tot-1]+(s1[p1]*s2[p2]>=0?s1[p1++]:s2[p2++]);
+	while(p1<=n) ++tot,A[tot]=A[tot-1]+s1[p1++];
+	while(p2<=m) ++tot,A[tot]=A[tot-1]+s2[p2++];
+}
+ll in(Node a)
+{
+	if(a*A[1]>0||A[tot]*a>0) return 0;
+	ll ps=lower_bound(A+1,A+tot+1,a,cmp2)-A-1;
+	return (a-A[ps])*(A[ps%tot+1]-A[ps])<=0;
+}
+int main()
+{
+	cin>>n>>m>>q;
+	for(ll i=1;i<=n;i++)
+		scanf("%lld%lld",&C1[i].x,&C1[i].y);
+	Convex(C1,n);
+	for(ll i=1;i<=m;i++)
+	{
+		scanf("%lld%lld",&C2[i].x,&C2[i].y);
+		C2[i].x=-C2[i].x;C2[i].y=-C2[i].y;
+	}
+	Convex(C2,m);
+	Minkowski();
+	Convex(A,tot);
+	bs=A[1];for(ll i=tot;i>=1;i--) A[i]=A[i]-A[1];
+	while(q--)
+	{
+		scanf("%lld%lld",&A[0].x,&A[0].y);
+		printf("%lld\n",in(A[0]-bs));
+	}
+	return 0;
+}
+```
 
 
 
@@ -3129,6 +3521,10 @@ signed main()
 
 
 
+
+
+
+
 #### 杂项
 
 ##### Pick定理
@@ -3181,8 +3577,6 @@ signed main()
     return 0;
 }
 ```
-
-
 
 
 
@@ -3392,6 +3786,8 @@ mex 函数：最小不属于某集合的非负整数 $mex(A)=\min\{k|k\in\comple
 
 SG 函数：所有后继中都未出现的最小值 $sg(x)=mex\{sg(y)|y为x的直接儿子\}$
 
+> 输出任意先手必胜方案： 找最大 sg 将它变成剩余的 sg 和，可证一定能找到
+
 顶点 $x$ 所代表的局面是 P-position 当且仅当 $sg(x)=0$
 
 **SG定理**：由 n 个有向图组成的ICG，设它们的起点分别为 $s_1,s_2,\dots,s_n$ ，当且仅当 $SG(s_1)\oplus SG(s_2)\oplus\dots\oplus SG(s_1)\ne0$ 时，这个游戏先手必胜
@@ -3434,6 +3830,8 @@ $$
 
 
 ### 多项式
+
+> 一个多项式全家桶模板见上文公式-组合数学-球盒问题。
 
 #### FFT
 
@@ -3729,6 +4127,141 @@ signed main()
 }
 ```
 
+#### FWT
+
+快速沃尔什变换。求 $C_i=\sum_{i=j\oplus k}A_jB_k$，其中 $\oplus$ 是与/或/异或/同或。复杂度与 FFT 看齐。
+
+> 模板题 P4717-给定长为 $2^n(n\le 17)$ 的序列，分别求对或/与/异或后的序列，对 $P=998244353$ 取模
+
+```c++
+#include <bits/stdc++.h>
+using namespace std;
+using ll = long long;
+const ll P = 998244353;
+ll qpow(ll a, ll b = P - 2)
+{
+    ll r = 1;
+    for (; b; b >>= 1, a = a * a % P)
+        if (b & 1)
+            r = r * a % P;
+    return r;
+}
+struct modint
+{
+    ll v;
+    modint(ll v_ = 0) : v(v_) {}
+    modint operator+(const modint &o) const { return modint((v + o.v) % P); }
+    modint operator-(const modint &o) const { return modint((v - o.v + P) % P); }
+    modint operator*(const modint &o) const { return modint(v * o.v % P); }
+    modint operator/(const modint &o) const { return modint(v * qpow(o.v) % P); }
+    modint operator+=(const modint &o) { return *this = *this + o; }
+    modint operator-=(const modint &o) { return *this = *this - o; }
+    modint operator*=(const modint &o) { return *this = *this * o; }
+    modint operator/=(const modint &o) { return *this = *this / o; }
+};
+#define rd(x) scanf("%d", &x)
+const int N = 1 << 17 | 1;
+int n, m;
+modint A[N], B[N], a[N], b[N];
+
+inline void in()
+{
+    for (int i = 0; i < n; i++)
+        a[i] = A[i], b[i] = B[i];
+}
+
+inline void get()
+{
+    for (int i = 0; i < n; i++)
+        a[i] *= b[i];
+}
+
+inline void out()
+{
+    for (int i = 0; i < n; i++)
+        printf("%d%c", a[i], " \n"[i == n - 1]);
+}
+
+inline void OR(modint *f, modint x = 1)
+{
+    for (int o = 2, k = 1; o <= n; o <<= 1, k <<= 1)
+        for (int i = 0; i < n; i += o)
+            for (int j = 0; j < k; j++)
+                f[i + j + k] += f[i + j] * x;
+}
+
+inline void AND(modint *f, modint x = 1)
+{
+    for (int o = 2, k = 1; o <= n; o <<= 1, k <<= 1)
+        for (int i = 0; i < n; i += o)
+            for (int j = 0; j < k; j++)
+                f[i + j] += f[i + j + k] * x;
+}
+
+inline void XOR(modint *f, modint x = 1)
+{
+    for (int o = 2, k = 1; o <= n; o <<= 1, k <<= 1)
+        for (int i = 0; i < n; i += o)
+            for (int j = 0; j < k; j++)
+            {
+                f[i + j] += f[i + j + k];
+                f[i + j + k] = f[i + j] - f[i + j + k] - f[i + j + k];
+                f[i + j] *= x, f[i + j + k] *= x;
+            }
+}
+
+int main()
+{
+    rd(m), n = 1 << m;
+    for (int i = 0; i < n; i++)
+        rd(A[i]);
+    for (int i = 0; i < n; i++)
+        rd(B[i]);
+    in(), OR(a), OR(b), get(), OR(a, P - 1), out();
+    in(), AND(a), AND(b), get(), AND(a, P - 1), out();
+    in(), XOR(a), XOR(b), get(), XOR(a, (modint)1 / 2), out();
+    return 0;
+}
+```
+
+
+
+> lc982-给定整数数组 $a,|a|\le10^3,0\le a_i<2^{16}$，求 $a_i\&a_j\&a_k=0$ 的三元对的数目($i,j,k$ 可以取等)
+
+设桶数组 $a$，即求 $\sum_{i\&j\&k=0}a_ia_ja_k=\sum_{i\&p=0}a_i\sum_{j\&k=p}a_ja_k$，即先对 $a$ 做 FWT，然后算 $fwt(b)=fwt(a)^3$，再逆运算得到 $b_0$ 作为答案。
+
+```c++
+#include <bits/stdc++.h>
+using namespace std;
+int w;
+int B[1 << 16];
+void FWTand(int *a, int opt)
+{
+    int N = 1 << w;
+    for (int mid = 1; mid < N; mid <<= 1)
+        for (int R = mid << 1, j = 0; j < N; j += R)
+            for (int k = 0; k < mid; k++)
+                if (opt == 1)
+                    a[j + k] += a[j + k + mid];
+                else
+                    a[j + k] -= a[j + k + mid];
+}
+int countTriplets(vector<int> &A)
+{
+    for (auto a : A)
+    {
+        B[a]++;
+        while ((1 << w) <= a)
+            w++;
+    }
+    FWTand(B, 1);
+    for (int i = 0; i < (1 << w); i++)
+        B[i] *= B[i] * B[i];
+    FWTand(B, -1);
+    return B[0];
+}
+```
+
 
 
 
@@ -3830,6 +4363,33 @@ f_{i-1}\\i^3\\i^2\\i\\1
 f_i\\(i+1)^3\\(i+1)^2\\i+1\\1
 \end{pmatrix}
 $$
+
+
+
+> 矩阵前 $k$ 项和：(SCNUOI1068 / GDCPC2022K) (直接用 A.P. 的问题是不一定可逆)
+
+已知 $n$ 阶方阵 $A$，求 $A+A^2+A^3+\cdots+A^k$。
+
+令 $B_i=A+A^2+\cdots+A^i$，$n$ 阶单位阵为 $E$。若 $k$ 为偶数，上式可以转化为：
+$$
+B_k=(A+A^2+\cdots+A^{\frac k2})+A^{\frac k2}(A+A^2+\cdots+A^{\frac k2})=B_{\frac k2}+A^{\frac k2}B_{\frac k2}=(E+A^{\frac k2})B_{\frac k2}
+$$
+若 $k$ 为奇数，可以直接用上一个偶数，即 $B_k=B_{k-1}+A^k$。
+
+其中，$A^i$ 可由矩阵快速幂计算，复杂度为 $O(n^3\log i)$。而 $B_k$ 的递推需要 $\log k$ 次，故总复杂度为 $O(n^3\log^2k)$。
+
+```c++
+matrix psum(ll k)
+{
+    if (k == 0)
+        return matrix(n);
+    if (k == 1)
+        return *this;
+    if (k % 2 == 1)
+        return psum(k - 1) + pow(k);
+    return (unit(n) + this->pow(k / 2)) * psum(k / 2);
+}
+```
 
 
 
@@ -6366,22 +6926,16 @@ struct heap //可删堆(大根堆)
     ll top()
     {
         while (!b.empty() && a.top() == b.top())
-        {
             a.pop(), b.pop();
-        }
         return a.top();
     }
     ll pop()
     {
-        ll t = top();
-        a.pop();
-        return t;
+        ll t = top(); a.pop(); return t;
     }
     ll size() { return a.size() - b.size(); }
 }
 ```
-
-
 
 
 
@@ -9395,6 +9949,30 @@ $$
 
 
 
+> lc2699-给定 $n(\le100)$ 点稠密图，有一些边边权不确定($-1$)，给出一种构造正边权方案，使得指定的两点单源最短路为特定值
+
+> 解法一：无解的充要条件：①所有边赋 1 无解；②所有边赋无穷无解。
+>
+> 设在上述第一种情况跑出来的 $source$ 单源最短路是 $d_{i,0}$，当有解时，根据 dijkstra 的特性，只要按照 dijkstra 遍历顺序去修改边，就不会在修改后对已确定的最短路产生影响。
+>
+> 所以在第一种情况下，再跑一遍 dijkstra，此时跑出的结果为 $d_{i,1}$，对可修改的边 $(u,v)$，设边权改为 $w$，则所求路径 $s\to \cdots\to x\to y\to\cdots\to t$ 由三部分组成：
+>
+> 1. $d_{x,1}$ 即 $s\to\cdots\to x$
+>
+> 2. $x\to y = w$
+>
+> 3. $y\to\cdots\to t$，如果 $y$ 确实在最短路上，对所有边赋 $1$ 的最短路是 $d_{t,0}$，其在后半段的最短路长度可以直接路径相减，即 $d_{t,0}-d_{y,0}$。
+>
+>    如果 $y$ 不在最短路上，那么这次修改无效，可以直接忽略修改。
+>
+> 要满足题意，即构造 $d_{x,1}+w+d_{t,0}-d_{y,0}=target$，即 $w=target-d_{t,0}+d_{y,0}-d_{x,1}$。
+
+解法二：设可修改的边的权列表是 $w$，为书写方便令 $D=target$，则 $w$ 的所有可能性不超过 $O(D^2)$ 种，分别为：$[1,1,\cdots,1],[2,1,\cdots,1],\cdots,[D,1,\cdots,1],[D,2,\cdots,1],\cdots[D,D,\cdots,D]$ 种。
+
+注意到 $[1,D,\cdots,1]$ 这样的可能性不计，这是因为只用上述顺序在有解的情况下一定可以构造出，且每次增加总 $\sum w$ 为 $1$ 下，最多只增加 $1$ 的答案最短路长度。也就是说不需要指数级的所有可能性都枚举出来，只需要枚举所有可能性的一个特定 $D^2$ 子集就一定能覆盖到有解的情况。
+
+复杂度为 $O(2\log Dn^2)$。
+
 #### Johnson
 
 复杂度 $O(nm\log m)$ ，适用于所有图，能判负环
@@ -10821,7 +11399,7 @@ signed main()
 
 二分图性质：
 
-1. 不存在长为奇数的环  (也是判定方法)
+1. 不存在长为奇数的环  (也是判定方法，直接点 DFS 染二色即可判断)
 2. 最小顶点覆盖数等于最大匹配数 $v(G)$
 3. 最大独立集数 $\alpha(G)=n-v(G)$ 
 
@@ -11126,6 +11704,522 @@ int main()
 ```
 
 
+
+> lc1595-求最小边覆盖(用权和最小的边集覆盖所有的点)
+
+最小权边覆盖可以转化为最小权匹配。边覆盖=匹配+额外边。
+
+额外边是加了之后只多覆盖一个点的边，对不在匹配的每个点，选择最小的边，不会影响其他不在匹配的点。对邻接矩阵，二分图左边第 $i$ 个点的最优额外边是 $\min e_{i,:}$，右边第 $j$ 个点的最优额外边是 $\min e_{:,j}$。即分别为行列最小值。
+
+显然一种较差的解是每个点都直接选择最小的额外边，称为基本解。在基本解的前提下，引入匹配，每加入一条匹配边 $(u,v)$，首先去掉了两边的额外边，再加上这条边的边权，即 $e_{i,j}-\min e_{i,:}-\min e_{:,j}$。在费用网络流建立一个流量为 $1$，费用为上述值的边。然后源点跟左边、右边跟汇点都连流量为 $1$ 费用为 $0$ 的边，即求朴素的最小权匹配。
+
+使用 MCFN，复杂度为 $O(\min(n,m)^2\max(n,m))=O(n^3)$。
+
+一个包装良好的复杂长板子：
+
+> 前置依赖：
+>
+> ```c++
+> namespace details {
+> 	inline unsigned int bsf32(uint32_t n) noexcept {
+> #if defined __GNUC__
+> 		return __builtin_ctz(n);
+> #elif defined _MSC_VER
+> 		unsigned long ans;
+> 		_BitScanForward(&ans, n);
+> 		return ans;
+> #elif
+> 		static constexpr unsigned char table[32] = {
+> 			0, 1, 28, 2, 29, 14, 24, 3, 30, 22, 20, 15, 25, 17, 4, 8,
+> 			31, 27, 13, 23, 21, 19, 16, 7, 26, 12, 18, 6, 11, 5, 10, 9,
+> 		};
+> 		return table[((n & -n) * 0x077CB531) >> 57];
+> #endif
+> 	}
+> 
+> 	inline unsigned int bsf64(uint64_t n) noexcept {
+> #if defined __GNUC__
+> 		return __builtin_ctzll(n);
+> #elif defined _MSC_VER
+> 		unsigned long ans;
+> 		_BitScanForward64(&ans, n);
+> 		return ans;
+> #elif
+> 		static constexpr unsigned char table[64] = {
+> 			0, 1, 56, 2, 57, 49, 28, 3, 61, 58, 42, 50, 38, 29, 17, 4,
+> 			62, 47, 59, 36, 45, 43, 51, 22, 53, 39, 33, 30, 24, 18, 12, 5,
+> 			63, 55, 48, 27, 60, 41, 37, 16, 46, 35, 44, 21, 52, 32, 23, 11,
+> 			54, 26, 40, 15, 34, 20, 31, 10, 25, 14, 19, 9, 13, 8, 7, 6,
+> 		};
+> 		return table[((n & -n) * 0x03f79d71b4ca8b09) >> 58];
+> #endif
+> 	}
+> 
+> 	inline unsigned int bsr32(uint32_t n) noexcept {
+> #if defined __GNUC__
+> 		return 31 - __builtin_clz(n);
+> #elif defined _MSC_VER
+> 		unsigned long ans;
+> 		_BitScanReverse(&ans, n);
+> 		return ans;
+> #elif
+> 		float t = n;
+> 		uint32_t ans;
+> 		memcpy(&ans, &t, sizeof(float));
+> 		return (ans >> 23 & 255) - 127;
+> #endif
+> 	}
+> 
+> 	inline unsigned int bsr64(uint64_t n) noexcept {
+> #if defined __GNUC__
+> 		return 63 - __builtin_clzll(n);
+> #elif defined _MSC_VER
+> 		unsigned long ans;
+> 		_BitScanReverse64(&ans, n);
+> 		return ans;
+> #elif
+> 		float t = n;
+> 		uint32_t ans;
+> 		memcpy(&ans, &t, sizeof(float));
+> 		return (ans >> 23 & 255) - 127;
+> #endif
+> 	}
+> 
+> 	inline unsigned int popcnt32(uint32_t n) noexcept {
+> #if defined __GNUC__
+> 		return __builtin_popcount(n);
+> #elif defined _MSC_VER
+> 		return __popcnt(n);
+> #elif
+> 		n -= ((n >> 1) & 0x55555555);
+> 		n = (n & 0x33333333) + ((n >> 2) & 0x33333333);
+> 		return ((((n >> 4) + n) & 0x0f0f0f0f) * 0x01010101) >> 24;
+> #endif
+> 	}
+> 
+> 	inline unsigned int popcnt64(uint64_t n) noexcept {
+> #if defined __GNUC__
+> 		return __builtin_popcountll(n);
+> #elif defined _MSC_VER
+> 		return __popcnt64(n);
+> #elif
+> 		n -= ((n >> 1) & 0x5555555555555555);
+> 		n = (n & 0x3333333333333333) + ((n >> 2) & 0x3333333333333333);
+> 		return ((((n >> 4) + n) & 0x0f0f0f0f0f0f0f0f) * 0x0101010101010101) >> 56;
+> #endif
+> 	}
+> 
+> 	inline unsigned int parity32(uint32_t n) noexcept {
+> #if defined __GNUC__
+> 		return __builtin_parity(n);
+> #elif defined _MSC_VER
+> 		return __popcnt(n) & 1;
+> #elif
+> 		n ^= n >> 1;
+> 		n ^= n >> 2;
+> 		n = (n & 0x11111111) * 0x11111111;
+> 		return (n >> 28) & 1;
+> #endif
+> 	}
+> 
+> 	inline unsigned int parity64(uint64_t n) noexcept {
+> #if defined __GNUC__
+> 		return __builtin_parityll(n);
+> #elif defined _MSC_VER
+> 		return __popcnt64(n) & 1;
+> #elif
+> 		n ^= n >> 1;
+> 		n ^= n >> 2;
+> 		n = (n & 0x1111111111111111) * 0x1111111111111111;
+> 		return (n >> 60) & 1;
+> #endif
+> 	}
+> 
+> 
+> 	template<typename I, bool B = 32 < std::numeric_limits<I>::digits>
+> 	struct _BitFuncImpl {
+> 		inline static unsigned int bsf(I n) noexcept { return bsf64(n); }
+> 		inline static unsigned int bsr(I n) noexcept { return bsr64(n); }
+> 		inline static unsigned int popcnt(I n) noexcept { return popcnt64(n); }
+> 		inline static unsigned int parity(I n) noexcept { return parity64(n); }
+> 	};
+> 
+> 	template<typename I>
+> 	struct _BitFuncImpl<I, false> {
+> 		inline static unsigned int bsf(I n) noexcept { return bsf32(n); }
+> 		inline static unsigned int bsr(I n) noexcept { return bsr32(n); }
+> 		inline static unsigned int popcnt(I n) noexcept { return popcnt32(n); }
+> 		inline static unsigned int parity(I n) noexcept { return parity32(n); }
+> 	};
+> 
+> 	template<typename I>
+> 	inline unsigned int bsf(I n) noexcept { return _BitFuncImpl<I>::bsf(n); }
+> 	template<typename I>
+> 	inline unsigned int bsr(I n) noexcept { return _BitFuncImpl<I>::bsr(n); }
+> 	template<typename I>
+> 	inline unsigned int popcnt(I n) noexcept { return _BitFuncImpl<I>::popcnt(n); }
+> 	template<typename I>
+> 	inline unsigned int parity(I n) noexcept { return _BitFuncImpl<I>::parity(n); }
+> }
+> 
+> template<typename E>
+> class Network {
+> public:
+>  using edge_type = E;
+>  using size_type = unsigned;
+> 
+> private:
+>  size_type n, m;
+>  size_type* pos;
+>  std::unique_ptr<edge_type[]> edges;
+> 
+> public:
+>  Network(std::unique_ptr<edge_type[]> edges, std::unique_ptr<size_type[]> spos, size_type n, size_type m)
+>      : n(n), m(m), pos(spos.release() + 1), edges(std::move(edges))
+>  {
+>      pos[-1] = 1;
+>  }
+> 
+>  Network(const Network& other) : n(other.n), m(other.m), pos(other.pos), edges(new edge_type[m]) {
+>      std::copy_n(other.edges.get(), m, edges.get());
+>      ++pos[-1];
+>  }
+> 
+>  ~Network() { if (--pos[-1] == 0) delete[] (pos - 1); }
+> 
+>  inline size_type order() const noexcept { return n; }
+>  inline size_type size() const noexcept { return m; }
+>  inline const size_type* raw_pos() const noexcept { return pos; }
+>  inline const edge_type* raw_edges() const noexcept { return edges.get(); }
+>  inline edge_type* raw_edges() noexcept { return edges.get(); }
+> };
+> 
+> template<typename F = int, typename C = int>
+> class MCFN {
+> public:
+>  using size_type = unsigned;
+> 
+> private:
+>  struct RawEdge {
+>      size_type from, to;
+>      F cap;
+>      C cost;
+>  };
+> 
+>  struct Edge {
+>  private:
+>      friend class MCFN;
+>      size_type _rev, _to;
+>      F _cap;
+>      C _cost;
+>      Edge(size_type rev, size_type to, F cap, C cost) : _rev(rev), _to(to), _cap(cap), _cost(cost) {}
+>  public:
+>      using flow_type = F;
+>      using cost_type = C;
+>      Edge() = default;
+>      inline size_type rev() const noexcept { return _rev; }
+>      inline size_type to() const noexcept { return _to; }
+>      inline flow_type residual() const noexcept { return _cap; }
+>      inline bool full() const noexcept { return _cap == 0; }
+>      inline void push(flow_type d) noexcept { _cap -= d; }
+>      inline cost_type cost() const noexcept { return _cost; }
+>  };
+> 
+>  std::vector<RawEdge> edges;
+>  std::vector<size_type> deg;
+> 
+> public:
+>  MCFN() noexcept = default;
+> 
+>  MCFN(size_type n) : deg(n, 0) {}
+> 
+>  void reserve(size_type n, size_type m) {
+>      edges.reserve(m);
+>      deg.reserve(n);
+>  }
+> 
+>  inline size_type add_vertex() {
+>      const size_type ans = deg.size();
+>      deg.push_back(0);
+>      return ans;
+>  }
+> 
+>  inline void add_edge(size_type from, size_type to, F cap, C cost) {
+>      if (cap <= 0) return;
+>      edges.emplace_back(RawEdge{from, to, cap, cost});
+>      ++deg[from];
+>      ++deg[to];
+>  }
+> 
+>  Network<Edge> prepare() const {
+>      using size_type = typename Network<Edge>::size_type;
+>      const size_type n = deg.size(), m = edges.size();
+>      std::unique_ptr<Edge[]> sorted_edges(new Edge[2 * m]);
+>      std::unique_ptr<size_type[]> spos(new size_type[n + 2]);
+>      const auto pos = spos.get() + 1;
+>      *std::partial_sum(deg.begin(), deg.end(), pos) = 2 * m;
+>      for (size_type i = m;i-- > 0;) {
+>          const RawEdge e = edges[i];
+>          const size_type u = e.from, v = e.to;
+>          const size_type rp = --pos[v], p = --pos[u];
+>          sorted_edges[p] = Edge(rp, v, e.cap, e.cost);
+>          sorted_edges[rp] = Edge(p, u, 0, -e.cost);
+>      }
+>      return Network<Edge>(std::move(sorted_edges), std::move(spos), n, 2 * m);
+>  }
+> };
+> ```
+>
+> 网络流算法：
+>
+> ```c++
+> template<typename F = int, typename C = int, typename G>
+> auto ssp(G&& g, std::size_t s, std::size_t t, bool nneg = false)
+> -> std::pair<
+>  typename std::common_type<F, typename std::remove_reference<G>::type::edge_type::flow_type>::type,
+>  typename std::common_type<C, typename std::remove_reference<G>::type::edge_type::cost_type>::type>
+> {
+>  using graph_type = typename std::remove_reference<G>::type;
+>  using size_type = typename graph_type::size_type;
+>  using edge_type = typename graph_type::edge_type;
+>  using flow_type = typename std::common_type<F, typename edge_type::flow_type>::type;
+>  using cost_type = typename std::common_type<C, typename edge_type::cost_type>::type;
+>  static constexpr size_type BIN_LEN = std::numeric_limits<cost_type>::digits;
+>  static constexpr cost_type INF = std::numeric_limits<cost_type>::max();
+>  struct ShortestPath {
+>      size_type pre;
+>      cost_type pot, dis;
+>  };
+>  struct ListNode {
+>      size_type prev, next;
+>  };
+>  const size_type n = g.order(), m = g.size();
+>  const bool use_heap = m / n <= n / std::min<size_type>(3 * details::bsr(n + 7) + 15, 64);
+>  const auto edges = g.raw_edges();
+>  const auto pos = g.raw_pos();
+>  std::vector<ShortestPath> sp(n);
+>  std::vector<bool> vis;
+>  const auto init = [&] {
+>      vis.assign(n, false);
+>      std::vector<size_type> q(n);
+>      size_type l = 0, r = 1;
+>      for (auto& e : sp)
+>          e.pot = INF;
+>      sp[s] = {0, 0};
+>      vis[s] = true;
+>      q[0] = s;
+>      while (l != r) {
+>          const size_type u = q[l];
+>          l = l + 1 != n ? l + 1 : 0;
+>          vis[u] = false;
+>          const size_type pu = sp[u].pre;
+>          const cost_type du = sp[u].pot;
+>          const auto start_edge = edges + pos[u];
+>          const auto end_edge = edges + pos[u + 1];
+>          for (auto i = start_edge;i != end_edge;++i) {
+>              const edge_type e = *i;
+>              if (e.full()) continue;
+>              const size_type v = e.to();
+>              const cost_type dv = sp[v].pot;
+>              const cost_type ndv = du + e.cost();
+>              if (ndv < dv) {
+>                  sp[v].pre = pu + 1;
+>                  sp[v].pot = ndv;
+>                  if (sp[v].pre >= n) throw std::invalid_argument("graph contains negative cycles.");
+>                  if (!vis[v]) {
+>                      q[r] = v;
+>                      vis[v] = true;
+>                      r = r + 1 != n ? r + 1 : 0;
+>                  }
+>              }
+>          }
+>      }
+>  };
+>  if (!nneg) init();
+>  const cost_type pt = sp[t].pot;
+>  flow_type flow = 0;
+>  cost_type cost = 0;
+>  const auto augment = [&] {
+>      flow_type f = std::numeric_limits<flow_type>::max();
+>      for (size_type i = t;i != s;) {
+>          const edge_type e = edges[sp[i].pre];
+>          const flow_type r = edges[e.rev()].residual();
+>          if (r < f) f = r;
+>          i = e.to();
+>      }
+>      for (size_type i = t;i != s;) {
+>          auto& e = edges[sp[i].pre];
+>          edges[e.rev()].push(f);
+>          e.push(-f);
+>          i = e.to();
+>      }
+>      flow += f;
+>      const cost_type dt = sp[t].dis;
+>      for (auto& e : sp)
+>          if (e.dis < dt)
+>              e.pot -= dt - e.dis;
+>      cost += cost_type(f) * (pt - sp[s].pot);
+>  };
+>  const auto flow_with_heap = [&] {
+>      std::vector<ListNode> list(n + BIN_LEN + 1);
+>      const auto dijkstra_with_heap = [&] {
+>          const auto radix_distance = [] (cost_type lhs, cost_type rhs) {
+>              return lhs != rhs ? details::bsr(lhs ^ rhs) + 1 : 0;
+>          };
+>          const auto buk = list.data() + n;
+>          const auto insert_list = [&] (size_type idx, size_type v) {
+>              const size_type rear = buk[idx].prev;
+>              list[rear].next = v;
+>              list[v].prev = rear;
+>              buk[idx].prev = v;
+>              list[v].next = idx + n;
+>          };
+>          cost_type top = 0;
+>          for (size_type i = 0;i <= n + BIN_LEN;++i)
+>              list[i] = {i, i};
+>          list[s] = {n, n};
+>          buk[0] = {size_type(s), size_type(s)};
+>          for (auto& e : sp)
+>              e.dis = INF;
+>          sp[s].dis = 0;
+>          while (true) {
+>              size_type u = buk[0].next;
+>              if (u == n) {
+>                  size_type idx = 1;
+>                  for (;idx <= BIN_LEN;++idx)
+>                      if (buk[idx].next < n)
+>                          break;
+>                  if (idx > BIN_LEN) break;
+>                  const size_type head = buk[idx].next;
+>                  top = sp[head].dis;
+>                  for (size_type i = head;(i = list[i].next) < n;)
+>                      if (sp[i].dis < top)
+>                          top = sp[i].dis;
+>                  for (size_type i = head;i < n;) {
+>                      const size_type j = list[i].next;
+>                      insert_list(radix_distance(top, sp[i].dis), i);
+>                      i = j;
+>                  }
+>                  buk[idx] = {idx + n, idx + n};
+>                  u = buk[0].next;
+>              }
+>              if (u == size_type(t)) return true;
+>              const size_type next = list[u].next;
+>              list[next].prev = n;
+>              buk[0].next = next;
+>              const cost_type pu = sp[u].pot;
+>              const cost_type du = sp[u].dis;
+>              const auto start_edge = edges + pos[u];
+>              const auto end_edge = edges + pos[u + 1];
+>              for (auto i = start_edge;i != end_edge;++i) {
+>                  const edge_type e = *i;
+>                  if (e.full()) continue;
+>                  const size_type v = e.to();
+>                  const cost_type pv = sp[v].pot;
+>                  const cost_type dv = sp[v].dis;
+>                  const cost_type ndv = e.cost() + pu - pv + du;
+>                  if (ndv < dv) {
+>                      const size_type new_idx = radix_distance(top, ndv);
+>                      if (new_idx != radix_distance(top, dv)) {
+>                          const size_type prev = list[v].prev;
+>                          const size_type next = list[v].next;
+>                          list[prev].next = next;
+>                          list[next].prev = prev;
+>                          insert_list(new_idx, v);
+>                      }
+>                      sp[v].dis = ndv;
+>                      sp[v].pre = e.rev();
+>                  }
+>              }
+>          }
+>          return false;
+>      };
+>      while (dijkstra_with_heap())
+>          augment();
+>  };
+>  const auto flow_without_heap = [&] {
+>      std::vector<size_type> min_buk;
+>      const auto dijkstra_without_heap = [&] {
+>          vis.assign(n, false);
+>          min_buk = {size_type(s)};
+>          for (auto& e : sp)
+>              e.dis = INF;
+>          sp[s].dis = 0;
+>          while (true) {
+>              size_type u;
+>              cost_type du;
+>              if (!min_buk.empty()) {
+>                  u = min_buk.back();
+>                  min_buk.pop_back();
+>                  if (vis[u]) continue;
+>                  du = sp[u].dis;
+>              } else {
+>                  du = INF;
+>                  for (size_type i = 0;i < n;++i)
+>                      if (!vis[i] && sp[i].dis < du)
+>                          du = sp[u = i].dis;
+>                  if (du == INF) break;
+>              }
+>              if (u == size_type(t)) return true;
+>              vis[u] = true;
+>              const cost_type pu = sp[u].pot;
+>              const auto start_edge = edges + pos[u];
+>              const auto end_edge = edges + pos[u + 1];
+>              for (auto i = start_edge;i != end_edge;++i) {
+>                  const edge_type e = *i;
+>                  if (e.full()) continue;
+>                  const size_type v = e.to();
+>                  const cost_type pv = sp[v].pot;
+>                  const cost_type dv = sp[v].dis;
+>                  const cost_type ndv = e.cost() + pu - pv + du;
+>                  if (ndv < dv) {
+>                      sp[v].dis = ndv;
+>                      sp[v].pre = e.rev();
+>                      if (ndv == du) min_buk.push_back(v);
+>                  }
+>              }
+>          }
+>          return false;
+>      };
+>      while (dijkstra_without_heap())
+>          augment();
+>  };
+>  if (use_heap)
+>      flow_with_heap();
+>  else
+>      flow_without_heap();
+>  return std::make_pair(flow, cost);
+> }
+> ```
+
+本题代码：
+
+```c++
+class Solution {
+public:
+    int connectTwoGroups(const vector<vector<int>>& cost) {
+        const int m = cost.size(), n = cost[0].size();
+        vector<int> row_min(m, INT_MAX);
+        vector<int> col_min(n, INT_MAX);
+        for (int i = 0;i < m;++i) {
+            for (int j = 0;j < n;++j) {
+                row_min[i] = min(row_min[i], cost[i][j]);
+                col_min[j] = min(col_min[j], cost[i][j]);
+            }
+        }
+        MCFN<int, int> mcfn(m + n + 2);
+        const int s = m + n, t = s + 1;
+        for (int i = 0;i < m;++i) {
+            for (int j = 0;j < n;++j)
+                mcfn.add_edge(i, m + j, 1, min(cost[i][j] - row_min[i] - col_min[j], 0));
+            mcfn.add_edge(s, i, 1, 0);
+        }
+        for (int i = 0;i < n;++i)
+            mcfn.add_edge(m + i, t, 1, 0);
+        return reduce(row_min.begin(), row_min.end(), 0) + reduce(col_min.begin(), col_min.end(), 0) + ssp(mcfn.prepare(), s, t).second;
+    }
+};
+```
 
 ### 网络流
 
@@ -11541,6 +12635,121 @@ signed main()
 }
 ```
 
+#### 最小割
+
+> SCNUOJ1975-给定 $n,m(2\le n\le10^n,1\le m\le10^5)$ 的有向简单连通图，保证点 $1$ 对 $n$ 可达且任意 $1<x<n$ 出入度均不为零。求删掉最少多少边使得 $1,n$ 不连通并输出方案。
+
+割将原点和汇点分在两个不同点集的点划分方案，容量为分属两点集的边的数目。本题显然是最小割模板。
+
+最大流最小割定理：能够从源点到达汇点的最大流量等于从网络中移除导致网络流中断的边集的最小容量和。
+
+Dinic $O(n\sqrt m)$，残余网络搜索有流量的可达边集及其反集，连接两集合的边可删。
+
+```c++
+#include <bits/stdc++.h>
+using namespace std;
+
+const int N = 1e5 + 5, M = 2e5 + 5;
+int n, m, s, t, tot = 1, lnk[N], ter[M], nxt[M], val[M], dep[N], cur[N];
+
+void add(int u, int v, int w)
+{
+    ter[++tot] = v, nxt[tot] = lnk[u], lnk[u] = tot, val[tot] = w;
+}
+
+void addedge(int u, int v, int w) { add(u, v, w), add(v, u, 0); }
+
+int bfs(int s, int t)
+{
+    memset(dep, 0, sizeof(dep));
+    memcpy(cur, lnk, sizeof(lnk));
+    std::queue<int> q;
+    q.push(s), dep[s] = 1;
+    while (!q.empty())
+    {
+        int u = q.front();
+        q.pop();
+        for (int i = lnk[u]; i; i = nxt[i])
+        {
+            int v = ter[i];
+            if (val[i] && !dep[v])
+                q.push(v), dep[v] = dep[u] + 1;
+        }
+    }
+    return dep[t];
+}
+
+int dfs(int u, int t, int flow)
+{
+    if (u == t)
+        return flow;
+    int ans = 0;
+    for (int &i = cur[u]; i && ans < flow; i = nxt[i])
+    {
+        int v = ter[i];
+        if (val[i] && dep[v] == dep[u] + 1)
+        {
+            int x = dfs(v, t, std::min(val[i], flow - ans));
+            if (x)
+                val[i] -= x, val[i ^ 1] += x, ans += x;
+        }
+    }
+    if (ans < flow)
+        dep[u] = -1;
+    return ans;
+}
+
+int dinic(int s, int t)
+{
+    int ans = 0;
+    while (bfs(s, t))
+    {
+        int x;
+        while ((x = dfs(s, t, 1 << 30)))
+            ans += x;
+    }
+    return ans;
+}
+
+int vis[N];
+void dfs(int u)
+{
+    vis[u] = 1;
+    for (int i = lnk[u]; i; i = nxt[i])
+    {
+        int v = ter[i];
+        if (!vis[v] && val[i])
+            dfs(v);
+    }
+}
+
+int main()
+{
+    scanf("%d%d", &n, &m);
+    s = 1, t = n;
+    while (m--)
+    {
+        int u, v, w = 1;
+        scanf("%d%d", &u, &v);
+        addedge(u, v, w);
+    }
+    printf("%d\n", dinic(s, t));
+    dfs(s);
+    for (int u = 1; u <= n; u++)
+    {
+        for (int i = lnk[u]; i; i = nxt[i])
+        {
+            int v = ter[i];
+            if (vis[u] == 1 && vis[v] == 0 && val[i] == 0)
+            {
+                printf("%d %d\n", u, v);
+            }
+        }
+    }
+    return 0;
+}
+```
+
 
 
 ### 杂项
@@ -11809,10 +13018,10 @@ int main()
 	}
 
 	ll ans = 0;
-		for (int i = 0; i < 4; i++)
-			for (int j = 0; j < 4; j++)
-				for (int k = 0; k < 4; k++)
-					ans = (ans + dp[n][i][j][k]) % MOD;
+    for (int i = 0; i < 4; i++)
+        for (int j = 0; j < 4; j++)
+            for (int k = 0; k < 4; k++)
+                ans = (ans + dp[n][i][j][k]) % MOD;
 
 	cout << ans << endl;
 	return 0;
@@ -11964,6 +13173,15 @@ signed main()
 
 #### 状压DP
 
+枚举每个二进制状态，并降序枚举每个状态的子集状态，复杂度为 $O(3^n)$
+
+```c++
+for (int m = 0; m < (1 << n); ++m)// 降序遍历 m 的非空子集
+  for (int s = m; s; s = (s - 1) & m) // s 是 m 的一个非空子集
+```
+
+
+
 > 洛谷P1896-在 $n\times n$ 格子放 $k$ 人，每人周围八方向不得有人，求方案数 $1\le n\le9,0\le k\le n^2$
 
 设每一行的状态为 $j$ ，即 $n$ 个 $0/1$ 组合的 $2^n$ 个状态，设 $dp[i][j][k]$ 表示只考虑前 $i$ 行，第 $i$ 行的分布为 $j$ ，已经放置了 $k$ 个人的方案数；先暴力处理一行内所有可能的情况(某状态对应多少个人)
@@ -12008,6 +13226,34 @@ signed main()
 
 
 #### 数位DP
+
+> lc233-问 $[1,n](n\le 10^9)$ 的整数出现了多少个 $1$
+
+$f$ 是从左到右构造好了 $i$ 个位，造好里已经出现了 $cnt_1$ 个 $1$，当前位是否被 $n$ 限制。$dp$ 是已造好 $i$ 个位，出现了 $j$ 个 $1$ 的答案。$O(\log^2n)$。
+
+```c++
+const int M = 15;
+int countDigitOne(int n) {
+    auto s = to_string(n);
+    int m = s.length();
+    int dp[M][M];
+    memset(dp, -1, sizeof(dp));
+    function<int(int, int, bool)> f = [&](int i, int cnt1, bool is_limit) -> int {
+        if (i == m) return cnt1;
+        if (!is_limit && dp[i][cnt1] >= 0) return dp[i][cnt1];
+        int res = 0;
+        for (int d = 0, up = is_limit ? s[i] - '0' : 9; d <= up; ++d) // 枚举要填入的数字 d
+            res += f(i + 1, cnt1 + (d == 1), is_limit && d == up);
+        if (!is_limit) dp[i][cnt1] = res;
+        return res;
+    };
+    return f(0, 0, true);
+}
+```
+
+
+
+
 
 > 牛客2022寒假第五场D-求区间 $[l,r]$ 内满足如下条件的数字个数①相邻两数位和是素数 ②至少有一个数位1 ③无前导0 $1\le l\le r\le10^{10}$
 
@@ -12217,30 +13463,20 @@ int lcs(string X, string Y)
 
 #### 编辑距离
 
-> 有字符串x,y；每次只能进行如下编辑的一种：删除/插入/修改一个字符，求最小编辑次数，使x=y。
+> lc72-有字符串x,y；每次只能进行如下编辑的一种：删除/插入/修改一个字符，求最小编辑次数，使x=y。
 
 定义$dp[i][j]$表示将长为i的x子串编辑为长为j的y子串的编辑距离。
 
 ```c++
-#include <bits/stdc++.h>
-using namespace std;
-#define MAXN 2002
-#define repe(i,a,b) for(int i=a;i<=b;++i)
-int n,dp[MAXN][MAXN];
-char x[MAXN],y[MAXN];
-int edit(int a, int b)
-{
-    if(dp[a][b]!=-1) return dp[a][b];
-    if(!a) return dp[a][b]=b;
-    if(!b) return dp[a][b]=a;
-    return dp[a][b]=min(min(edit(a-1,b)+1,edit(a,b-1)+1),edit(a-1,b-1)+(int)(x[a]!=y[b]));
-}
-signed main()
-{
-    scanf("%s%s",x+1,y+1);
-    repe(i,0,2000) repe(j,0,2000) dp[i][j]=-1;
-    printf("%d", edit(strlen(x+1),strlen(y+1)));
-    return 0;
+int minDistance(string s, string t) {
+    int n = s.length(), m = t.length(), f[2][m + 1];
+    for (int j = 0; j <= m; ++j) f[0][j] = j;
+    for (int i = 0; i < n; ++i) {
+        f[(i + 1) % 2][0] = i + 1;
+        for (int j = 0; j < m; ++j)
+            f[(i + 1) % 2][j + 1] = s[i] == t[j] ? f[i % 2][j] : min(min(f[i % 2][j + 1], f[(i + 1) % 2][j]), f[i % 2][j]) + 1;
+    }
+    return f[n % 2][m];
 }
 ```
 
@@ -12388,6 +13624,14 @@ signed main()
   串 $S$ 的每个真前缀在串 $T$ 出现次数：(SCNUOJ1718)
 
   重构 $S=S+$ `#` $+T$ ，继续执行上述过程 ( $n'=n+m+1$ )，取 $ans_{1..n}$ 
+  
+- 将 $s$ 拼接最小长度字符串使其成为回文串 (lc214)
+
+  设 $s$ 为模式串，$s'$ (逆)为原串，用 KMP 在 $s'$ 里匹配出最长的 $s$ 前缀，就是最长的回文串。也可以 manacher 或字符串哈希做
+  
+- 环上长为 $n$ 的回文串数目(多边形对称轴)  (p3454)
+
+  二倍长链 $s$ 并求单倍长逆 $t'$，求 $s$ 中 $t'$ 的数目
 
 
 
@@ -12423,6 +13667,10 @@ signed main()
 ```
 
 回文子串数目：$\sum\lfloor\dfrac{p_i}2\rfloor$。
+
+最长回文前缀：$i-p_i+1=1$ 时更新最值为 $2p_i-1$。
+
+长为 $2k$ 的回文串数目(p3454)：`for(int i=2*k+1;i<=4*k;i++)res+=(p[i]>=n);`
 
 
 
@@ -12737,6 +13985,7 @@ for (i = 1, k = 0; i <= n; ++i) {
 应用：
 
 - 字符串匹配：模式串 $T$ 若出现必然是主串 $S$ 后缀的前缀，二分 $sa$ ，复杂度为 $O(|T|\log|S|)$ ，可以一并求出出现次数和位置
+- 字典序最大子串：必然是一个后缀，对全体后缀跑后缀数组即可
 - 求两字符串的最长公共子串：将其拼接起来，求 height数组最值(取得 height 的两项要求一个在左原串一个在右)
 - 求循环同构串里字典序最小的 (最小表示法算法的第二解法) (可以离散化)
 - 两子串的最长公共前缀 $lcp(sa[i],sa[j])=\min(height[i+1..j])$ 
@@ -13494,6 +14743,122 @@ int main()
 }
 ```
 
+### 子序列自动机
+
+对 $S$ 每个字符，升序记录它出现的位置，设字符 $i$ 出现的位置的集合为 $pos_i$。
+
+判断 $T$ 是否是 $S$ 的子序列，每次二分找 $T_i$ 在上一次匹配 $S_j$ 后的最近下标，如果一直能找到则是子序列。复杂度取 $T\log |S|$。
+
+> P5826-字符集大小 $10^5$，$|S|\le10^5,\sum |T|\le 10^6$。上述问题。
+
+```c++
+#include <bits/stdc++.h>
+using namespace std;
+typedef int ll;
+#define mn 100002
+ll n, q, m, type, ii;
+vector<ll> v[mn];
+signed main()
+{
+	scanf("%d%d%d%d", &type, &n, &q, &m);
+	for(ll i=1;i<=n;++i) scanf("%d", &ii), v[ii].push_back(i);
+	while (q--)
+	{
+		ll len, at = 0, x;
+		bool suc = true;
+		scanf("%d", &len);
+		while (len--)
+		{
+			scanf("%d", &x);
+			if (!suc) continue;
+			auto it = lower_bound(v[x].begin(), v[x].end(), at + 1);
+			if (it == v[x].end()) suc = false;
+			else at = *it;
+		}
+		printf(suc ? "Yes\n" : "No\n");
+	}
+	return 0;
+}
+```
+
+第二种建图方式：$nxt_{i,j}$ 表示 $i$ 位置后的第一个 $j$ 的位置，$0$ 是根节点。
+
+```c++
+for(LL i=n;i>=1;--i){
+    for(LL j=1;j<=a;++j) nxt[i-1][j]=nxt[i][j];
+    nxt[i-1][s[i]]=i;
+}
+```
+
+> 当字符集较大时，可套用可持久化，在叶子节点放一个 id，表示出边。
+
+将 $T$ 输入自动机，可以检验是否是子序列。
+
+求本质不同子序列个数：记忆化 DFS，设 $x$ 的 DFN 子树有 $f_x$ 个子序列，答案为 $f_0$，转移为 $f_u=1+\sum f_v$。非空就 $f_0-1$。
+
+```c++
+#include <bits/stdc++.h>
+using namespace std;
+using ll = long long;
+const ll mod = 1e9 + 7;
+vector<ll> nxt[28], f;
+ll dfs(int u)
+{
+    if (f[u])
+        return f[u];
+    ll ans = 1;
+    for (auto i = 1; i <= 26; ++i)
+    {
+        if (nxt[i][u])
+        {
+            (ans += dfs(nxt[i][u])) %= mod;
+        }
+    }
+    return f[u] = ans;
+}
+int distinctSubseqII(string s)
+{
+    ll n = s.size();
+    for (ll j = 1; j <= 26; ++j)
+        nxt[j].resize(n + 2, 0);
+    for (ll i = n; i >= 1; --i)
+    {
+        for (ll j = 1; j <= 26; ++j)
+            nxt[j][i - 1] = nxt[j][i];
+        nxt[s[i - 1] - 'a' + 1][i - 1] = i;
+    }
+    f.resize(n + 2, 0);
+    return (dfs(0) - 1 + mod) % mod;
+}
+```
+
+求两串公共子序列个数，类比且一下：
+
+```c++
+LL Dfs(LL x,LL y){
+    if(f[x][y]) return f[x][y];
+    for(LL i=1;i<=a;++i)
+        if(nxt1[x][i]&&nxt2[y][i])
+            f[x][y]+=Dfs(nxt1[x][i],nxt2[y][i]);
+    return ++f[x][y];
+}
+```
+
+回文子序列
+
+```c++
+LL Dfs(LL x,LL y){
+	if(f[x][y]) return f[x][y];
+	for(LL i=1;i<=a;++i)
+		if(nxt1[x][i]&&nxt2[y][i]){
+			if(nxt1[x][i]+nxt2[y][i]>n+1) continue;
+			if(nxt1[x][i]+nxt2[y][i]<n+1) f[x][y]++;
+			f[x][y]=(f[x][y]+Dfs(nxt1[x][i],nxt2[y][i]))%mod;
+		}
+	return ++f[x][y];
+}
+```
+
 
 
 ### 最小表示法
@@ -13774,71 +15139,19 @@ signed main()
 }
 ```
 
+归并排序求其他内容：
 
+- lc315-每个元素右边比它小的元素数
 
-#### 其他
+  归并合并 $a_i\le a_j$ 时，$j$ 是第一个 $\le$ 的，故 $[mid,j)$ 全满足，对当前 $i$ 的原下标累加贡献。用离散化权值树状数组也行。
 
-最小成本排序
+- lc493-翻转对-求二倍逆序对(前者两倍严格大于后者)的数目
 
-> 有n个重量互不重复为wi的货物，每次交换两个货物产生i+j的成本。1<=n<=1000,0<=wi<=10000，需要将货物升序排序，求最小成本
+  归并合并前，双指针累加符合的区间数，算完了再合并当前的。
 
-成环交换排序。自环(本身就位)不理，其他环用环内最小元素与环内其他元素一一对换，或者用已知就位的最小元素借过来拿来一一对换
+- lc327-区间和在 $[l,u]$ 的区间个数
 
-```c++
-#include <iostream>
-#include <algorithm>
-using namespace std;
-static const int MAX = 1000;
-static const int VMAX = 10000;
-int n, A[MAX], s;
-int B[MAX], T[VMAX+1];
-int solve()
-{
-    int ans = 0;
-    bool V[MAX];
-    for(int i=0;i<n;i++)
-    {
-        B[i] = A[i];
-        V[i] = false;//V,B,T的设置是代码实现的关键！
-    }
-    sort(B, B+n);
-    for(int i=0; i<n; i++) T[B[i]] = i;
-    //for(int i=0; i<100; i++) cout << T[i] << " "; cout << endl;
-    for(int i=0; i<n; i++)
-    {
-        if(V[i]) continue;
-        int cur = i;
-        int S = 0;
-        int m = VMAX;
-        int an = 0;
-        while(1)
-        {
-            V[cur] = true;
-            an++;
-            int v = A[cur];
-            m = min(m, v);
-            S += v;
-            cur = T[v];
-            if(V[cur]) break;
-        }
-        ans += min( S+(an-2)*m , S + m + (an+1)*s );
-    }
-    return ans;
-}
-int main()
-{
-    cin>>n;
-    s=VMAX;
-    for(int i=0; i<n; i++)
-    {
-        cin >> A[i];
-        s = min(s, A[i]);
-    }
-    int ans = solve();
-    cout << ans << endl;
-    return 0;
-}
-```
+  归并合并前，双指针累加符合的区间数，算完了再合并当前的。
 
 
 
@@ -13939,6 +15252,10 @@ signed main()
 > 例题 P2782 友好城市 南北岸有 $n$ 个不同城市，在不同坐标，北岸每个城市与南岸一个城市相连，连线不能相交，求最多能留多少条连线 $1\le n\le2\times10^5,0\le x\le10^6$ 
 
 以一个岸为基准结构体排序，然后求另一个岸的最长单调上升子序列长度即可
+
+> lc354-求长宽同时严格单调上升的最长子序列
+
+先按 $w$ 升序排序，再第二关键字将 $h$ 降序排序，从而避免了相同下存在递增。再第二关键字将 $h$ 降序排序，从而避免了相同下存在递增。
 
 
 
@@ -14421,6 +15738,85 @@ int main()
             printf("%d\n", ans[i]);
     return 0;
 }
+```
+
+#### wqs二分
+
+王钦石二分(Alien Trick)。
+
+> lc188/SCNUOI1069-有 $n(1\le n\le10^5)$ 天，当日股票价格 $p_i(1\le p_i\le 10^9)$，每天可以买入或卖出股票，但最多持有一股，问最大收益。
+
+设恰好完成 $k$ 次买卖时，最大收益是 $g_k$。设增量(/导数)为 $g'_k=g_k-g_{k-1}$那么可以得到一个结论，增量 $g'_k$ 一定单调不降(不严格单调递增)。当 $k$ 不断增大到最大 $n$($n$ 次交易即都当天买当天卖等价于 $0$ 次交易)时，$g_k$ 会降到 $0$，即 $g_0=g_n=0$，一阶导 $g'_k$ 单调递减，不难判断 $g$ 呈倒 U 型。
+
+任务是求出 $g$ 数列(/离散函数)的最大值 $\max g$。用几何思路，考虑作直线与 $g$ 图像相切，设枚举了斜率为 $c(c > 0)$ 的直线，过所有点 $g_i(1\le i\le n)$ 作 $n$ 条直线。
+
+由于 $c > 0$，所以 $y$ 截距最大的直线一定是相切的。设有斜率为 $c$ 过点 $(k,g_k)$ 的直线，不难计算得截距是 $b=g_k-kc$。回到要求的问题上，可以将截距抽象成进行了 $k$ 次买卖，净利润为 $g_k$，但每次卖出需要付手续费 $c$​。抽象为已知手续费 $c$，且不限交易次数，求出最大的含手续费利润 $b$。
+
+因为不限交易次数，考虑贪心，即只要能赚的钱不低于手续费就买卖一次。由此可以 $O(n)$ 计算出对固定的斜率 $c$ 得到的最大切线截距 $b=g_k-kc$ 及其 $k$ 值($sellcnt$)。对答案 $\max g = b+gk$ 而言，$b$ 相等时要尽可能大的 $k$，所以在上述贪心时，在利润最大化的同时，应当再最大化交易次数。
+
+注意到斜率一定不会超过增量的最大值即 $\max p$，故二分上界取 $\max p$ 即可。分母为 $1$，故折线斜率为整数，即二分只需要在整数范围内即可。如果题给的 $k$ 在 $g$ 单调递减时取得(即最高点 $k' < k,g_{k'} > g_k$)，也就是说不限次数地贪心得到的 $sellcnt < k$，那么此时也可以直接不限次数贪心求出 $\max g$，只要 $p_i > p_{i-1}$ 就可以前一天买今天卖。
+
+时间复杂度是 $O(n\log \max p)$。
+
+```c++
+#include <bits/stdc++.h>
+using namespace std;
+using ll = long long;
+signed main()
+{
+    ll k, n;
+    cin >> n >> k;
+    vector<ll> p(n);
+    for (int i = 0; i < n; ++i)
+    {
+        cin >> p[i];
+    }
+    ll lf = 1, rf = *max_element(p.begin(), p.end());
+    ll ans = -1;
+    while (lf <= rf)
+    {
+        ll cf = (lf + rf) >> 1; // 斜率
+        ll buycnt = 0, sellcnt = 0;
+        ll buyp = -p[0], sellp = 0;
+        for (int i = 1; i < n; ++i) // 贪心
+        {
+            if (sellp - p[i] >= buyp)
+            {
+                buyp = sellp - p[i];
+                buycnt = sellcnt;
+            }
+            if (buyp + p[i] - cf >= sellp)
+            {
+                sellp = buyp + p[i] - cf;
+                sellcnt = buycnt + 1;
+            }
+        }
+        // cout << cf << ' ' << sellp << ' ' << sellcnt << '\n';
+        if (sellcnt >= k)
+        {
+            ans = sellp + k * cf; // 注意不是+sellcnt,是+k
+            lf = cf + 1;
+        }
+        else
+        {
+            rf = cf - 1;
+        }
+    }
+    if (ans == -1)
+    {
+        ans = 0;
+        for (int i = 1; i < n; ++i)
+        {
+            ans += max(p[i] - p[i - 1], 0LL);
+        }
+    }
+    cout << ans;
+    return 0;
+}
+/*
+8 3
+1 100 1 4 1 4 1 4
+*/
 ```
 
 
@@ -14924,6 +16320,14 @@ signed main()
 > 洛谷P2503-将 $n$ 个数分成 $m$ 组，组内求和得到 $m$ 个数，求最小方差 $m\le n\le20,2\le m\le6$ 
 >
 > 对某个序列，每次将当前数贪心放进 $m$ 组里和最小的一组，可以证明是对确定序列得到最小方差的；然后用模拟退火不断打乱序列即可，对每个位置退火 $1$ 次，共退火 $n$ 次
+
+
+
+> lc1157-有数组 $n(\le 2\times10^4)$ 和 $q(\le10^4)$ 次询问，每次问子区间 $[l,r]$ 的出现频率不低于 $t(t$ 至少区间一半长 $)$ 的元素是什么。
+
+因为出现次数至少一半，随机枚举 $20$ 次，几乎不可能取不到是该数字。每次枚举，通过 lower, upper bound 对该元素的出现下标有序数组搜索得到出现频次。
+
+> 解法二：使用 Boyer-Moore 投票算法 $O(n)$ 在已知存在众数的情况下求出众数，利用投票算法套线段树维护信息。
 
 
 
@@ -16002,7 +17406,49 @@ print((x / y * y * y).quantize(Decimal('0.00'), ROUND_HALF_DOWN))
 > ROUND_UP (away from zero).
 > ROUND_05UP (away from zero if last digit after rounding towards zero would have been 0 or 5; otherwise towards zero)
 
+### 悬线法
 
+可以应用于满足以下条件的题目：
+
+- 需要在扫描序列时维护单调的信息；
+- 可以使用单调栈解决；
+- 不需要在单调栈上二分。
+
+> P4147-给定只包含 FR 的矩阵，求全为 F 矩阵的最大面积的3倍
+
+举每个 `F` 的位置作为矩形的最高点，然后找到以该点向上最上的前提下，向左向右最远能扩展多远。设 $l_{i,j},r_{i,j},a_{i,j}$ 分别表示点 $(i,j)$ 向左右上的最远距离。时间 $O(nm)$，空间 $O(m)$。
+
+```c++
+#include <algorithm>
+#include <cstdio>
+int m, n, a[1010], l[1010], r[1010], ans;
+
+int main() {
+  scanf("%d%d", &n, &m);
+  for (int i = 1; i <= n; i++) {
+    for (int j = 1; j <= m; j++) {
+      l[j] = r[j] = j;
+    }
+    char s[3];
+    for (int j = 1; j <= m; j++) {
+      scanf("%s", s);
+      if (s[0] == 'F')
+        a[j]++;
+      else if (s[0] == 'R')
+        a[j] = 0;
+    }
+    for (int j = 1; j <= m; j++)
+      while (l[j] != 1 && a[l[j] - 1] >= a[j]) l[j] = l[l[j] - 1];
+    for (int j = m; j >= 1; j--)
+      while (r[j] != m && a[r[j] + 1] >= a[j]) r[j] = r[r[j] + 1];
+    for (int j = 1; j <= m; j++) ans = std::max(ans, (r[j] - l[j] + 1) * a[j]);
+  }
+  printf("%d", ans * 3);
+  return 0;
+}
+```
+
+单调栈法：对每行执行一次每个 $i$ 对应的最远 $l,r$ 可以用单调栈维护。维护单调递增栈，每个元素被退栈之时得到它的右边界。然后再继续来一遍，得到左边界。之后同理操作即可。
 
 ### 程序语法
 
@@ -16423,9 +17869,11 @@ string eight(one, 1, 16);
 - `getline(cin, string)` 读整行(注意跟 `cin.getline` 区分)
 - `to_string(any)` 其它数值类型转 `std::string` (注：char 会视为 int，不能传C风格字符串)
 - `stoi` , `stol` , `stof` , `stod` ，字符串转 `int, long long, float, double`
+- `reduce(首, 尾, v)` 令每个元素为 $a_i=i+v$
 - `lexicographical_compare(迭代器a首, 迭代器a尾, 迭代器b首, 迭代器b尾)` 字典序比较两容器(不一定是字符串)
 - `replace(首迭代器, 尾迭代器, 待替换字符, 替换成的字符)` 批量替换
 - `count(首迭代器, 尾迭代器, 字符)` 字符出现次数统计
+- `reduce(首, 尾, 起始值)` 返回容器元素之和加上起始值，C++17
 
 stringstream：从里面读出数据类比 cin ，用 `ss >> v` ；把数据塞进去用 `<<` 
 
