@@ -6,7 +6,7 @@
 
 ![image-20220325120131181](img/image-20220325120131181.png)
 
-<div align="center" style="font-size:18px">Last built at Dec. 21, 2023</div>
+<div align="center" style="font-size:18px">Last built at Dec. 26, 2023</div>
 
 <div STYLE="page-break-after: always;"></div>
 
@@ -853,30 +853,6 @@ $$
 >
 > - 不动：反三角函数、对数函数、幂函数(幂不动性差些)
 > - 动：三角函数、常数函数、指数函数
-
-
-
-
-$$
-\vec a\times\vec b=\left|\matrix{\vec i&\vec j&\vec k\\a_x&a_y&a_z\\b_x&b_y&b_z}\right|=(a_zb_x-a_xb_z)\vec i+(a_xb_y-a_yb_x)\vec j+(a_yb_z-a_zb_y)\vec k
-$$
-非零向量平行的充要条件：$a_zb_x-a_xb_z=a_xb_y-a_yb_x=a_yb_z-a_zb_y=0$
-
-点到平面距离公式：$d=\dfrac{|Ax+By+Cz+D|}{\sqrt{A^2+B^2+C^2}}$
-
-
-
-球面一般方程：$x^2+y^2+z^2+Ax+By+Cz+D=0$ 若$A^2+B^2+C^2-4D>0$，是球面
-
-圆锥面方程：$z^2=k^2(x^2+y^2)$ , $z=\pm k\sqrt{x^2+y^2}$
-
-椭球面方程： $\frac{x^2}{a^2}+\frac{y^2}{b^2}+\frac{z^2}{c^2}=1$
-
-单叶双曲面(沿着 $z$ 延展的曲线)方程： $\frac{x^2}{a^2}+\frac{y^2}{b^2}-\frac{z^2}{c^2}=1$ ，双叶： $\frac{x^2}{a^2}+\frac{y^2}{b^2}-\frac{z^2}{c^2}=-1$
-
-抛物面(沿着 $z$ 正向)方程： $\frac{x^2}p+\frac{y^2}q=2z$ 
-
-双曲面方程： $\frac{x^2}p-\frac{y^2}q=2z$
 
 
 
@@ -3521,10 +3497,6 @@ signed main()
 
 
 
-
-
-
-
 #### 杂项
 
 ##### Pick定理
@@ -3770,7 +3742,55 @@ signed main()
 }
 ```
 
+### 立体几何
 
+直线参数方程：$A+t\vec{AB}$
+
+点 $P(x,y,z)$ 到直线 $A(x_0,y_0,z_0)+t(a,b,c)$ 的距离 $\dfrac{|\vec{PA} \times (a,b,c)|}{\sqrt{a^2+b^2+c^2}}$ (四边形面积(叉乘)=底($AB$ 长度)乘以高(距离)) 
+
+直线夹角 $\cos\varphi=\dfrac{|m_1m_2+n_1n_2+p_1p_2|}{\sqrt{m_1^2+n_1^2+p_1^2}\sqrt{m_2^2+n_2^2+p_2^2}}$
+
+直线垂直：$m_1m_2+n_1n_2+p_1p_2=0$ 
+
+空间向量的叉乘：
+
+$$
+\vec a\times\vec b=\left|\matrix{\vec i&\vec j&\vec k\\a_x&a_y&a_z\\b_x&b_y&b_z}\right|=(a_zb_x-a_xb_z)\vec i+(a_xb_y-a_yb_x)\vec j+(a_yb_z-a_zb_y)\vec k
+$$
+
+> 叉乘绝对值：$\vec i,\vec j,\vec k$ 的系数平方和开根。
+
+直线平行：$a_zb_x-a_xb_z=a_xb_y-a_yb_x=a_yb_z-a_zb_y=0$ 等价于 $\dfrac{x_1}{x_2}=\dfrac{y_1}{y_2}=\dfrac{z_1}{z_2}$ 
+
+
+
+求过不共线三点 $A,B,C$ 的平面 $ax+by+cz+d=0$
+
+- 求 $\vec{AB},\vec{AC}$，求出法向量为 $\vec{n} =\vec{AB}\times\vec{AC}=(a,b,c)$
+
+- 法向量垂直平面任一点 $P(x,y,z)$，设存在投影点 $P_0(x_0,y_0,z_0)$ 在平面内，则与其点积为 $\vec n\cdot\vec{PP_0}=0$，即 $a(x-x_0)+b(y-y_0)+c(z-z_0)$
+
+  用 $A,B,C$ 任一取代 $P_0$，求出 $d=-(ax_0+by_0+cz_0)$
+
+直线 $(n,m,p)$ 与平面的夹角正弦值 $\sin\varphi=\dfrac{|am+bn+cp|}{\sqrt{a^2+b^2+c^2}\sqrt{m^2+n^2+p^2}}$
+
+直线与平面平行 $am+bn+cp=0$，垂直 $\dfrac am=\dfrac bn=\dfrac cp$
+
+点到平面距离公式：$d=\dfrac{|Ax+By+Cz+D|}{\sqrt{A^2+B^2+C^2}}$
+
+
+
+> 球面一般方程：$x^2+y^2+z^2+Ax+By+Cz+D=0$ 若$A^2+B^2+C^2-4D>0$，是球面
+>
+> 圆锥面方程：$z^2=k^2(x^2+y^2)$ , $z=\pm k\sqrt{x^2+y^2}$
+>
+> 椭球面方程： $\frac{x^2}{a^2}+\frac{y^2}{b^2}+\frac{z^2}{c^2}=1$
+>
+> 单叶双曲面(沿着 $z$ 延展的曲线)方程： $\frac{x^2}{a^2}+\frac{y^2}{b^2}-\frac{z^2}{c^2}=1$ ，双叶： $\frac{x^2}{a^2}+\frac{y^2}{b^2}-\frac{z^2}{c^2}=-1$
+>
+> 抛物面(沿着 $z$ 正向)方程： $\frac{x^2}p+\frac{y^2}q=2z$ 
+>
+> 双曲面方程： $\frac{x^2}p-\frac{y^2}q=2z$
 
 ### 博弈论
 
@@ -3935,7 +3955,7 @@ FFT 在模意义下的一种实现，功能上与 FFT 类似。FFT 的计算量�
 
 原根：$m\in N_+,a\in Z$，若 $(a,m)=1,\delta_m(a)=\varphi(m)$，则 $a$ 是模 $m$ 的原根
 
-$998244353$ 的原根是 $3$，$10^9+7$ 的原根是 $5$
+$998244353$ 的原根是 $3$，$10^9+7$ 不能做 NTT(MTT 考虑 P4245)
 
 > 洛谷P3803
 
@@ -5677,6 +5697,385 @@ signed main()
             printf("%lld\n", ans);
         }
     }
+    return 0;
+}
+```
+
+#### 树上二分
+
+对单调问题，$O(\log n)$ 单次查询出固定左/右端点下，最长的右端点/左端点，区间内满足性质。
+
+> 2023GDCPC-F 给定长为 $n(\le 10^5)$ 的序列，有颜色 $c_i(1\le c_i\le n)$ 和值 $v_i(1\le v_i\le 10^9)$，$q(\le 10^5)$ 次询问，时限 5s，空间 1GB，要求维护：
+>
+> 1. `1 p x` 修改 $c_p$ 为 $x$
+>
+> 2. `2 p x` 修改 $v_p$ 为 $x$
+>
+> 3. `3 x k a_1 a_2 ... a_k` $\sum k\le 10^6$
+>
+>    找到包含 $x$ 的最长区间 $[l,r]$ 满足 $k$ 个颜色 $a$ 在该区间全部覆盖
+
+求某个区间出现的颜色是否都在 $A$，即求 $A$ 所有颜色在区间出现次数之和是否等于区间长度。可以维护线段树/树状数组，每个节点保存哈希表，表示该区间出现的颜色及其次数。每个维护值重复 $\log n$  次，故空间复杂度为 $O(n\log n)$。可以考虑用 `pb_ds` un map 卡常。
+
+二分找出从 $x$ 往左往右能到达的最大左右端点，求区间和。如果朴素二分，复杂度为 $O(\sum k \log^2 n)$，考虑使用线段树/树状数组上二分/倍增优化，为 $O(\sum k\log n)$。
+
+线段树上二分：
+
+```c++
+#include <bits/stdc++.h>
+
+using namespace std;
+using ll = long long;
+const ll mn = 3e5 + 10, mt = mn * 4;
+
+// 比 unordered_map 更快的哈希表
+#include <ext/pb_ds/assoc_container.hpp>
+using namespace __gnu_pbds;
+const int RANDOM = chrono::high_resolution_clock::now().time_since_epoch().count();
+struct chash
+{
+    int operator()(int x) const { return x ^ RANDOM; }
+};
+typedef gp_hash_table<int, int, chash> hash_t;
+
+ll s[mt];
+hash_t h[mt];
+#define lfs p << 1
+#define rfs p << 1 | 1
+#define mkcf ll cf = (lf + rf) >> 1
+#define ci const int &
+void modifyS(int p, int lf, int rf, ci pos, ci v)
+{
+    if (lf == rf)
+    {
+        s[p] += v;
+        return;
+    }
+    mkcf;
+    if (pos <= cf)
+    {
+        modifyS(lfs, lf, cf, pos, v);
+    }
+    else
+    {
+        modifyS(rfs, cf + 1, rf, pos, v);
+    }
+    s[p] = s[lfs] + s[rfs];
+}
+ll queryS(int p, int lf, int rf, ci lc, ci rc)
+{
+    if (lc <= lf && rf <= rc)
+    {
+        return s[p];
+    }
+    mkcf;
+    ll ans = 0;
+    if (lc <= cf)
+    {
+        ans += queryS(lfs, lf, cf, lc, rc);
+    }
+    if (cf + 1 <= rc)
+    {
+        ans += queryS(rfs, cf + 1, rf, lc, rc);
+    }
+    return ans;
+}
+void modifyC(int p, int lf, int rf, ci pos, ci c, ci v)
+{
+    h[p][c] += v;
+    if (lf == rf)
+    {
+        return;
+    }
+    mkcf;
+    if (pos <= cf)
+    {
+        modifyC(lfs, lf, cf, pos, c, v);
+    }
+    else
+    {
+        modifyC(rfs, cf + 1, rf, pos, c, v);
+    }
+}
+#define colors const vector<ll> &
+ll check(ll p, ll lf, ll rf, colors cs)
+{
+    ll sum = 0;
+    for (auto &c : cs)
+    {
+        sum += h[p][c];
+    }
+    return sum == rf - lf + 1;
+}
+const ll fail = -1;
+ll queryCR(int p, int lf, int rf, int lc, colors cs)
+{
+    if (rf < lc)
+    {
+        return fail;
+    }
+    if (lc <= lf)
+    {
+        if (check(p, lf, rf, cs))
+        { // still ok, move right
+            return -1;
+        }
+        if (lf == rf)
+        { // first to fail is lf, then ok is lf-1
+            return lf - 1;
+        }
+    }
+    mkcf;
+    ll pos = queryCR(lfs, lf, cf, lc, cs);
+    if (pos != fail)
+    {
+        return pos;
+    }
+    return queryCR(rfs, cf + 1, rf, lc, cs);
+}
+ll queryCL(int p, int lf, int rf, int rc, colors cs)
+{
+    if (lf > rc)
+    {
+        return fail;
+    }
+    if (rf <= rc)
+    {
+        if (check(p, lf, rf, cs))
+        {
+            return -1;
+        }
+        if (lf == rf)
+        {
+            return lf + 1;
+        }
+    }
+    mkcf;
+    ll pos = queryCL(rfs, cf + 1, rf, rc, cs);
+    if (pos != fail)
+    {
+        return pos;
+    }
+    return queryCL(lfs, lf, cf, rc, cs);
+}
+
+ll n, q, c[mn], v[mn];
+void solve()
+{
+    cin >> n >> q;
+    for (ll i = 1; i <= n; ++i)
+    {
+        cin >> c[i];
+        modifyC(1, 1, n, i, c[i], 1);
+    }
+    for (ll i = 1; i <= n; ++i)
+    {
+        cin >> v[i];
+        modifyS(1, 1, n, i, v[i]);
+    }
+    for (ll op, x, y; q--;)
+    {
+        cin >> op >> x >> y;
+        if (op == 1)
+        {
+            modifyC(1, 1, n, x, c[x], -1);
+            c[x] = y;
+            modifyC(1, 1, n, x, c[x], 1);
+        }
+        else if (op == 2)
+        {
+            modifyS(1, 1, n, x, y - v[x]);
+            v[x] = y;
+        }
+        else
+        {
+            bool ok = false;
+            vector<ll> vec;
+            for (ll i = 1, z; i <= y; ++i)
+            {
+                cin >> z;
+                if (c[x] == z)
+                {
+                    ok = true;
+                }
+                vec.emplace_back(z);
+            }
+            if (!ok)
+            {
+                cout << "0\n";
+                continue;
+            }
+
+            ll l = queryCL(1, 1, n, x, vec);
+            ll r = queryCR(1, 1, n, x, vec);
+            l = l == fail ? 1 : l;
+            r = r == fail ? n : r;
+            cout << queryS(1, 1, n, l, r) << '\n';
+        }
+    }
+
+    for (ll i = 1; i <= 4 * n; ++i)
+    {
+        h[i].clear();
+        s[i] = 0;
+    }
+}
+
+signed main()
+{
+    ios::sync_with_stdio(false), cin.tie(0);
+    ll t;
+    cin >> t;
+    while (t--)
+    {
+        solve();
+    }
+    return 0;
+}
+```
+
+树状数组上倍增：
+
+```c++
+#include <bits/stdc++.h>
+#define MAXN ((int) 3e5)
+using namespace std;
+
+// 比 unordered_map 更快的哈希表
+#include <ext/pb_ds/assoc_container.hpp>
+using namespace __gnu_pbds;
+const int RANDOM = chrono::high_resolution_clock::now().time_since_epoch().count();
+struct chash {
+    int operator()(int x) const { return x ^ RANDOM; }
+};
+typedef gp_hash_table<int, int, chash> hash_t;
+
+int n, q, C[MAXN + 10], V[MAXN + 10];
+
+hash_t colTree[MAXN + 10];
+long long smTree[MAXN + 10];
+
+int lb(int x) { return x & (-x); }
+
+// val == -1：把位置 pos 的颜色 c 删掉
+// val == 1：把位置 pos 的颜色设为 c
+void addCol(int pos, int c, int val) {
+    for (; pos <= n; pos += lb(pos)) colTree[pos][c] += val;
+}
+
+// 查询 vec 里的所有颜色在前 pos 个位置中一共出现了几次
+int queryCol(int pos, vector<int> &vec) {
+    int ret = 0;
+    for (; pos; pos -= lb(pos)) for (int c : vec) {
+        auto it = colTree[pos].find(c);
+        if (it != colTree[pos].end()) ret += it->second;
+    }
+    return ret;
+}
+
+// 树状数组上倍增，
+// 返回值 l 满足 vec 里所有颜色在区间 [l, lim] 中出现的总次数等于区间长度，且 l 最小
+int gao1(int lim, vector<int> &vec) {
+    int base = queryCol(lim, vec);
+    if (base == lim) return 1;
+
+    int b;
+    for (b = 1; b <= n; b <<= 1);
+
+    int now = 0, cnt = 0;
+    for (b >>= 1; b; b >>= 1) {
+        int nxt = now | b, tmp = 0;
+        for (int c : vec) {
+            auto it = colTree[nxt].find(c);
+            if (it != colTree[nxt].end()) tmp += it->second;
+        }
+        if (nxt > lim || base - (cnt + tmp) == lim - nxt) {
+            // do nothing
+        } else {
+            now = nxt; cnt += tmp;
+        }
+    }
+    return now + 2;
+}
+
+// 树状数组上倍增，
+// 返回值 r 满足 vec 里所有颜色在区间 [lim, r] 中出现的总次数等于区间长度，且 r 最大
+int gao2(int lim, vector<int> &vec) {
+    int base = queryCol(lim, vec);
+
+    int b;
+    for (b = 1; b <= n; b <<= 1);
+
+    int now = 0, cnt = 0;
+    for (b >>= 1; b; b >>= 1) {
+        int nxt = now | b, tmp = 0;
+        for (int c : vec) {
+            auto it = colTree[nxt].find(c);
+            if (it != colTree[nxt].end()) tmp += it->second;
+        }
+        if (nxt < lim || (cnt + tmp) - base == nxt - lim) {
+            now = nxt; cnt += tmp;
+        } else {
+            // do nothing
+        }
+    }
+    return now;
+}
+
+// 位置 pos 的权值增加 val
+void addSm(int pos, long long val) {
+    for (; pos <= n; pos += lb(pos)) smTree[pos] += val;
+}
+
+// 求前 pos 个位置的权值之和
+long long querySm(int pos) {
+    long long ret = 0;
+    for (; pos; pos -= lb(pos)) ret += smTree[pos];
+    return ret;
+}
+
+void solve() {
+    scanf("%d%d", &n, &q);
+    for (int i = 1; i <= n; i++) {
+        scanf("%d", &C[i]);
+        addCol(i, C[i], 1);
+    }
+    for (int i = 1; i <= n; i++) {
+        scanf("%d", &V[i]);
+        addSm(i, V[i]);
+    }
+
+    while (q--) {
+        int op, x, y; scanf("%d%d%d", &op, &x, &y);
+        if (op == 1) {
+            addCol(x, C[x], -1);
+            addCol(x, y, 1);
+            C[x] = y;
+        } else if (op == 2) {
+            addSm(x, y - V[x]);
+            V[x] = y;
+        } else {
+            bool ok = false;
+            vector<int> vec;
+            for (int i = 1; i <= y; i++) {
+                int z; scanf("%d", &z);
+                if (C[x] == z) ok = true;
+                vec.push_back(z);
+            }
+            if (!ok) { printf("0\n"); continue; }
+
+            int L = gao1(x, vec), R = gao2(x, vec);
+            printf("%lld\n", querySm(R) - querySm(L - 1));
+        }
+    }
+
+    for (int i = 1; i <= n; i++) colTree[i].clear();
+    for (int i = 1; i <= n; i++) smTree[i] = 0;
+}
+
+int main() {
+    int tcase; scanf("%d", &tcase);
+    while (tcase--) solve();
     return 0;
 }
 ```
@@ -11397,6 +11796,8 @@ signed main()
 
 ### 匹配问题
 
+#### 二分图
+
 二分图性质：
 
 1. 不存在长为奇数的环  (也是判定方法，直接点 DFS 染二色即可判断)
@@ -11417,7 +11818,7 @@ DAG 最小不可相交路径覆盖 = $n-v(G)$
 
 DAG 的最小可相交路径覆盖就先 floyd 求传递闭包，在闭包新图跑最大匹配，答案依然为 $n-v(G)$
 
-
+#### 最大匹配
 
 匈牙利算法又名 KM 算法，邻接矩阵复杂度为 $O(n^3)$ ，邻接表为 $O(nm)$，可以求二分图最大匹配以及二分图最大权匹配(有完美时可求出完美)
 
@@ -11482,7 +11883,7 @@ signed main()
 }
 ```
 
-
+#### 完美匹配
 
 > 洛谷P6577-题面类似 $n_l=n_r$ ，求完美匹配(无重边，保证有完美匹配)
 
@@ -11570,7 +11971,7 @@ signed main()
 }
 ```
 
-
+#### 最大权匹配
 
 > UOJ80-左部点数 $n_l$ ，右部 $n_r$ ，编号依次 $1$ 开始， $m$ 条加权边，求最大权匹配以及第 $i$ 个左部点匹配哪个右部点 ( $0$ 代表无匹配)
 
@@ -11703,7 +12104,7 @@ int main()
 }
 ```
 
-
+#### 最小边覆盖
 
 > lc1595-求最小边覆盖(用权和最小的边集覆盖所有的点)
 
@@ -15162,8 +15563,10 @@ signed main()
 ```c++
 while (lf < rf)
 {
-    ll lc = (2 * lf + rf) / 3, rc = (2 * rf + lf + 2) / 3;
-    ll lv = f(lc), rv = f(rc);
+    ll tri = (rf - lf) / 3;
+    ll lc = lf + tri, rc = rf - tri;
+    db lv = calc(lc), rv = calc(rc);
+    ans = min({ans, lv, rv});
     if (lv < rv)
     {
         rf = rc - 1;
@@ -17288,7 +17691,7 @@ signed main()
 
 
 
-#### java 高精度
+#### Java 高精度
 
 `java.math.BigInteger`,`java.math.BigDecimal` 高精度运算 JAVA8为例
 
@@ -17382,7 +17785,7 @@ public class Main {
 
 
 
-#### python 高精度
+#### Python 高精度
 
 以例子说明：(正常使用四则运算，输入输出和格式化，设置精度即可)
 
@@ -17810,7 +18213,7 @@ ll m = unique(a + 1, a + 6) - (a + 1);
 nth_element(a + 1, a + k, a + n + 1); //使得a[k]归位
 ```
 
-**partial\_sort** : 保证\[lf,cf)有序，\[cf,rf\]按本来的相对顺序。
+**partial\_sort** : 保证\[lf,cf)有序，\[cf,rf\]按本来的相对顺序。排序逆序可以如 `greater<ll>()` 做参数
 
 ```c++
 partial_sort(lf,cf,rf);
@@ -18050,7 +18453,13 @@ array, valarray
 
 
 
+`complex<T>` 复数，支持 `(,)` 构造，能传入 `abs`, `arg`($[-\pi,\pi]$ 离 x 正半最近的偏移)，能和 T 运算。`conj` 共轭复数，`norm` 范数，`polar(T rho,T theta)` 构造对应复数
+
+
+
 #### pb_ds
+
+有一种比 unordered_map 更快的哈希表，具体参见上文 `线段树-树上二分`。
 
 ```c++
 #include <ext/pb_ds/assoc_container.hpp>
@@ -18114,6 +18523,7 @@ signed main()
             else if (opt == 5)
             {
                 lastans = (*--tr.lower_bound(x * dig)) / dig;
+                
             }
             else if (opt == 6)
             {

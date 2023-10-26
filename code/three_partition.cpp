@@ -20,7 +20,8 @@ signed main()
         db ans = 1e21;
         while (lf < rf)
         {
-            ll lc = (2 * lf + rf) / 3, rc = (2 * rf + lf + 2) / 3;
+            ll tri = (rf - lf) / 3;
+			ll lc = lf + tri, rc = rf - tri;
             db lv = f(lc), rv = f(rc);
             ans = min({ans, lv, rv});
             if (lv < rv)
@@ -28,6 +29,7 @@ signed main()
                 rf = rc - 1;
             }
             else
+			
             {
                 lf = lc + 1;
             }
