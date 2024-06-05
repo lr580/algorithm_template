@@ -1,5 +1,3 @@
-
-
 <hr/>
 <div style="font-size:36px;font-weight:900;margin:-14px 10px" align="center">lr580's 算法模板</div>
 <hr/>
@@ -108,6 +106,31 @@ $n$ 人围圈排列数 $Q_n^n=(n-1)!$ ，部分圆排列公式 $Q_n^r=\dfrac{A_n
 - $\sum_{i=0}^n\begin{pmatrix}n-i\\i\end{pmatrix}=fib_{n+1}$
 
 > 某些时候可以两边求导再求
+
+> 枚举所有组合可以使用 Gosper's Hack 技巧：
+>
+> ```c++
+> unsigned int nextSubset(unsigned int subset) {
+>     unsigned int u = subset & -subset;
+>     unsigned int v = subset + u;
+>     return v | (((v ^ subset) / u) >> 2);
+> }
+> void gospersHack(int k, int n) {
+>     unsigned int subset = (1 << k) - 1;
+>     unsigned int limit = (1 << n);
+>     while (subset < limit) {
+>         for (int i = 0; i < n; ++i) {
+>             if (subset & (1 << i)) {
+>                 std::cout << i + 1 << " ";
+>             }// Process the subset here
+>         }// For example, printing it out
+>         std::cout << std::endl;
+>         subset = nextSubset(subset);
+>     }
+> }
+> ```
+>
+> 
 
 **容斥原理：**
 
@@ -1242,7 +1265,7 @@ bool isprime(ll p)
 }
 ```
 
-**Miller Rabin算法**，复杂度 $O(k\log^3 n)$ ，$k$ 是设定参数，能够以较高准确率判定是否为素数，建议设 $10$，见 `pollard-rho` 代码。
+**Miller Rabin算法**，复杂度 $O(k\log n)$ ，$k$ 是设定参数，能够以较高准确率判定是否为素数，建议设 $10$，见 `pollard-rho` 代码。
 
 > $100$ 内质数为  $25$ 个 `2,3,5,7,11,13,17,19,23,29,31,37,41,43,47,53,59,61,67,71,73,79,83,89,97`
 
@@ -5560,6 +5583,104 @@ int main()
 }
 ```
 
+#### 动态开点
+
+动态开点线段树模板题，强制在线维护：(lc715)
+
+- 将区间 $[l,r)$ 的所有点染色。
+- 将区间 $[l,r)$ 的所有点取消染色。
+- 查询区间 $[l,r)$ 是否每个点都被染色。
+
+其中操作数 $q=10^4$，值域 $n=10^9$。
+
+本质：懒开点的线段树，即仍然构造值域为 $[1,n]$ 的普通线段树。但是对所有节点，只有需要访问时，才使用内存分配给该点。对大部分不需要访问的点不开内存。
+
+点数估计：可以考虑走大约 $2q\log n$；如果 $q>n$，最坏点数约 $2n-1$。
+
+```c++
+using ll = long long;
+class RangeModule
+{
+    constexpr static ll inf = 1e9;
+    constexpr static ll maxn = 60 * 1e4; // log(inf)*q
+    struct node
+    {
+        ll ls, rs, sum, laz;
+    } t[maxn] = {};
+    int cnt = 1;
+#define cll const ll &
+#define mkcf ll cf = (lf + rf) >> 1
+    void pushdown(int r, cll lf, cll rf)
+    {
+        if (!t[r].ls)
+            t[r].ls = ++cnt;
+        if (!t[r].rs)
+            t[r].rs = ++cnt;
+        if (!t[r].laz)
+            return;
+        if (t[r].laz == 1)
+        {
+            mkcf;
+            t[t[r].ls].sum = (cf - lf + 1); // len-len/2
+            t[t[r].rs].sum = rf - cf;       // len/2
+        }
+        else
+        {
+            t[t[r].ls].sum = t[t[r].rs].sum = 0;
+        }
+        t[t[r].ls].laz = t[t[r].rs].laz = t[r].laz;
+        t[r].laz = 0;
+    }
+    void pushup(int r)
+    {
+        t[r].sum = t[t[r].ls].sum + t[t[r].rs].sum;
+    }
+    void update(int r, ll lf, ll rf, cll lc, cll rc, cll v)
+    {
+        if (lc <= lf && rf <= rc)
+        {
+            t[r].sum += (v == 1) * (rf - lf + 1);
+            t[r].laz = v;
+            return;
+        }
+        pushdown(r, lf, rf);
+        mkcf;
+        if (lc <= cf)
+            update(t[r].ls, lf, cf, lc, rc, v);
+        if (rc >= cf + 1)
+            update(t[r].rs, cf + 1, rf, lc, rc, v);
+        pushup(r);
+    }
+    ll query(int r, ll lf, ll rf, cll lc, cll rc)
+    {
+        if (lc <= lf && rf <= rc)
+            return t[r].sum;
+        pushdown(r, lf, rf);
+        ll res = 0;
+        mkcf;
+        if (lc <= cf)
+            res += query(t[r].ls, lf, cf, lc, rc);
+        if (rc >= cf + 1)
+            res += query(t[r].rs, cf + 1, rf, lc, rc);
+        return res;
+    }
+public:
+    RangeModule() {}
+    void addRange(int left, int right)
+    {
+        update(1, 1, inf, left, right - 1, 1);
+    }
+    bool queryRange(int left, int right)
+    {
+        return query(1, 1, inf, left, right - 1) == right - left;
+    }
+    void removeRange(int left, int right)
+    {
+        update(1, 1, inf, left, right - 1, -1);
+    }
+};
+```
+
 
 
 #### zkw线段树
@@ -8490,6 +8611,18 @@ signed main()
 
 #### 最近公共祖先
 
+解法零：暴力
+
+```python
+if d[u]<d[v]:
+    u,v=v,u
+while d[u]>d[v]:
+    u=fa[u]
+while u!=v:
+    u,v=fa[u],fa[v]
+return u
+```
+
 解法一：倍增法求 LCA 可以 $O(n\log n)$ 预处理和 $O(\log n)$ 查询
 
 ```c++
@@ -8626,9 +8759,152 @@ signed main()
 }
 ```
 
+解法三：tarjan 离线，复杂度取并查集的
 
+```c++
+#include <algorithm>
+#include <cstring>
+#include <iostream>
+using namespace std;
+
+class Edge {
+ public:
+  int toVertex, fromVertex;
+  int next;
+  int LCA;
+  Edge() : toVertex(-1), fromVertex(-1), next(-1), LCA(-1){};
+  Edge(int u, int v, int n) : fromVertex(u), toVertex(v), next(n), LCA(-1){};
+};
+
+const int MAX = 100;
+int head[MAX], queryHead[MAX];
+Edge edge[MAX], queryEdge[MAX];
+int parent[MAX], visited[MAX];
+int vertexCount, queryCount;
+
+void init() {
+  for (int i = 0; i <= vertexCount; i++) {
+    parent[i] = i;
+  }
+}
+
+int find(int x) {
+  if (parent[x] == x) {
+    return x;
+  } else {
+    return find(parent[x]);
+  }
+}
+
+void tarjan(int u) {
+  parent[u] = u;
+  visited[u] = 1;
+
+  for (int i = head[u]; i != -1; i = edge[i].next) {
+    Edge& e = edge[i];
+    if (!visited[e.toVertex]) {
+      tarjan(e.toVertex);
+      parent[e.toVertex] = u;
+    }
+  }
+
+  for (int i = queryHead[u]; i != -1; i = queryEdge[i].next) {
+    Edge& e = queryEdge[i];
+    if (visited[e.toVertex]) {
+      queryEdge[i ^ 1].LCA = e.LCA = find(e.toVertex);
+    }
+  }
+}
+
+int main() {
+  memset(head, 0xff, sizeof(head));
+  memset(queryHead, 0xff, sizeof(queryHead));
+
+  cin >> vertexCount >> queryCount;
+  int count = 0;
+  for (int i = 0; i < vertexCount - 1; i++) {
+    int start = 0, end = 0;
+    cin >> start >> end;
+
+    edge[count] = Edge(start, end, head[start]);
+    head[start] = count;
+    count++;
+
+    edge[count] = Edge(end, start, head[end]);
+    head[end] = count;
+    count++;
+  }
+
+  count = 0;
+  for (int i = 0; i < queryCount; i++) {
+    int start = 0, end = 0;
+    cin >> start >> end;
+
+    queryEdge[count] = Edge(start, end, queryHead[start]);
+    queryHead[start] = count;
+    count++;
+
+    queryEdge[count] = Edge(end, start, queryHead[end]);
+    queryHead[end] = count;
+    count++;
+  }
+
+  init();
+  tarjan(1);
+
+  for (int i = 0; i < queryCount; i++) {
+    Edge& e = queryEdge[i * 2];
+    cout << "(" << e.fromVertex << "," << e.toVertex << ") " << e.LCA << endl;
+  }
+
+  return 0;
+}
+```
+
+解法四：LCA 为两个游标跳转到同一条重链上时深度较小的那个游标所指向的点。
+
+树链剖分的预处理时间复杂度为线性，单次查询的时间复杂度为对数，并且常数较小。
 
 #### 树上k级祖先
+
+倍增：(lc1483, 不存在输出 -1)
+
+```c++
+class TreeAncestor {
+    vector<vector<int>> pa;
+public:
+    TreeAncestor(int n, vector<int> &parent) {
+        int m = 32 - __builtin_clz(n); // n 的二进制长度
+        pa.resize(n, vector<int>(m, -1));
+        for (int i = 0; i < n; i++)
+            pa[i][0] = parent[i];
+        for (int i = 0; i < m - 1; i++)
+            for (int x = 0; x < n; x++)
+                if (int p = pa[x][i]; p != -1)
+                    pa[x][i + 1] = pa[p][i];
+    }
+
+    int getKthAncestor(int node, int k) {
+        int m = 32 - __builtin_clz(k); // k 的二进制长度
+        for (int i = 0; i < m; i++) {
+            if ((k >> i) & 1) { // k 的二进制从低到高第 i 位是 1
+                node = pa[node][i];
+                if (node < 0) break;
+            }
+        }
+        return node;
+    }
+
+    // 另一种写法，不断去掉 k 的最低位的 1
+    int getKthAncestor2(int node, int k) {
+        for (; k && node != -1; k &= k - 1) // 也可以写成 ~node
+            node = pa[node][__builtin_ctz(k)];
+        return node;
+    }
+};
+```
+
+
 
 > 例题P5903：给定 $n(2\le n\le5\times10^5)$ 点有根树， $q(1\le q\le5\times10^6)$ 询问，随机种子 $s$ 。接下来输入每个点的父亲 ( $0$ 为根)，然后有根据随机种子生成的询问，每次求节点 $x$ 的 $k$ 级祖先。输出 $\oplus_{i=1}^qi\times ans_i$ 。s
 
@@ -8738,6 +9014,8 @@ signed main()
 在 LCA 的基础上，设深度为 $d[x]$ ，则距离为 $d[u]+d[v]-2d[lca]$ 。
 
 > 也可以表示为：$|d[u]-d[LCA]|+|d[v]-d[LCA]|$
+
+> 注：暴力思路是从 $u$ 出发 DFS 到 $v$ 即可
 
 
 
@@ -10255,7 +10533,6 @@ void dijkstra()
                 minu = i;
             }
         }
-        minv = BIG;
         vis[minu] = true;
         for (auto i : g[minu])
         {
@@ -10263,7 +10540,7 @@ void dijkstra()
             {
                 d[i.first] = d[minu] + i.second;
             }
-        }
+        }//如果只求d[t]可以vis[t]时break
     }
 }
 signed main()
@@ -10307,6 +10584,7 @@ struct node
     bool operator<(const node &x) const { return d > x.d; }
 };
 priority_queue<node> q;
+//priority_queue<pair<LL, int>, vector<pair<LL, int>>, greater<pair<LL, int>>> q;
 signed main()
 {
     n = read(), m = read(), s = read();
@@ -10338,12 +10616,20 @@ signed main()
 }
 ```
 
-如果要输出路径本身，那么每次松弛时让 $v$ 指向起点 $u$ ；然后从终点倒序遍历这个指向数组，然后再顺着输出。如果要计数最短路数目，或求最短时点权最值最大的路径等，也在松弛时修改。
+如果要输出路径本身，那么每次松弛时让 $v$ 指向起点 $u$ ；然后从终点倒序遍历这个指向数组，然后再顺着输出。如果要计数最短路数目，或求最短时点权最值最大的路径等，也在松弛时修改。(==时不用push)
 
-可以修改松弛条件，来求别的最短路，如路径最大边权最小最短路：(也可以最小生成树上DFS)(SCNUOJ1458)
+可以修改松弛条件，来求别的最短路，如路径最大边权最小的路：(也可以最小生成树上DFS)(SCNUOJ1458 / lc1631)
 $$
 dis[j]=\min(dis[j],\max(dis[mink],ma[mink][j]))
 $$
+同理最大边权最大的最短路取 $dis=\infty$ ($dis_0=0$) 且：(lc1631)
+
+```c++
+if(max(dist[u], w) < dist[v]) dist[v] = max(dist[u], w)
+```
+
+
+
 非负权图跑 $n$ 次可以实现全源最短路，复杂度 $O(nm\log m)$ 。不能求单源最长路。
 
 
@@ -10477,7 +10763,7 @@ signed main()
 
 对 $n$ 个变量 $x_i$ 和 $m$ 个不等式 $x_i-x_j\le c_k,c_k\in R$，求一组解 $x$ 使得每个不等式都满足，或者判断无解。
 
-将其变为 $x_i\le x_j+c_k$，联想单源最短路三角不等式，所以对每个约束条件构造 $j\to i$ 的权为 $c_k$ 的有向边，且建立超级源点 $x_0$ 向每个点连权为 $0$ 的边。若负环无解，否则最短路数组 $-d$ 是一组解。注意到若 $x$ 是合法解，则 $x+C$ 也是合法解。用 Bellman-Ford / SPFA 即可，都是 $O(nm)$。
+将其变为 $x_i\le x_j+c_k$，联想单源最短路三角不等式，所以对每个约束条件构造 $j\to i$ 的权为 $c_k$ 的有向边，且建立超级源点 $x_0$ 向每个点连权为 $0$ 的边。若负环无解，否则最短路数组 $-d$ 是一组解，这组解是最小的。注意到若 $x$ 是合法解，则 $x+C$ 也是合法解。用 Bellman-Ford / SPFA 即可，都是 $O(nm)$。
 
 构造技巧：
 
@@ -13334,6 +13620,15 @@ for (int i = 1; i <= n; i++) //W容量 v价值
   for (int l = W; l >= w[i]; l--) f[l] = max(f[l], f[l - w[i]] + v[i]);
 ```
 
+> 方案数：(洛谷P1164)
+>
+> ```c++
+> dp[0]=1;
+> for(int i=0;i<n;++i)
+>     for(int j=m-a[i];j>=0;--j) 
+>         dp[j+a[i]] += dp[j];
+> ```
+
 **完全背包**：(可以选取无限次) (将01背包第二维修改顺序即可)
 
 ```c++
@@ -15577,6 +15872,8 @@ while (lf < rf)
     }
 }
 ```
+
+此三分无法处理 `lv==rv`，可以通过离散化去除连续段。
 
 
 
@@ -17912,6 +18209,8 @@ $$
 
 - 交换两个数 `a^=b^=a^=b`
 
+- 删掉最低的 1，其他不变 `x&(x-1)`
+
 
 
 内建函数：
@@ -18054,6 +18353,24 @@ from datetime import *
 d1, d2 = datetime(2022,5,8), datetime(2002,5,8)
 print((d1-d2).days) # 天数差
 print((datetime.today()+timedelta(days=1)).weekday()) #星期[0,6]一-日
+```
+
+输出版本的语法：(适用于 OMS 等可测试平台)
+
+```c
+printf("%lld", __STDC_VERSION__); //c
+```
+
+```c++
+std::cout << __cplusplus; //c++
+```
+
+```python
+print(sys.version) # Python
+```
+
+```java
+System.out.println(System.getProperty("java.version")); //Java
 ```
 
 
@@ -18207,6 +18524,14 @@ distribution 范围支持负数和超过 int 的范围(即 long long)。
 ll m = unique(a + 1, a + 6) - (a + 1);
 ```
 
+原地去重：
+
+```c++
+nums.erase(unique(nums.begin(), nums.end()), nums.end());
+```
+
+
+
 **nth\_element** : (a,a+k,a+n,cmp); 使容器a+k所在元素左边都小于它，右边都大于它(a+k通常移位)，不返回值
 
 ```c++
@@ -18323,7 +18648,7 @@ back()方法同理
 
 insert(p, value)插入 O(n)
 
-insert(p, b1, b2);将[b1,b2]内元素插入到p位置前面
+insert(p, b1, b2);将[b1,b2)内元素插入到p位置前面
 
 erase(p)删除 也可以用诸如x.end()-1;O(n) 
 
@@ -18738,3 +19063,4 @@ LL mul(LL a, LL b, LL P){
 }
 ```
 
+l
