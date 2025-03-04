@@ -4,7 +4,7 @@
 
 ![image-20220325120131181](img/image-20220325120131181.png)
 
-<div align="center" style="font-size:18px">Last built at Dec. 26, 2023</div>
+<div align="center" style="font-size:18px">Version 1.2.3, last built at 2025/3/5</div>
 
 <div STYLE="page-break-after: always;"></div>
 
@@ -28,7 +28,7 @@
 4. $lcm(x,y)=[x,y]$ 最小公倍数
 5. $\lfloor x\rfloor$ 向下取整
 6. $\lceil x\rceil$ 向上取整
-7. $C^m_n=C(n,m)=(\matrix{n\\m})=\dfrac{n!}{m!(n-m)!}$ ，若 $n < m$ 得 $0$ 
+7. $C^m_n=C(n,m)=(\matrix{n\\m})=\dfrac{n!}{m!(n-m)!}$ ，若 $n < m$ 或 $m < 0$ 得 $0$，$C(n,0)=1$
 8. $A_n^m=P_n^m=P(n,m)=\dfrac{n!}{(n-m)!}=\prod_{i=n-m+1}^ni$ ，若 $n < m$ 得 $0$ 
 
 
@@ -88,7 +88,7 @@ $n$ 人围圈排列数 $Q_n^n=(n-1)!$ ，部分圆排列公式 $Q_n^r=\dfrac{A_n
 
 
 
-顺序和 $\le$ 乱序和 $\le$ 逆序和
+排序不等式：逆序和 $\le$ 乱序和 $\le$ 顺序和。给定升序数组 $a,b$，设 $c$ 是 $b$ 的排列，则求和 $\sum_{i=1}^na_ib_{n-i+1}\le \sum_{i=1}^na_ic_i\le \sum_{i=1}^na_ib_i$
 
 
 
@@ -1510,115 +1510,161 @@ signed main()
 
 > P4718 给定 $t(\le 350)$ 个 $n(1 < n\le10^{18})$，判断 $n$ 为质数或输出它的最大质因子
 
+[by NULL-SF](https://github.com/NULL-SF)
+
 ```c++
-#include <bits/stdc++.h>
+#include <iostream>
+#include <algorithm>
+#include <random>
+#include <chrono>
+
+#define int long long
+
 using namespace std;
-#define sc(x) scanf("%lld", &x)
+
 typedef long long ll;
-ll qpow(ll a, ll b, ll p)
+
+auto seed = chrono::system_clock::now().time_since_epoch().count();
+mt19937 gen(seed);
+    
+uniform_int_distribution<long long> dis(1, (long long)1e18);
+
+ll qpow(ll a, ll b, ll mod)
 {
     ll r = 1;
+    
     for (; b; b >>= 1)
     {
         if (b & 1)
-            r = (__int128)r * a % p;
-        a = (__int128)a * a % p;
+            r = (__int128)r * a % mod;
+        a = (__int128)a * a % mod;
     }
+    
     return r;
 }
-bool millerRabin(ll p)
-{ // 判断素数
-    if (p < 2)
-        return 0;
-    if (p == 2)
-        return 1;
-    if (p == 3)
-        return 1;
+
+bool miller_rabin(ll p, ll k = 30) // 判断素数
+{
+    if (p < 2) return false;
+    if (p == 2) return true;
+    if (p == 3) return true;
+    
     ll d = p - 1, r = 0;
-    while (!(d & 1))
-        ++r, d >>= 1; // 将d处理为奇数
-    for (ll k = 0; k < 10; ++k)
+    while (!(d & 1)) ++r, d >>= 1; // 将d处理为奇数
+    
+    while(k--) // k次随机运算提高准确率
     {
-        ll a = rand() % (p - 2) + 2;
+        ll a = dis(gen) % (p - 2) + 2;
         ll x = qpow(a, d, p);
-        if (x == 1 || x == p - 1)
-            continue;
-        for (int i = 0; i < r - 1; ++i)
+        
+        if (x == 1 || x == p - 1) continue;
+        
+        for (ll i = 0; i < r - 1; ++i)
         {
             x = (__int128)x * x % p;
-            if (x == p - 1)
-                break;
+            
+			if (x == p - 1) break;
         }
-        if (x != p - 1)
-            return 0;
+        
+        if (x != p - 1) return false;
     }
-    return 1;
+    
+    return true;
 }
+
 ll pollard_rho(ll x)
 {
-    ll s = 0, t = 0, c = (ll)rand() % (x - 1) + 1;
-    ll step = 0, goal = 1, val = 1;
-    for (goal = 1;; goal <<= 1, s = t, val = 1)
+    ll c = dis(gen) % (x - 1) + 1;
+    
+    for (ll goal = 1, s = 0, t; true; goal <<= 1, s = t)
     {
-        for (step = 1; step <= goal; ++step)
+    	ll val = 1;
+    	
+        for (ll step = 1; step <= goal; ++step)
         {
             t = ((__int128)t * t + c) % x; //随机数生成器
             val = ((__int128)val * abs(t - s)) % x;
+            
             if (step % 127 == 0)
             {
                 ll d = __gcd(val, x);
-                if (d > 1)
-                    return d;
+                if (d > 1) return d;
             }
         }
+        
         ll d = __gcd(val, x);
-        if (d > 1)
-            return d;
+        if (d > 1) return d;
     }
 }
-ll mx;
-void fac(ll x)
+
+ll get_maxi_prime_factor(ll x)
 {
-    if (x <= mx || x < 2)
-        return;
-    if (millerRabin(x))
-    {
-        mx = max(mx, x); //最大质因子
-        return;
-    }
+    if (x < 2) return 0;
+    
+    if (miller_rabin(x)) return x;
+    
     ll p = x;
-    while (p >= x) //直到找到平凡
-    {
-        p = pollard_rho(x);
-    }
-    while (x % p == 0)
-    {
-        x /= p;
-    }
-    fac(x), fac(p); // x*p=raw x
+    while (p >= x) p = pollard_rho(x); //直到找到平凡
+    while (x % p == 0) x /= p;
+    
+    return max(get_maxi_prime_factor(x), get_maxi_prime_factor(p)); //返回最大质因子
 }
+
 signed main()
 {
-    ll t, n;
-    cin.tie(0)->ios::sync_with_stdio(false);
+	ios::sync_with_stdio(false),cin.tie(0),cout.tie(0);
+    
+	ll t, n;
+    
     cin >> t;
     while (t--)
     {
-        srand(time(0));
         cin >> n;
-        mx = 0;
-        fac(n);
-        if (mx == n)
-        {
-            cout << "Prime\n";
-        }
-        else
-        {
-            cout << mx << '\n';
-        }
+        
+        ll mx = get_maxi_prime_factor(n);
+        
+        if (mx == n) cout << "Prime\n";
+        else cout << mx << '\n';
     }
+    
     return 0;
 }
+
+/* 因式分解：
+void get_prime_factors(ll base, ll index, map<ll, ll>& cnt_prime_fac)
+{
+    if (base < 2) return;
+    
+    if (miller_rabin(base))
+    {
+        cnt_prime_fac[base]+=index;
+        
+        return;
+    }
+    
+    ll new_fac= base, multimes = 0;
+    while (new_fac >= base) new_fac = pollard_rho(base); //直到找到平凡
+    while (base % new_fac == 0) base /= new_fac, multimes++;
+    
+    get_prime_factors(base, index, cnt_prime_fac);
+	get_prime_factors(new_fac, index * multimes, cnt_prime_fac);
+    
+    return;
+}
+
+signed main()
+{
+	ios::sync_with_stdio(false),cin.tie(0),cout.tie(0);
+    
+	map<ll,ll> prime_factors;
+	get_prime_factors(27, 2, prime_factors);
+	
+	for(auto x:prime_factors) cout<<x.first<<':'<<x.second<<'\n';
+    
+    return 0;
+}
+
+*/
 ```
 
 
@@ -2004,7 +2050,9 @@ signed main()
 
 #### 取模公式
 
-**费马小定理**：若 $p$ 为素数， $a\in Z_+,a\bot p$ ，则 $a^{p-1}\equiv 1(\bmod p)$ 
+##### 费马小定理
+
+若 $p$ 为素数， $a\in Z_+,a\bot p$ ，则 $a^{p-1}\equiv 1(\bmod p)$ 
 
 线性逆元公式(从 $1$ 开始)：$i^{-1}\equiv-\lfloor\dfrac pi\rfloor\times(p\bmod i)^{-1}(\bmod p)$   (实现时 $+p$ 再取模)
 
@@ -2014,7 +2062,8 @@ signed main()
 
 
 
-**卢卡斯定理：**
+##### 卢卡斯定理
+
 $$
 n=sp+q,m=tp+r,0\le q,r\le p-1,p是质数，则\\
 \begin{pmatrix}n\\m\end{pmatrix}\mod p=
@@ -2062,7 +2111,7 @@ signed main()
 }
 ```
 
-**扩展卢卡斯定理：**
+**扩展卢卡斯定理**
 
 求 $C_n^m\bmod p$，将 $p$ 质因数分解为 $p_1^{\alpha_1}p_2^{\alpha_2}\cdots$，用中国剩余定理求方程组 $C_n^m\bmod p_1^{\alpha_i}$ 的最小解 $x$。如果 $p_i^{\alpha_1}$ 都是素数且较小可以预处理阶乘，直接对每个子算式上 lucas，否则用下述代码：
 
@@ -2166,11 +2215,11 @@ signed main()
 
 
 
+##### 欧拉定理
 
+欧拉定理： $\gcd(a,m)=1$ 则 $a^{\varphi(m)}\equiv 1(\bmod m)$ 
 
-**欧拉定理：** $\gcd(a,m)=1$ 则 $a^{\varphi(m)}\equiv 1(\bmod m)$ 
-
-**拓展欧拉定理**：
+拓展欧拉定理
 $$
 a^b\equiv\begin{cases}
 a^{b\ \bmod\ \varphi(p)},&\gcd(a,p)=1\\
@@ -2178,6 +2227,20 @@ a^b,&\gcd(a,p)\neq1,b < \varphi(p)\\
 a^{b\ \bmod\ \varphi(p)+\varphi(p)},&\gcd(a,p)\neq1,b\ge\varphi(p)
 \end{cases}(\bmod p)
 $$
+
+合并为 $a^b\equiv a^{b\bmod\varphi(p)}\pmod p$。
+
+> SCNUOJ2117-求 $(n!)^{n!}\bmod998244353$，$1\le n\le5000$，$T\le5000$ 次询问
+
+```python
+p, phi, f, fp = 998244353, 998244352, [1, 1], [1, 1]
+for i in range(2, 5001):
+    f.append((f[-1] * i) % p)
+    fp.append((fp[-1] * i) % phi)
+for _ in range(int(input())):
+    n = int(input())
+    print(pow(f[n], fp[n], p))
+```
 
 > 洛谷P5091-求 $a^b\bmod m,1\le a\le10^9,1\le m\le10^8,1\le b\le10^{2\times10^7}$
 
@@ -2213,7 +2276,9 @@ signed main()
 
 
 
-**线性快速幂**：同底数和模数，即对变化的 $x$ 求 $a^x\bmod p$，可以时空 $O(\sqrt p)$ 预处理并 $O(1)$ 计算快速幂。
+##### 线性快速幂
+
+同底数和模数，即对变化的 $x$ 求 $a^x\bmod p$，可以时空 $O(\sqrt p)$ 预处理并 $O(1)$ 计算快速幂。
 
 对 $a^b\bmod p$，令 $s=\sqrt p$ 或 $2^k$(如 $k=16$)，可以将 $b$ 拆成 $\lfloor\dfrac bs\rfloor s+(b\bmod s)$，线性预处理出 $a^i,a^{is},0\le i\le s$。即计算 $(a^{\lfloor\frac bs\rfloor s}\times a^{b\ \bmod \ s})\bmod s$。
 
@@ -2241,15 +2306,11 @@ signed main()
 }
 ```
 
+##### 威尔逊定理
 
-
-**威尔逊定理**：对素数 $p$ 有 $(p-1)!\equiv -1\pmod p$
-
-
+对素数 $p$ 有 $(p-1)!\equiv -1\pmod p$
 
 > 杂项：一个数对9取模等于数位和对9取模
-
-
 
 #### 欧拉函数
 
@@ -2832,6 +2893,8 @@ $$
 \vec{OD}=\vec{OE}-\vec{EC}=\vec{OE}+\dfrac{\sqrt{r^2-|PE|^2}}{|AB|}\vec{AB}
 $$
 求两圆 $P,Q$ 的交点：由余弦定理，求出夹角 $\cos\theta=\cos\ang APQ=\cos\ang BPQ=\dfrac{|PQ|^2+r_1^2-r_2^2}{2r_1|PQ|}$ ，可得角度 $\theta$ 。根据反三角函数可知 $\vec{OP}$ 的夹角 $\alpha$ ，则 $\vec{PA}=(r_1\cos(\alpha+\theta),r_1\sin(\alpha+\theta))$ 且 $\vec{PB}=(r_1\cos(\alpha-\theta),r_1\sin(\alpha-\theta))$ ，那么 $\vec{OA}=\vec{OP}+\vec{PA},\vec{OB}=\vec{OP}+\vec{PB}$ 
+
+两圆是否相交(等)：圆心距离 $d$ 小于等于 $r_1+r_2$ 即 $d^2\le(r_1+r_2)^2$
 
 
 
@@ -10529,7 +10592,7 @@ void dijkstra()
         {
             if (!vis[i] && d[i] < minv)
             {
-                minv = d[i];
+                minv = d[i];//minv不能省略，否则minu可能不为正无穷若初始化min在点范围内
                 minu = i;
             }
         }
@@ -18666,6 +18729,8 @@ erase(p, q)删除区间[p,q)的元素
 
 可以set<类型> var{数组, 数组+len}来获取数组的set化
 
+insert(元素值) 返回 pair，分别代表迭代器和是否成功插入
+
 insert(sp, se)方法植入闭区间
 
 erase(元素值)方法。可以删除不存在的值，将会忽略操作
@@ -18745,6 +18810,7 @@ bitset<d> s2(str);
 5. .set()全设为1
 6. .reset()全设为0
 7. .flip()按位取反
+8. .test(i) 第i位是不是1
 
 上述函数可以传一个参数，则只对该位操作
 
