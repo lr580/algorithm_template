@@ -1,0 +1,5568 @@
+% ============================================================================
+% LaTeX 版构建说明
+% ----------------------------------------------------------------------------
+% 本文件由 template.md 经 convert.py 自动转换生成，请勿手动编辑正文部分。
+%
+% 【成品】
+%   algorithm_template.tex —— 本 LaTeX 源文件
+%   algorithm_template.pdf —— 已编译成品（130 页，XeLaTeX）
+%
+% 【代码来源】正文 286 个代码块分三类处理：
+%   130 个 —— 与仓库 code/ 中原有文件内容逐字一致，以 \inputminted 引用 code/xxx；
+%   83  个 —— 代码行数超过 10 行、但 code/ 中没有对应文件，
+%             由转换器抽取为新文件 code/ext_NNN.*（统一前缀 ext_，
+%             沿用原仓库的小写下划线 snake_case 命名），同样以 \inputminted 引用；
+%   73  个 —— 不超过 10 行的小段代码，直接以 minted 环境内嵌在本文件中。
+%   所有代码内容与 template.md 完全一致（已逐块程序化校验）。
+%
+% 【重新生成】
+%   python3 convert.py template.md algorithm_template.tex
+%   运行后自动：扫描 code/ 建立内容匹配，一致的块写为 \inputminted 引用；
+%   超过 10 行的其余块写入 code/ext_NNN.*（每次运行先清理旧的 ext_*，
+%   保证幂等、编号连续）；不超过 10 行的小段直接内嵌为 minted 环境。
+%
+% 【重新编译】
+%   依赖：TeX Live 2022（或更新版本，需含 ctexart、minted、tcolorbox 等），
+%         并已安装 Python（minted 语法高亮依赖 Pygments）。
+%     xelatex -shell-escape -interaction=nonstopmode algorithm_template.tex
+%     xelatex -shell-escape -interaction=nonstopmode algorithm_template.tex
+%   必须编译两次：第一遍生成目录，第二遍填充页码。
+%   -shell-escape 是 minted 调用 Pygments 所必需。
+%
+% 【排版特性】
+%   引擎：XeLaTeX，ctexart 双栏（twocolumn，10pt）
+%   目录：单栏独立排版（封面 + 目录在正文双栏之前）
+%   代码：minted 语法高亮（friendly 配色）+ 行号 + 左侧框线，
+%         长行自动断行，长代码可跨栏连续且行号连续
+%   数学：amsmath / amssymb / esint / mathtools，兼容原 Markdown 的 MathJax 写法
+%   表格：宽表 table* 跨双栏 + booktabs
+% ============================================================================
+\documentclass[twocolumn,10pt]{ctexart}
+
+% ---------- 页面 ----------
+\usepackage[a4paper,left=1.5cm,right=1.5cm,top=2.0cm,bottom=2.0cm,
+            columnsep=0.6cm]{geometry}
+\usepackage{setspace}
+
+% ---------- 数学 ----------
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{esint}
+\usepackage{mathtools}
+\allowdisplaybreaks[2]
+
+% ---------- 代码高亮 ----------
+\usepackage{xcolor}
+\usepackage{minted}
+\setmonofont{DejaVu Sans Mono}[Scale=0.85]
+\setCJKmonofont{Noto Sans Mono CJK SC}
+\setminted{
+  linenos,
+  numbersep=4pt,
+  fontsize=\scriptsize,
+  breaklines,
+  breaksymbolleft={},
+  breakanywhere,
+  breakanywheresymbolpre={},
+  breakanywheresymbolpost={},
+  frame=leftline,
+  framerule=0.8pt,
+  framesep=5pt,
+  tabsize=2,
+  baselinestretch=1.0,
+  numberblanklines=true,
+  resetmargins=true
+}
+\usemintedstyle{friendly}
+
+% ---------- 引用块（浅色底+左竖线，可跨页/跨栏，可在列表中嵌套） ----------
+\usepackage[most]{tcolorbox}
+\newtcolorbox{notebox}{
+  colback=gray!6, colframe=gray!50,
+  boxrule=0pt, leftrule=2pt, arc=0pt, outer arc=0pt,
+  left=6pt, right=4pt, top=3pt, bottom=3pt,
+  breakable, before skip=8pt, after skip=8pt
+}
+
+% ---------- 表格 ----------
+\usepackage{booktabs}
+\usepackage{pifont}
+\newcommand{\cds}[1]{\ding{\numexpr191+#1\relax}}
+
+% ---------- 公式自适应缩放（超宽单行公式缩至栏宽） ----------
+\usepackage{adjustbox}
+
+% ---------- 列表 ----------
+\usepackage{enumitem}
+\setlist{nosep,leftmargin=1.5em,itemsep=1.5pt,topsep=4pt,parsep=0pt}
+
+% ---------- 超链接 ----------
+\usepackage[colorlinks=true,linkcolor=blue!60!black,
+            urlcolor=blue!60!black,citecolor=blue!60!black]{hyperref}
+
+% ---------- 页眉页脚 ----------
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small lr580's 算法模板}
+\fancyhead[R]{\small \nouppercase{\leftmark}}
+\fancyfoot[C]{\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+\fancypagestyle{plain}{\fancyhf{}\fancyfoot[C]{\thepage}
+  \renewcommand{\headrulewidth}{0pt}}
+
+% ---------- 编号 / 目录深度 ----------
+\setcounter{secnumdepth}{3}
+\setcounter{tocdepth}{3}
+
+% ---------- 5、6 级标题（加粗独立行） ----------
+\makeatletter
+\newcommand{\hfive}[1]{\par\addvspace{6pt}\@afterindentfalse
+  {\noindent\bfseries\normalsize #1}\par\nobreak\vspace{2pt}}
+\newcommand{\hsix}[1]{\par\addvspace{4pt}\@afterindentfalse
+  {\noindent\bfseries\small #1}\par\nobreak\vspace{1pt}}
+\makeatother
+
+% ---------- MathJax 兼容宏 ----------
+\newcommand{\Omicron}{O}
+\newcommand{\Z}{\mathbb{Z}}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\N}{\mathbb{N}}
+\newcommand{\ang}{\angle}
+\newcommand{\exist}{\exists}
+
+\begin{document}
+
+\begin{titlepage}
+\centering
+\vspace*{2.2cm}
+\includegraphics[width=0.38\textwidth]{img/image-20220325120131181.png}\\[1.6cm]
+{\Huge\bfseries lr580's 算法模板\par}
+\vspace{0.8cm}
+{\LARGE Algorithm Template\par}
+\vspace{2.2cm}
+{\large Version 1.2.3\par}
+\vspace{0.4cm}
+{\large 最后更新：2025/3/5\par}
+\vspace{3.2cm}
+{\large \today\par}
+\end{titlepage}
+
+\onecolumn
+\tableofcontents
+\clearpage
+\twocolumn
+
+%% [文档标题] lr580's 算法模板
+
+\section{数学}
+
+\subsection{公式}
+
+\subsubsection{常用符号}
+
+\begin{enumerate}
+\item $x|y$ 表示 $x$ 整除 $y$ ，例如 $2|8$ ，
+\item $x\bot y$ 表示 $x,y$ 互质
+\item $gcd(x,y)=(x,y)$ 最大公约数
+\item $lcm(x,y)=[x,y]$ 最小公倍数
+\item $\lfloor x\rfloor$ 向下取整
+\item $\lceil x\rceil$ 向上取整
+\item $C^m_n=C(n,\allowbreak{}m)=(\begin{matrix}n\\m\end{matrix})=\dfrac{n!}{m!(n-m)!}$ ，若 $n < m$ 或 $m < 0$ 得 $0$，$C(n,0)=1$
+\item $A_n^m=P_n^m=P(n,\allowbreak{}m)=\dfrac{n!}{(n-m)!}=\prod_{i=n-m+1}^ni$ ，若 $n < m$ 得 $0$
+\end{enumerate}
+
+\subsubsection{组合数学}
+
+\hfive{排列组合}
+
+元素依次排成一个圆圈的排列称作环排列，$S$ 的 $r$ 环排列数等于$\dfrac{P(n,r)}r$
+
+组合数性质：设正整数 $n,r$，有
+
+\begin{itemize}
+\item $C(n,r)=\dfrac nrC(n-1,r-1)$
+\item $C(n,\allowbreak{}r)=\dfrac{n-r+1}{r}C(n,\allowbreak{}r-1)$
+\item $C(n,r)=C(n,n-r)$
+\item $C(n,r)=C(n-1,r-1)+C(n-1,r)$  (Pascal公式/杨辉三角)
+
+二项式定理 $n$ 是正整数，对一切 $x,y$ ，有：
+\end{itemize}
+
+\begin{adjustbox}{max width=\linewidth,center}
+$(x+y)^n=\sum_{k=0}^n\begin{pmatrix}n\\k\end{pmatrix}x^ky^{n-k}$
+\end{adjustbox}
+
+多重组合数(即多重集的全排列)公式：
+
+\begin{adjustbox}{max width=\linewidth,center}
+$\begin{pmatrix}n\\n_1,n_2,\cdots n_r\end{pmatrix}=\dfrac{n!}{n_1!n_2!\cdots n_t!}$
+\end{adjustbox}
+
+二项式定理的多项式形式：
+
+\begin{adjustbox}{max width=\linewidth,center}
+$(x_1+\cdots+x_t)^n=\sum_{\text{满足}n_1+\cdots+n_t=n\text{的非负整数解}}
+\begin{pmatrix}n\\n_1,n_2,\cdots n_t\end{pmatrix}
+x_1^{n_1}x_2^{n_2}\cdots x_t^{n_t}$
+\end{adjustbox}
+
+从多重集 $S=\{n_1\cdot a_1,\allowbreak{}\cdots n_k\cdot a_k\}$ 选 $r$ 个元素的多重集组合数，为 $x_1+\cdots +x_k=r$ 的非负整数解数目，插板法知为 $\begin{pmatrix}r+k-1\\k-1\end{pmatrix}$ (条件： $r < \min n_i$ )，任意条件为：
+
+\begin{adjustbox}{max width=\linewidth,center}
+$\sum_{p=0}^k(-1)^p\sum_{A}
+\begin{pmatrix}
+k+r-1-\sum_An_{A_i}-p\\k-1
+\end{pmatrix}$
+\end{adjustbox}
+
+$A$ 是枚举子集，满足 $|A|=p,A_i < A_{i+1}$
+
+$n$ 个自然数选 $k$ 个，任两个数都不相邻： $\begin{pmatrix}n-k+1\\k\end{pmatrix}$
+
+$i$ 数错位排列数公式： $d[0]=d[1]=0,d[2]=1$
+
+\begin{adjustbox}{max width=\linewidth,center}
+$d[n]=(n-1)(d[n-1]+d[n-2])=n!(1-\dfrac{1}{1!}+-\dfrac{1}{2!}+\cdots+(-1)^n\dfrac1{n!})$
+\end{adjustbox}
+
+$d_n=(n-1)(d_{n-1}+d_{n-2})=nd_{n-1}+(-1)^n$。且增长速度 $\lim_{n\to\infty}\dfrac{d_n}{n}=\dfrac1e$
+
+$n$ 个数有 $m$ 个乱的情况数： $C_n^md[m]$
+
+$n$ 人围圈排列数 $Q_n^n=(n-1)!$ ，部分圆排列公式 $Q_n^r=\dfrac{A_n^r}r$
+
+排序不等式：逆序和 $\le$ 乱序和 $\le$ 顺序和。给定升序数组 $a,b$，设 $c$ 是 $b$ 的排列，则求和 $\sum_{i=1}^na_ib_{n-i+1}\le \sum_{i=1}^na_ic_i\le \sum_{i=1}^na_ib_i$
+
+推论：
+
+\begin{itemize}
+\item $\sum_{k=0}^n\begin{pmatrix}n\\k\end{pmatrix}=2^n,\allowbreak{}n\in N$
+\item $\sum_{k=0}^n(-1)^k\begin{pmatrix}n\\k\end{pmatrix}=0,\allowbreak{}n\in N$
+\item $\sum_{l=0}^n\begin{pmatrix}l\\k\end{pmatrix}=\begin{pmatrix}n+1\\k+1\end{pmatrix},\allowbreak{}n,\allowbreak{}k\in N$
+\item $\sum_{i=0}^m\begin{pmatrix}n\\i\end{pmatrix}\begin{pmatrix}m\\m-i\end{pmatrix}=\begin{pmatrix}m+n\\m\end{pmatrix},\allowbreak{}n\ge m$
+\item $\sum_{i=0}^n\begin{pmatrix}n\\i\end{pmatrix}^2=\begin{pmatrix}2n\\n\end{pmatrix}$
+\item $\begin{pmatrix}n\\r\end{pmatrix}\begin{pmatrix}r\\k\end{pmatrix}=\begin{pmatrix}n\\k\end{pmatrix}\begin{pmatrix}n-k\\r-k\end{pmatrix},\allowbreak{}n\ge r\ge k,\allowbreak{}n,\allowbreak{}r,\allowbreak{}k\in N$
+\item $\sum_{k=0}^r\begin{pmatrix}m\\k\end{pmatrix}\begin{pmatrix}n\\r-k\end{pmatrix}=\begin{pmatrix}n+m\\r\end{pmatrix},\allowbreak{}n,\allowbreak{}m,\allowbreak{}r\in N,\allowbreak{}r\le\min(m,\allowbreak{}n)$
+\item $\sum_{k=0}^n\begin{pmatrix}m\\k\end{pmatrix}\begin{pmatrix}n\\k\end{pmatrix}=\begin{pmatrix}m+n\\m\end{pmatrix},\allowbreak{}m,\allowbreak{}n\in N$
+\item $\sum_{i=0}^ni\begin{pmatrix}n\\i\end{pmatrix}=n2^{n-1}$
+\item $\sum_{i=0}^n\begin{pmatrix}n-i\\i\end{pmatrix}=fib_{n+1}$
+\end{itemize}
+
+\begin{notebox}
+某些时候可以两边求导再求
+
+枚举所有组合可以使用 Gosper's Hack 技巧：
+
+\inputminted{cpp}{code/ext_001.cpp}
+\end{notebox}
+
+\textbf{容斥原理：}
+
+$U$ 中元素有 $n$ 种不同属性 $p_i$ ，拥有属性 $p_i$ 的元素构成集合 $S_i$
+
+\begin{adjustbox}{max width=\linewidth,center}
+$\begin{gathered}
+|\bigcup_{i=1}^nS_i|=\sum_{m=1}^n(-1)^{m-1}\sum_{a_i<a_{i+1}}|\bigcap_{i=1}^mS_{a_i}|
+\\
+|\bigcap_{i=1}^nS_i|=|U|-|\bigcup_{i=1}^n\overline{S_i}|
+\end{gathered}$
+\end{adjustbox}
+
+\textbf{抽屉原理：}
+
+把 $mn+1$ 个物体放到 $n$ 个抽屉里，至少有一个抽屉至少有 $m+1$ 个物体
+
+把 $mn-1$ 个物体放到 $n$ 个抽屉里，至少有一个抽屉至少有 $m-1$ 个物体
+
+将 $n$ 物放到 $k$ 抽屉，至少一个有不少于 $\lceil\dfrac nk\rceil$ 个物体
+
+\begin{notebox}
+应用：选 $n$ 个正整数的若干个数， $n\ge m$ 时选出的数必然存在可以被 $m$ 整除
+\end{notebox}
+
+\hfive{卡特兰数}
+
+\begin{adjustbox}{max width=\linewidth,center}
+$\begin{gathered}
+H[0]=1\\
+H[n+1]=\sum_{i=0}^nH[i]\cdot H[n-i-1]
+\end{gathered}$
+\end{adjustbox}
+
+从 $0$ 到 $5$ 分别是 $1,1,2,5,14,42$ ，\mintinline{text}|H[35]|  为 19 位长度，\mintinline{text}|H[36]| 爆long long
+
+\begin{adjustbox}{max width=\linewidth,center}
+$\begin{gathered}
+H[n]=H[n-1]\times\dfrac{4n-2}{n+1}\\
+H[n]=\dfrac{C(2n,n)}{n+1}\\
+H[n]=C(2n,n)-C(2n,n-1)
+\end{gathered}$
+\end{adjustbox}
+
+常见应用：
+
+\begin{itemize}
+\item 矩阵连乘： P=a1×a2×a3×……×an，依据乘法结合律，不改变其顺序，只用括号表示成对的乘积，试问有几种括号化的方案。h(n) 种
+\item 一个栈(无穷大)的进栈序列为 1，2，3，…，n，有多少个不同的出栈序列
+\item 在一个凸多边形中，通过若干条互不相交的对角线，把这个多边形划分成若干个三角形方案数如 n=6,f(6)=14
+\item 给定 n 个节点，能构成多少不同的二叉搜索树
+\item 给定 n 对括号，求括号正确配对的字符串数
+\item $2n$ 个黑白，使得前缀黑色小于白色的方案数
+\item 圆上 $2n$ 点用 $n$ 条不相交线段连接的方案数
+\item $n$ 人有 $50$ 元，$n$ 人有 $100$ 元买 $50$ 元物品，排队方案数使得 $2n$ 人都可找零
+\item $2n$ 人交 $5$ 元， $n$ 人只有 $5$ 元一张，另 $n$ 人 $10$ 元一张，问多少种方案只要有 $10$ 元人交钱就有 $5$ 元找零
+\item $n$ 个 $+1$ 和 $n$ 个 $-1$ 构成 $2n$ 项 $a_1,\cdots a_{2n}$ 满足前缀和 $a_1+\cdots+a_k\ge0(k=1,\allowbreak{}2,\allowbreak{}\cdots2 n)$ 的数列方案数
+\item 从 $(0,0)$ 到 $(m,n)$ 的非降路径数 $\begin{pmatrix}n+m\\m\end{pmatrix}$
+\item 从 $(0,0)$ 到 $(n,n)$ 除端点不接触 $y=x$ 非降路径数 $2\begin{pmatrix}2n-2\\n-1\end{pmatrix}-2\begin{pmatrix}2n-2\\n\end{pmatrix}$
+\item 从 $(0,0)$ 到 $(n,n)$ 除端点不穿过 $y=x$ 非降路径数 $\dfrac2{n+1}\begin{pmatrix}2n\\n\end{pmatrix}$
+\end{itemize}
+
+\hfive{斯特林数}
+
+\textbf{第一类}：(无符号:)将n个不同元素构成m个非空圆排列的数目( $[A,B,C]\neq[C,B,A]$ 为不同圆排列(轮换) )。(斯特林轮换数)无符号为 $s_u(n,m),s(n,m)$ 或$\left[\begin{matrix}n\\m\end{matrix}\right]$ ，有符号为 $s_s(n,m)$ ，分别表现升阶函数和降阶函数的各项系数。
+
+\begin{adjustbox}{max width=\linewidth,center}
+$\begin{aligned}
+x^{n\downarrow}&=x(x-1)(x-2)\dots(x-n+1)=\sum_{k=0}^ns_s(n,k)x^k\\
+x^{n\uparrow}&=x(x+1)(x+2)\dots(x+n-1)=\sum_{k=0}^ns_u(n,k)x^k\\
+s_s(n,u)&=(-1)^{n+m}s_u(n,m)\\
+s_u(n+1,m)&=s_u(n,m-1)+n\cdot s_u(n,m)\\
+s_s(n+1,m)&=s_s(n,m-1)-n\cdot s_s(n,m)\\
+\end{aligned}$
+\end{adjustbox}
+
+\begin{notebox}
+例题：有 n 个仓库，每个仓库有两把钥匙，共 2n 把钥匙。同时又有 n 位官员。问如何放置钥匙使得所有官员都能够打开所有仓库？（只考虑钥匙怎么放到仓库中，而不考虑官员拿哪把钥匙。）那如果官员分成 m 个不同的部，部中的官员数量和管理的仓库数量一致。那么有多少方案使得，同部的所有官员可以打开所有本部管理的仓库，而无法打开其他部管理的仓库？（同样只考虑钥匙的放置。）
+
+第一问就是打开将钥匙放入仓库构成一个环：1号仓库放2号钥匙，2号仓库放3号钥匙……n号仓库放1号钥匙。这种情况相当于钥匙和仓库编号构成一个圆排列方案数是$(n-1)!$种。
+
+而第二问就对应的将n个元素分成m个圆排列，方案数就是第一类无符号Stirling数$s_u(n,m)$。如要要考虑官员的情况，只需再乘上$n!$即可。
+\end{notebox}
+
+p5409/p5408
+
+\textbf{第二类}：(斯特林子集数)把n个互异元素分成m个互不区分非空集合，记为$S(n,m)$或$\left\{\begin{matrix}n\\m\end{matrix}\right\}$
+
+\begin{adjustbox}{max width=\linewidth,center}
+$\begin{aligned}
+S(n,m)&=\frac{1}{m!}\sum_{k=0}^m(-1)^k\left(\begin{matrix}m\\k\end{matrix}\right)(m-k)^n=\sum_{i=0}^m\dfrac{(-1)^{m-i}i^n}{i!(m-i)!}\\
+S(n+1,m)&=S(n,m-1)+m\cdot S(n,m)
+\end{aligned}$
+\end{adjustbox}
+
+递推上与第一类的区别在于$m$还是$n$作系数和正负问题。
+
+求斯特林数，可以套用公式二，使用 $dp$ 。注意到初始状态是$S(n,1)=S(n,n)=1$ 。$S(n,0)=0^n$ 。求同一行( $n$ 相同)斯特林数可以用通项卷积，复杂度 $O(n\log n)$
+
+(p5396/p5395)
+
+\hfive{生成函数}
+
+可以解决组合问题(排列则乘一个阶乘变成组合)
+
+\begin{adjustbox}{max width=\linewidth,center}
+$\begin{aligned}
+e^x&=\sum_{n=0}^\infty\frac{x^n}{n!}=1+\dfrac x{1!}+\dfrac{x^2}{2!}+\cdots,x\in\mathbf{R}
+\\
+e^{-x}&=1-\dfrac{x}{1!}+\dfrac{x^2}{2!}-\cdots
+\\
+\dfrac{e^x+e^{-x}}2&=(1+\dfrac{x^2}{2!}+\dfrac {x^4}{4!}\cdots)
+\\
+\dfrac1{1-x^a}&=1+x^a+x^{2a}+\cdots
+\end{aligned}$
+\end{adjustbox}
+
+\hfive{球盒问题}
+
+\begin{table*}[t]
+\centering
+\small
+\begin{tabular}{ccccc}
+\toprule
+球区别 & 盒区别 & 空盒 & 模型 & 方案计数 \\
+\midrule
+有 & 有 & 有 & 选取 & $m^n$ \\
+有 & 有 & 无 & 放球 & $m!\left\{\begin{matrix}n\\m\end{matrix}\right\}$ \\
+有 & 无 & 有 & 放球 & $\sum_{k=1}^m\left\{\begin{matrix}n\\k\end{matrix}\right\}$ \\
+有 & 无 & 无 & 放球 & $\left\{\begin{matrix}n\\m\end{matrix}\right\}$ \\
+无 & 有 & 有 & 不定方程 & $C_{n+m-1}^n$ \\
+无 & 有 & 无 & 不定方程 & $C_{n-1}^{m-1}$ \\
+无 & 无 & 有 & 正整数拆分 & $G(x)=\frac1{\prod_{i=1}^m(1-x^i)},\allowbreak{}x^n$系数 \\
+无 & 无 & 无 & 正整数拆分 & $G(x)=\frac{x^m}{\prod_{i=1}^m(1-x^i)},\allowbreak{}x^n$系数 \\
+\bottomrule
+\end{tabular}
+\end{table*}
+
+不定方程 $\sum_{i=1}^mx_i=n$ 非负整数解个数是 $C_{n+m-1}^{m-1}=C_{n+m-1}^n$
+
+正整数 $n$ 拆分为 $m$ 个正整数即 $a_1x_1+a_2x_2+\cdots+a_mx_m=n$ ，若不允许重复，生成函数为 $\prod_{i=1}^m(1+x^{a_i})$ ，若允许重复，为 $\prod_{i=1}^m\dfrac1{1-x^i}$ 。均取系数 $x^n$。不允许就先每个至少取 $1$ 所以乘 $x^m$
+
+\begin{notebox}
+例洛谷P2386- $m$ 个相同苹果放 $n$ 相同盘子,可空盘, 求方案数
+\end{notebox}
+
+\inputminted{cpp}{code/ext_002.cpp}
+
+一种非正整数划分的 DP 解法 (时空 $O(nm)$ )
+
+\inputminted{cpp}{code/p2386_ball_and_box_dp.cpp}
+
+\begin{notebox}
+P5824-$n$ 球 $m$ 盒 $(1\le n,m\le2\times 10^5)$，求放球方案对 $998244343$ 取模。
+\end{notebox}
+
+\begin{enumerate}
+\item 球互不同，盒互不同。$m^n$
+\item 球互不同，盒互不同，每盒最多装一个球。$A_m^n$
+\item 球互不同，盒互不同，每盒最少装一个球。容斥枚举空盒数 $\sum_{i=0}^m(-1)^iC_m^i(m-i)^n$
+\item 球互不同，盒相同。二项式反演求第二类斯特林数 $\sum_{i=1}^m S(n,i)$
+\item 球互不同，盒相同，每盒最多装一个球。$[n\le m]$
+\item 球互不同，盒相同，每盒最少装一个球。$S(n,m)$
+\item 球相同，盒互不同。隔板法 $C_{n+m-1}^{m-1}$
+\item 球相同，盒互不同，每盒最多装一个球。$C_m^n$
+\item 球相同，盒互不同，每盒最少装一个球。隔板法 $C_{n-1}^{m-1}$
+\item 球相同，盒相同。分拆数 $p(n,m)$，使用生成函数多项式求 $\exp$ 后求逆
+\item 球相同，盒相同，每盒最多装一个球。$[n\le m]$
+\item 球相同，盒相同，每盒最少装一个球。$p(n-m,m)$
+
+含：
+\end{enumerate}
+
+\begin{itemize}
+\item 排列组合，快速幂，欧拉筛求线性 $i^k$
+\item NTT，多项式的求逆、求导、积分、指数、对数
+\item 求整行第二类斯特林数、求同 $k$ 部的整列分拆数
+
+的综合模板题：
+\end{itemize}
+
+\inputminted{cpp}{code/p5824_poly_kit.cpp}
+
+\hfive{其他}
+
+\hsix{分拆数}
+
+若 $n,r\in\Z^+$，正整数 $n_1,\cdots,n_r$ 满足 $n=\sum_{i=1}^rn_i$ 则为 $n$ 的一个 $r$ 拆分。
+
+分拆数 $p_n$ 是自然数 $n$ 的分拆方法数，有 $p_0=p_1=1,\allowbreak{}p_2=2,\allowbreak{}p_3=3,\allowbreak{}p_4=5,\allowbreak{}p_5=7,\allowbreak{}p_6=11,\allowbreak{}p_7=15,\allowbreak{}p_8=22$。
+
+将 $n$ 拆分为恰有 $k$ 部分的分拆称为 $k$ 部分分拆，记作 $p(n,k)$。初始值为 $p(0,0)=1$。当且仅当 $n\ge k$ 有解。
+
+\begin{adjustbox}{max width=\linewidth,center}
+$p(n,k)=p(n-1,k-1)+p(n-k,k)$
+\end{adjustbox}
+
+$k$ 部分拆数的生成函数为：(p4389/p5824)
+
+\begin{adjustbox}{max width=\linewidth,center}
+$\sum_{n,k=0}^\infty p(n,k)x^ny^k=\dfrac1{1-xy}\dfrac1{1-x^2y}\dfrac1{1-x^3y}\cdots$
+\end{adjustbox}
+
+互异分拆数 $pd_n$，自然数 $n$ 各部分不相同的分拆数。如 $pd_0=pd_1=pd_2=1,\allowbreak{}pd_3=pd_4=2,\allowbreak{}pd_5=3,\allowbreak{}pd_6=4,\allowbreak{}pd_7=5,\allowbreak{}pd_8=6$
+
+\begin{adjustbox}{max width=\linewidth,center}
+$pd(n,k)=pd(n-k,k-1)+pd(n-k,k)$
+\end{adjustbox}
+
+计算可以压缩第二维，使得时间复杂度 $O(nk)$ 空间复杂度 $O(n)$。
+
+奇分拆数 $po_n$，拆分出各部分都是奇数的拆分方法数。有：$po_n=pd_n$。
+
+最左边是互异拆分的生成函数，最右边是奇分拆数的生成函数。
+
+\begin{adjustbox}{max width=\linewidth,center}
+$\prod_{i=1}^\infty(1+x^i)=\dfrac{\prod_{i=1}^\infty(1-x^{2i})}{\prod_{i=1}^\infty(1-x^{i})}=\prod_{i=1}^\infty\dfrac1{1-x^{2i-1}}$
+\end{adjustbox}
+
+互异偶分拆数 $pde_n$ 与互异奇分拆数 $pdo_n$ 满足 $pd_n=pde_n+pdo_n$。
+
+广义五边形数为 $a_{2i}=\dfrac{i(3i-1)}2$，$a_{2i+1}=\dfrac{i(3i+1)}2$。
+
+递推式：$p_n=p_{n-1}+p_{n-2}-p_{n-5}-p_{n-7}+\cdots$。即下标是五边形数，且两正两负交替。
+
+那么可以简化为：
+
+\begin{adjustbox}{max width=\linewidth,center}
+$p_i=\sum_{j=1}^{a_j\le i}(-1)^{\lfloor\frac{j+1}{2}\rfloor+1}p_{i-a_{j}}$
+\end{adjustbox}
+
+可以计算到 $n=5\times10^4$ 的 $O(n^2)$。
+
+\hsix{贝尔数}
+
+\textbf{贝尔数}：$n$ 元素集合划分方法数(开首是 $B_0=B_1=1,B_2=2,B_3=5,B_4=15$ )
+
+\begin{adjustbox}{max width=\linewidth,center}
+$B_{n+1}=\sum_{k=0}^n\begin{pmatrix}n\\k\end{pmatrix}B_k,\quad B_n=\sum_{k=0}^nS(n,k)$
+\end{adjustbox}
+
+可以用贝尔三角形 $a_{1,\allowbreak{}1}=1,\allowbreak{}a_{n,\allowbreak{}1}=a_{n-1,\allowbreak{}n-1},\allowbreak{}a_{n,\allowbreak{}m}=a_{n,\allowbreak{}m-1}+a_{n-1,\allowbreak{}m-1}$ 求 $B_i=a_{i,i}$
+
+\hsix{欧拉数}
+
+\textbf{欧拉数}：$n$ 元素排列有 $m$ 个元素大于上一个元素 $A(n,m)$ ，如 $A(3,1)=4$ 。
+
+$A(n,\allowbreak{}m)=0(m\ge n),\allowbreak{} A(0,\allowbreak{}m)=0,\allowbreak{} A(n,\allowbreak{}0)=1$
+
+否则 $A(n,\allowbreak{}m)=(n-m)A(n-1,\allowbreak{}m-1)+(m+1)A(n-1,\allowbreak{}m)$
+
+\subsubsection{复杂度}
+
+若递归算法存在分治递推式：
+
+\begin{adjustbox}{max width=\linewidth,center}
+$T(n)=\begin{cases}c&n=1\\aT(\dfrac nb)+cn^k&n>1\end{cases}$
+\end{adjustbox}
+
+其中 $a,b,c,k$ 是常数，$T(n)$ 是非递减函数，则：
+
+\begin{adjustbox}{max width=\linewidth,center}
+$T(n)=\begin{cases}\Omicron(n^{\log_ba})&a>b^k\\
+\Omicron(n^k\log_bn)&a=b^k\\
+\Omicron(n^k)&a<b^k\end{cases}$
+\end{adjustbox}
+
+注： $b=1$ 不适用，这是因为 $T(n)=aT(n)+cn^k$ 显然是死循环
+
+常用复杂度对 $10^8$ ：$n!(n=11),\allowbreak{}2^n(n=26),\allowbreak{}n^3(n=464),\allowbreak{}n^2\log n(n=3000),\allowbreak{}n\log n(n=4.5\times10^6)$
+
+\subsubsection{数列}
+
+\textbf{等差数列} A.P.   Arithmetic progression
+
+\begin{adjustbox}{max width=\linewidth,center}
+$a_n=a_1+(n-1)d=a_m+(n-m)d$
+\end{adjustbox}
+
+\begin{adjustbox}{max width=\linewidth,center}
+$d=\dfrac{a_m-a_n}{m-n}$
+\end{adjustbox}
+
+\begin{adjustbox}{max width=\linewidth,center}
+$\begin{aligned}
+S_n&=\dfrac{n(a_1+a_n)}2\\
+&=\dfrac{n(a_m+a_{n-m+1})}2\\
+&=na_1+\dfrac{n(n-1)}2d\\&=\dfrac d2n^2+(a_1-\dfrac d2)n\\&=na_{\frac{n+1}2}
+\end{aligned}$
+\end{adjustbox}
+
+部分性质：
+
+\begin{enumerate}
+\item \begin{adjustbox}{max width=\linewidth,center}
+$m+n=p+q\Rightarrow a_m+a_n=a_p+a_q$
+\end{adjustbox}
+\end{enumerate}
+
+\begin{enumerate}
+\item \begin{adjustbox}{max width=\linewidth,center}
+$\dfrac{a_n}{b_n}=\dfrac{S_{2n-1}}{T_{2n-1}}$
+\end{adjustbox}
+\end{enumerate}
+
+\begin{enumerate}
+\item \begin{adjustbox}{max width=\linewidth,center}
+$a_n=\dfrac{S_{2n-1}}{2n-1}$
+\end{adjustbox}
+
+\textbf{等比数列}  G.P.    Geometric progression
+\end{enumerate}
+
+\begin{adjustbox}{max width=\linewidth,center}
+$a_n=a_1q^{n-1}=a_mq^{n-m}$
+\end{adjustbox}
+
+\begin{adjustbox}{max width=\linewidth,center}
+$q=\large{\sqrt[n-m]{\dfrac{a_n}{a_m}}}$
+\end{adjustbox}
+
+\begin{adjustbox}{max width=\linewidth,center}
+$S_n=\dfrac{a_1(1-q^n)}{1-q},\quad(q\neq1)$
+\end{adjustbox}
+
+部分性质：
+
+\begin{enumerate}
+\item \begin{adjustbox}{max width=\linewidth,center}
+$m+n=p+q\Rightarrow a_m\times a_n=a_p\times a_q$
+\end{adjustbox}
+\end{enumerate}
+
+\begin{enumerate}
+\item \begin{adjustbox}{max width=\linewidth,center}
+$S_{n+m}=S_m+q^mS_n$
+\end{adjustbox}
+
+求和公式：
+\end{enumerate}
+
+\begin{adjustbox}{max width=\linewidth,center}
+$\begin{aligned}
+\sum_{i=1}^ni&=\dfrac{n(n+1)}2\\
+\sum_{i=1}^ni^2&=\dfrac{n(n+1)(2n+1)}2\\
+\sum_{i=1}^ni^3&=\left(\dfrac{n(n+1)}2\right)^2
+\end{aligned}$
+\end{adjustbox}
+
+\begin{adjustbox}{max width=\linewidth,center}
+$\begin{gathered}
+\sum_{i=1}^n\dfrac1i\approx0.57722+\ln n\\
+\sum_{i=1}^\infty\left(\dfrac1k\right)^i=\dfrac1{k-1}
+\end{gathered}$
+\end{adjustbox}
+
+求 $a_n$ ：
+
+\begin{itemize}
+\item $a_{n+1}=pa_n+q$ 构造新数列，使得 $b_{n+1}=pb_n$
+\end{itemize}
+
+\begin{itemize}
+\item $a_{n+1}=a_n+f(n)$ 累加法
+\end{itemize}
+
+\begin{itemize}
+\item $a_{n+1}=a_n\cdot f(n)$ 累乘法
+\end{itemize}
+
+\begin{itemize}
+\item $a_{n+1}=\dfrac{pa_n}{ka_n+m}$ 倒数法，令 $b_n=a_n^{-1}$
+\end{itemize}
+
+\begin{itemize}
+\item $\overline{k},\allowbreak{}\overline{kk},\allowbreak{}\overline{kkk}\cdots$ $a_n=\dfrac k9(10^n-1)$
+\end{itemize}
+
+\begin{itemize}
+\item $a,b,a,b,\cdots$ $a_n=\dfrac{a+b+(-1)^n(b-a)}2$
+
+求 $S_n$ ：
+\end{itemize}
+
+\begin{itemize}
+\item 裂项相消 $b_n=\dfrac1{a_n\cdot a_{n+k}},\allowbreak{}a_n\in A.P.$
+\end{itemize}
+
+\begin{itemize}
+\item 错位相减 $c_n=a_n\cdot b_n,\allowbreak{}a_n\in A.P.,\allowbreak{}b_n\in G.P.$
+
+\begin{adjustbox}{max width=\linewidth,center}
+$(1-q)S_n=a_1b_1-a_nb_{n+1}+\dfrac{db_2}{1-q}(1-q^{n-1})$
+\end{adjustbox}
+
+$c_n=(an+b)q^{n-1}$ ，则 $S_n=(An+B)q^n-B$ ，其中 $A=\dfrac a{q-1},\allowbreak{}B=\dfrac{b-A}{q-1}$
+\end{itemize}
+
+\begin{itemize}
+\item 分组求和
+\end{itemize}
+
+\begin{itemize}
+\item 倒序相加
+\end{itemize}
+
+\subsubsection{高等数学}
+
+\begin{notebox}
+含部分初等数学
+\end{notebox}
+
+\begin{adjustbox}{max width=\linewidth,center}
+$\cot x=\dfrac 1{\tan x},\sec x=\dfrac 1{\cos x},\csc x=\dfrac{1}{\sin x}$
+\end{adjustbox}
+
+\begin{adjustbox}{max width=\linewidth,center}
+$\tan\frac{x}{2}=\frac{1-\cos x}{\sin x}
+=\frac{\sin x}{1+\cos x}$
+\end{adjustbox}
+
+\begin{adjustbox}{max width=\linewidth,center}
+$\begin{gathered}
+\sin a=\frac{2\tan\frac{a}{2}}{1+\tan^2\frac{a}{2}}\\
+\cos a=\frac{1-\tan^2\frac{a}{2}}{1+\tan^2\frac{a}{2}}\\
+\tan a=\frac{2\tan\frac{a}{2}}{1-\tan^2\frac{a}{2}}
+\end{gathered}$
+\end{adjustbox}
+
+\begin{adjustbox}{max width=\linewidth,center}
+$\begin{aligned}
+\sin\alpha+\sin\beta&=2\sin\frac{\alpha+\beta}{2}\cos\frac{\alpha-\beta}{2}\\
+\sin\alpha-\sin\beta&=2\cos\frac{\alpha+\beta}{2}\sin\frac{\alpha-\beta}{2}\\
+\cos\alpha+\cos\beta&=2\cos\frac{\alpha+\beta}{2}\cos\frac{\alpha-\beta}{2}\\
+\cos\alpha-\cos\beta&=-2\sin\frac{\alpha+\beta}{2}\sin\frac{\alpha-\beta}{2}\\
+\sin\alpha\cos\beta&=\frac{1}{2}\Bigl(\sin(\alpha+\beta)+\sin(\alpha-\beta)\Bigr)\\
+\cos\alpha\sin\beta&=\frac{1}{2}\Bigl(\sin(\alpha+\beta)-sin(\alpha-\beta)\Bigr)\\
+\cos\alpha\cos\beta&=\frac{1}{2}\Bigl(\cos(\alpha+\beta)+\cos(\alpha-\beta)\Bigr)\\
+\sin\alpha\sin\beta&=-\frac{1}{2}\Bigl(\cos(\alpha+\beta)-\cos(\alpha-\beta)\Bigr)\\
+\end{aligned}$
+\end{adjustbox}
+
+等价无穷小： $a^x-1\sim x\ln a,\allowbreak{}\arcsin(ax)\sim\sin(ax)\sim ax$ $,\allowbreak{}\arctan(ax)\sim\tan(ax)\sim ax,\allowbreak{}$ $\ln(1+x)\sim x$ , $\sqrt{1+x}-\sqrt{1-x}\sim x,$ $(1+ax)^b-1\sim abx,$ $\sqrt[b]{1+ax}-1\sim\dfrac abx$ $,1-\cos x\sim\dfrac{x^2}2,$ $x-\ln(1+x)\sim\dfrac{x^2}2,$ $\tan x-\sin x\sim\dfrac{x^3}2,$ $x-\arctan x\sim\dfrac{x^3}3$ $,x-\sin x\sim\dfrac{x^3}6$ $,\arcsin x-x\sim\dfrac{x^3}6$
+
+泰勒展开 (幂级数展开式)： (通常取 $x_0=0$ )
+
+\begin{adjustbox}{max width=\linewidth,center}
+$f(x)=f(x_0)+\dfrac{f'(x_0)}{1!}(x-x_0)
+%+\dfrac{f''(x_0)}{2!}(x-x_0)^2
++\cdots+\dfrac{f^{n}(x_0)}{n!}(x-x_0)^n
++R_n$
+\end{adjustbox}
+
+\begin{adjustbox}{max width=\linewidth,center}
+$\begin{aligned}
+e^x&=1+\dfrac1{1!}x+\dfrac1{2!}x^2+\cdots\\
+\ln(1+x)&=x-\dfrac12x^2+\dfrac13x^3+\cdots\\
+\sin x&=x-\dfrac1{3!}x^3+\dfrac1{5!}x^5+\cdots\\
+\arcsin x&=x+\dfrac12\dfrac{x^3}3+\dfrac{1\times3}{2\times4}\dfrac{x^5}5+\cdots\\
+\cos x&=1-\dfrac1{2!}x^2+\dfrac1{4!}x^4\\
+\dfrac1{1-x}&=1+x+x^2+x^3+\cdots\\
+(1+x)^a&=1+\dfrac{a}{1!}x+\dfrac{a(a-1)}{2!}x^2+\cdots\\
+\end{aligned}$
+\end{adjustbox}
+
+求导公式：
+
+\begin{adjustbox}{max width=\linewidth,center}
+$\begin{aligned}
+(C)'&=0\\
+(x^\mu)'&=\mu x^{\mu-1}\\
+(\sin x)'&=\cos x\\
+(\cos x)'&=-\sin x\\
+(\tan x)'&=\sec^2 x\\
+(\cot x)'&=-\csc^2 x=-\csc x\cot x\\
+(\sec x)'&=\sec x\tan x\\
+(\csc x)'&=-\csc x\cot x\\
+(a^x)'&=a^x\ln a\ (a > 0,a\neq 1)\\
+(e^x)'&=e^x\\
+(\log_ax)'&=\dfrac1{x\ln a}\ (a > 0,a\neq 1)\\
+(\ln x)'&=\dfrac1x\\
+(\arcsin x)'&=\dfrac1{\sqrt{ 1-x^2}}\\
+(\arccos x)'&=-\dfrac1{\sqrt{ 1-x^2}}\\
+(\arctan x)'&=\dfrac1{1+x^2}\\
+(\mathrm{arccot}\ x)'&=-\dfrac1{1+x^2}\\
+\ln(x+\sqrt{a^2+x^2})'&=\frac 1{\sqrt{a^2+x^2}}
+\end{aligned}$
+\end{adjustbox}
+
+\begin{adjustbox}{max width=\linewidth,center}
+$\begin{aligned}
+(x^a)^{(n)}&=\begin{cases}A_a^nx^{a-n}&(n\le a)\\0&(n>a)\end{cases},a\in Z_+\\
+(\sin x)^{(n)}&=\sin\bigl(x+\frac {n\pi}2\bigr),n\in Z_+\\
+(\cos x)^{(n)}&=\cos\bigl(x+\frac {n\pi}2\bigr),n\in Z_+\\
+\bigl(\ln(1+x)\bigr)^{(n)}&=(-1)^{n-1}\frac{(n-1)!}{(1+x)^n},n\in Z_+\\
+(a^x)^{(n)}&=a^x\ln^na,n\in Z_+
+\end{aligned}$
+\end{adjustbox}
+
+积分公式：
+
+\begin{adjustbox}{max width=\linewidth,center}
+$\begin{aligned}
+\int kdx&=kx+C\ (k\ \text{是常数})\\
+\int x^\mu dx&=\dfrac{x^{\mu+1}}{\mu+1}+C\ (\mu\neq -1)\\
+\int\dfrac{dx}x&=\ln |x|+C\\
+\int\dfrac{dx}{1+x^2}&=\arctan x+C\\
+\int\dfrac{dx}{\sqrt{1-x^2}}&=\arcsin x+C\\
+\int\cos xdx&=\sin x+C\\
+\int\sin xdx&=-\cos x+C\\
+\int\dfrac{dx}{\cos^2x}&=\int\sec^2 xdx=\tan x+C\\
+\int\dfrac{dx}{\sin^2x}&=\int\csc^2 xdx=-\cot x+C\\
+\int\sec x\tan xdx&=\sec x+C\\
+\int\csc x\cot xdx&=-\csc x+C\\
+\int e^xdx&=e^x+C\\
+\int a^xdx&=\dfrac{a^x}{\ln a}+C
+\end{aligned}$
+\end{adjustbox}
+
+\begin{adjustbox}{max width=\linewidth,center}
+$\begin{aligned}
+\int\tan xdx=&-\ln|\cos x|+C\\
+\int\cot xdx=&\ \ln|\sin x|+C\\
+\int\sec xdx=&\ \ln|\sec x+\tan x|+C=\ln|\tan(\frac x2+\frac\pi4)|\\
+\int\csc xdx=&\ \ln|\csc x-\cot x|+C=\ln|\tan\frac x2|\\
+\int\frac{dx}{\sqrt{a^2-x^2}}=&\ \arcsin\frac{x}{a}+C\\
+\int\frac{dx}{x^2+a^2}=&\ \frac{1}{a}\arctan\frac{x}{a}+C\\
+\int\frac{dx}{x^2-a^2}=&\ \frac{1}{2a}\ln\biggl|\frac{x-a}{x+a}\biggr|+C\\
+\int\frac{xdx}{\sqrt{x^2\pm a^2}}=&\ \sqrt{x^2\pm a^2}+C\\
+\int\frac{dx}{\sqrt{x^2\pm a^2}}=&\ \ln \Bigl|x+\sqrt{x^2\pm a^2}\Bigr|+C\\
+\int\sqrt{a^2-x^2}dx=&\ \frac{x}{2}\sqrt{a^2-x^2}+\frac{a^2}{2}\arcsin\frac{x}{a}+C\\
+\int\sqrt{x^2\pm a^2}dx=&\ \frac{x}{2}\sqrt{x^2\pm a^2}\pm\frac{a^2}{2}\ln\Bigl|x+\sqrt{x^2\pm a^2}\Bigr|+C
+\end{aligned}$
+\end{adjustbox}
+
+\begin{adjustbox}{max width=\linewidth,center}
+$\begin{aligned}
+\int\frac A{x-a}dx&=A\ln|x-a|+C\\
+\int\frac A{(x-a)^n}dx&=-\frac A{(n-1)(x-a)^{n-1}}+C\\
+\int\frac{Bx+C}{x^2+px+q}dx&\quad(p^2-4q<0)\\
+=\frac B2\ln(x^2+px+q)&+\frac{2C-Bp}{\sqrt{4q-p^2}}\arctan\frac{2x+p}{\sqrt{4q-p^2}}+C\\
+\end{aligned}$
+\end{adjustbox}
+
+\begin{adjustbox}{max width=\linewidth,center}
+$\begin{gathered}
+\int\frac{Bx+C}{(x^2+px+q)^n}dx\quad(p^2-4q<0)\\
+=\frac B{2(1-n)(x^2+px+q)^{n-1}}
++(C-\frac{Bp}2)\int\frac{dx}{\Bigl(\bigl(x+\frac p2\bigr)^2+\bigl(\sqrt{q-\frac{p^2}4}\bigr)^2\Bigr)^n}
+\end{gathered}$
+\end{adjustbox}
+
+\begin{notebox}
+分部积分技巧：
+
+\begin{itemize}
+\item 不动：反三角函数、对数函数、幂函数(幂不动性差些)
+\item 动：三角函数、常数函数、指数函数
+\end{itemize}
+\end{notebox}
+
+偏导数定义： $\lim_{\Delta x\to0}\frac{f(x_0+\Delta x,\allowbreak{}y_0)-f(x_0,\allowbreak{}y_0)}{\Delta x}$
+
+全微分： $\Delta z=f(x+\Delta x,\allowbreak{}y+\Delta y)-f(x,\allowbreak{}y)$
+
+多元函数极值：$u$在开区域$G\subset\R^2$内有二阶连续偏导数，且$P_0(x_0,y_0)\in G$是$f$的驻点，令：
+
+\begin{adjustbox}{max width=\linewidth,center}
+$f''_{xx}(x_0,y_0)=A,f''_{xy}(x_0,y_0)=B,f''_{yy}(x_0,y_0)=C$
+\end{adjustbox}
+
+则：
+
+\begin{enumerate}
+\item 若$AC-B^2>0$，则在点$P_0$取得极值，$A<0$极大值，$A>0$极小值
+\item 若$AC-B^2<0$，则在点$P_0$不取极值
+\item 若$AC-B^2=0$，则无法判断
+
+拉格朗日乘数法：$n$元函数在开区域内有一阶连续偏导数，且不全为$0$，则在条件下的极值点一定是拉格朗日函数($n+1$元函数，新元是$\lambda$)$f+\lambda\varphi$的驻点
+
+三元积分变换：
+
+柱坐标：是仅变换$x,y$为极坐标(和$x,y$区域)的变换公式。
+\end{enumerate}
+
+\begin{adjustbox}{max width=\linewidth,center}
+$\iiint_\Omega f(x,y,z)dv=\iiint_{\Omega'}f(r\cos\theta,r\sin\theta,z)rdrd\theta dz$
+\end{adjustbox}
+
+球坐标：$\theta$同柱坐标，$\varphi$是与$z$轴正向的夹角
+
+\begin{adjustbox}{max width=\linewidth,center}
+$\iiint_\Omega f(x,y,z)dv=f(r\sin\varphi\cos\theta,r\sin\varphi\sin\theta,r\cos\varphi)r^2\sin\varphi drd\varphi d\theta$
+\end{adjustbox}
+
+设曲线$L$由参数方程$x=x(t),\allowbreak{}y=y(t)(\alpha\ge t\ge\beta)$表示，$x=x(t),y=y(t)$在$[\alpha,\beta]$上有一阶连续偏导数，且$x'^2(t)+y'^(2)\neq0$(即曲线$L$是光滑简单曲线)，函数$f(x,y)$在曲线上连续，则：
+
+\begin{adjustbox}{max width=\linewidth,center}
+$\int_Lf(x,y)ds=\int_\alpha^\beta f(x(t),y(t))\sqrt{x'^2(t)+y'^2(t)}dt$
+\end{adjustbox}
+
+显然如果是显函数$y=f(x)$，则直接化为$f(x)dx$，$x=f(y)$同理。
+
+\begin{adjustbox}{max width=\linewidth,center}
+$\iint_\Sigma f(x,y,z)dS=\iint_D f(x,y,z(x,y))\sqrt{1+\left(\cfrac{\partial z}{\partial x}\right)^2+\left(\cfrac{\partial z}{\partial y}\right)^2}dxdy$
+\end{adjustbox}
+
+计算时需要满足投影面面积$S\neq0$，如果不为零，需要更换投影面，换元投影。
+
+设有界闭区域$D$由分段光滑曲线$L$所围，函数$P(x,y),Q(x,y)$在$D$上具有一阶连续偏导数，$L$是$D$取正向的边界曲线：
+
+\begin{adjustbox}{max width=\linewidth,center}
+$\iint_D\left|\begin{matrix}\cfrac{\partial}{\partial x}&\cfrac{\partial}{\partial y}\\P&Q\end{matrix}\right|dxdy=\iint_D\left(\cfrac{\partial Q}{\partial x}-\cfrac{\partial P}{\partial y}\right)dxdy=\oint_LPdx+Qdy$
+\end{adjustbox}
+
+对于多连通区域，格林公式右端应包括沿区域$D$的全部边界正向曲线积分
+
+有向曲线弧$x=\varphi(t),y=\psi(t)$，起点和终点对应参数$\alpha,\beta(\alpha<\beta)$，在$[\alpha,\beta]$上具有一阶连续导数，且$\varphi'^2(t)+\psi'^2(t)\neq0$，切向量是$\vec t=(\varphi'(t),\psi'(t))$，指向$t$增大的方向，那么显然方向余弦是：
+
+\begin{adjustbox}{max width=\linewidth,center}
+$\cos\alpha=\cfrac{\varphi'(t)}{\sqrt{\varphi'^2(t)+\psi'^2(t)}}\quad\cos\beta=\cfrac{\psi'(t)}{\sqrt{\varphi'^2(t)+\psi'^2(t)}}$
+\end{adjustbox}
+
+则两类积分的转换公式为：
+
+\begin{adjustbox}{max width=\linewidth,center}
+$\int_LPdx+Qdy=\int_L(P\cos\alpha+Q\cos\beta)ds$
+\end{adjustbox}
+
+\begin{adjustbox}{max width=\linewidth,center}
+$ds=\sqrt{\varphi'^2(t)+\psi'^2(t)}dt,dx=\varphi'(t)dt,dy=\psi'(t)dt$
+\end{adjustbox}
+
+高斯公式：设空间闭区域$\Omega$是由分片光滑的闭曲线$\Sigma$所围成，函数$P(x,y,z),Q(x,y,z),R(x,y,z)$在$\Omega$以及$\Sigma$上具有关于$x,y,z$的连续偏导数，$\Sigma$是$\Omega$整个边界曲面的外侧，则有：
+
+\begin{adjustbox}{max width=\linewidth,center}
+$\begin{gathered}
+\iint_\Omega(\cfrac{\partial P}{\partial x}+\cfrac{\partial Q}{\partial y}+\cfrac{\partial R}{\partial z})dxdydz=\oiint_\Sigma Pdydz+Qdzdx+Pdxdy
+\\=\iint_{\partial\Omega}P\cos\alpha+Q\cos\beta+R\cos\gamma dS
+\end{gathered}$
+\end{adjustbox}
+
+注：$P=0,Q=0,R=0$也是函数，所以也就是说缺少了一部分也是可用的
+
+$z=z(x,y)$表示有向曲面$\Sigma$，在$xOy$的投影区域是$D_{xy}$，函数$z=z(x,y)$在$D_{xy}$上具有一阶连续偏导数，$R(x,y,z)$在$\Sigma$连续且$\Sigma$取上侧，曲面$\Sigma$上一点的法向量方向余弦是：
+
+\begin{adjustbox}{max width=\linewidth,center}
+$\cos\alpha=\cfrac{-z_x}{\sqrt{1+z^2_x+z^2_y}},
+\cos\beta=\cfrac{-z_x}{\sqrt{1+z^2_x+z^2_y}},
+\cos\gamma=\cfrac{1}{\sqrt{1+z^2_x+z^2_y}}$
+\end{adjustbox}
+
+\begin{adjustbox}{max width=\linewidth,center}
+$\iint_\Sigma Pdydz+Qdzdx+Rdxdy=\iint_\Sigma P\cos\alpha+Q\cos\beta+R\cos\gamma dS$
+\end{adjustbox}
+
+\subsubsection{线性代数}
+
+齐次线性方程组(等式右边全是 $0$ )必有零解。
+
+\begin{adjustbox}{max width=\linewidth,center}
+$\mathbf{A}\times\mathbf{B}=(\sum_{k=1}^na_{ik}\cdot b_{kj})$
+\end{adjustbox}
+
+矩阵乘法符合结合律、分配律，不符合交换律
+
+运算可行的前提下，转置满足如下运算规律：
+
+\begin{itemize}
+\item $(A^T)^T=A$
+\item $(A+B)^T=A^T+B^T$
+\item $(\lambda A)^T=\lambda A^T$
+\item $(AB)^T=B^TA^T$
+
+矩阵$\mathbf{A=O}$的充要条件是$\mathbf{AA^T=O}$
+\end{itemize}
+
+\begin{adjustbox}{max width=\linewidth,center}
+$\begin{gathered}
+\left|\begin{matrix}a_{11}&a_{12}&a_{13}\\a_{21}&a_{22}&a_{23}\\a_{31}&a_{32}&a_{33}\end{matrix}\right|\\=a_{11}(a_{22}a_{33}-a_{23}a_{32})-a_{12}(a_{21}a_{33}-a_{23}a_{31})+a_{13}(a_{21}a_{32}-a_{22}a_{31})
+\end{gathered}$
+\end{adjustbox}
+
+行列式 $\det$ 的性质：
+
+\begin{itemize}
+\item 行列式和它的转置行列式相等
+\end{itemize}
+
+\begin{itemize}
+\item 对换行列式的相邻两行或两列，行列式变号
+
+$\to$如果行列式存在两行或两列完全相同，则行列式为 $0$
+\end{itemize}
+
+\begin{itemize}
+\item 行列式某一行或某一列所有元素同时乘以同一个数$k$，等于用$k$乘以整个行列式
+
+$\to$行列式某一行或某一列所有公因子可以提取到行列式外面
+\end{itemize}
+
+\begin{itemize}
+\item 行列式如果有两行或两列元素成比例，则这个行列式为$0$
+\end{itemize}
+
+\begin{itemize}
+\item 若行列式某一行元素都是两数之和，那么可以将该行列式拆成两个行列式，这两个行列式除了这一行值分别是两数外，其他行不变；列同理
+\end{itemize}
+
+\begin{itemize}
+\item 行列式某一行或列各元素乘以同一个数加到另一行或列对应元素上，行列式不变
+\end{itemize}
+
+\begin{itemize}
+\item $|\lambda A|=\lambda^n|A|$
+\end{itemize}
+
+\begin{itemize}
+\item $|AB|=|A||B|$
+
+在$n$阶行列式中，把$a_{ij}$所在行和列去掉后，留下的$n-1$阶行列式叫做$a_{ij}$的余子式$M_{ij}$。且有代数余子式$A_{ij}$定义如下：
+\end{itemize}
+
+\begin{adjustbox}{max width=\linewidth,center}
+$A_{ij}=(-1)^{i+j}M_{ij}$
+\end{adjustbox}
+
+行列式的按行（列）展开法则：行列式等于它的任一行（列）各元素与其对应的代数余子式乘积之和：
+
+\begin{adjustbox}{max width=\linewidth,center}
+$D=\sum_{i=1}^na_{ij}A_{ij}=\sum_{j=1}^na_{ij}A_{ij}$
+\end{adjustbox}
+
+一个$n$阶矩阵$\mathbf{A}$各个元素的代数余子式$A_{ij}$的转置矩阵构成了矩阵$\mathbf{A}$的伴随矩阵$\mathbf{A^*}$：
+
+\begin{adjustbox}{max width=\linewidth,center}
+$\mathbf{A^*}=(A_{ij})^T=(A_{ji})=\left(\begin{matrix}A_{11}&A_{21}&\cdots&A_{n1}\\A_{12}&A_{22}&\cdots&A_{n2}\\\vdots&\vdots&\ddots&\vdots\\A_{1n}&A_{2n}&\cdots&A_{nn}\end{matrix}\right)$
+\end{adjustbox}
+
+伴随阵满足如下运算：(可以求逆矩阵)
+
+\begin{adjustbox}{max width=\linewidth,center}
+$\mathbf{AA^*=A^*A=|A|E}$
+\end{adjustbox}
+
+若矩阵$\mathbf{A}$可逆，则$|\mathbf{A}|\neq0$ ，称为非奇异矩阵。
+
+\begin{adjustbox}{max width=\linewidth,center}
+$\left(\begin{matrix}a&b\\c&d\end{matrix}\right)^{-1}=\frac1{ad-bc}\left(\begin{matrix}d&-b\\-c&a\end{matrix}\right)$
+\end{adjustbox}
+
+\begin{itemize}
+\item $\lambda\neq0,\allowbreak{}(\lambda\mathbf{A})^{-1}=\frac1\lambda\mathbf{A^{-1}}$
+\item $\mathbf{(AB)^{-1}=B^{-1}A^{-1}}$
+\item $\Lambda^{-1}=diag(\lambda_1^{-1},\allowbreak{}\cdots,\allowbreak{}\lambda_m^{-1})$
+
+初等变换得到的等价关系具有传递性。$\mathbf{A\sim B}$的充要条件是存在$m$阶可逆矩阵$\mathbf{P}$、$n$阶可逆矩阵$\mathbf{Q}$使得$\mathbf{PAQ=B}$ 。方阵$\mathbf A$可逆的充要条件是$\mathbf{A\overset{c}{\sim}B}$或$\mathbf{A\overset{c}{\sim}B}$或$\mathbf{A\sim B}$
+
+若矩阵$\mathbf A$中有不为$0$的$r$阶子式$D$，且所有$r+1$阶子式(若存在)均为$0$，则$D$称为$\mathbf A$的\textbf{最高阶非零子式}，且$r$称为$\mathbf A$的\textbf{秩}，记作$R(\mathbf A)$ 。可逆矩阵的秩等于矩阵阶数，不可逆矩阵的秩小于矩阵阶数
+
+向量方程组 $\mathbf A\mathbf x=\mathbf b$ ，解为 $\mathbf x=\mathbf A^{-1}\mathbf b$
+\end{itemize}
+
+\begin{itemize}
+\item 无解的充要条件是$R(\mathbf A)<R(\mathbf A,\allowbreak{}\mathbf b)$
+\item 有唯一解的充要条件是$R(\mathbf A)=R(\mathbf A,\allowbreak{}\mathbf b)=n$
+\item 有无穷解的充要条件是$R(\mathbf A)=R(\mathbf A,\allowbreak{}\mathbf b)<n$
+\end{itemize}
+
+\subsubsection{概率论}
+
+事件的运算规律：
+
+\begin{itemize}
+\item 若 $A\subset B$ 则 $A\cup B=B,AB=A$
+\end{itemize}
+
+\begin{itemize}
+\item $A-B=A\overline B=A-AB,\allowbreak{}A\cup B=A\cup(B-A)$
+\end{itemize}
+
+\begin{itemize}
+\item 结合律 $(A\cup B)\cup C=A\cup(B\cup C)$, $(A\cap B)\cap C=A\cap(B\cap C)$
+\end{itemize}
+
+\begin{itemize}
+\item 分配律 $(A\cup B)\cap C=(A\cap C)\cup(B\cap C)$
+
+\begin{adjustbox}{max width=\linewidth,center}
+$(A\cap B)\cup C=(A\cap C)\cup(B\cup C)$
+\end{adjustbox}
+\end{itemize}
+
+\begin{itemize}
+\item 对偶律 $\overline{A\cup B}=\overline A\cap \overline B$ , $\overline{A\cap B}=\overline A\cup \overline B$
+
+概率公式：
+\end{itemize}
+
+\begin{itemize}
+\item $P(A-B)=P(A)-P(AB)$
+\item 若 $B\subset A$ ，有：$P(A-B)=P(A)-P(B)$ , $P(A)\ge P(B)$
+\item $P(A\cup B)=P(A)+P(B)-P(AB)$ ，可由容斥原理推广到任意多事件
+
+在事件 $A$ 发生的条件下，事件 $B$ 的条件概率 $P(B|A)=\dfrac{P(AB)}{P(A)}$
+\end{itemize}
+
+\begin{adjustbox}{max width=\linewidth,center}
+$P(A_1\cup\cdots\cup A_n|A)=P(A_1|A)+\cdots+P(A_n|A)$
+\end{adjustbox}
+
+\begin{adjustbox}{max width=\linewidth,center}
+$P(A_1\cdots A_n)=P(A_1)P(A_2|A_1)\cdots P(A_n|A_1\cdots A_{n-1})$
+\end{adjustbox}
+
+如两个事件 $A,B$ 满足：$P(AB)=P(A)P(B)$ ，那么称 $A,B$ 独立
+
+两点分布方差为 $p(1-p)$ ，二项分布方差为 $np(1-p)$ ，均匀分布期望 $\dfrac{a+b}2$ ，方差 $\dfrac{(b-a)^2}{12}$
+
+数学期望的性质：
+
+\begin{itemize}
+\item 若 $C$ 是常数，则 $E(C)=C,E(CX)=CE(X)$
+\end{itemize}
+
+\begin{itemize}
+\item $E(X_1+X_2)=E(X_1)+E(X_2)$
+\end{itemize}
+
+\begin{itemize}
+\item 若 $X,Y$ 相互独立，则 $E(XY)=E(X)E(Y)$
+
+方差计算公式 $D(X)=E(X^2)-[E(X)]^2$
+\end{itemize}
+
+\begin{itemize}
+\item 设 $C$ 是常数，则 $D(C)=0$ ，$D(CX)=C^2D(X)$
+\end{itemize}
+
+\begin{itemize}
+\item 若 $X,Y$ 相互独立，则 $D(X\pm Y)=D(X)+D(Y)$ (注意都是加)
+\end{itemize}
+
+\subsubsection{其他}
+
+\textbf{阶乘} 极限值：13!刚好爆int , 21!刚好爆long long
+
+\textbf{斐波那契数列}：f(47)刚好爆int, f(93)刚好爆long long
+
+通项 $f_n=\left(\left(\dfrac{1+\sqrt 5}2\right)^n-\left(\dfrac{1-\sqrt 5}2\right)^n\right)\div\sqrt 5$。约等于去掉减式的最近整数
+
+快速倍增 $[\begin{matrix}F_{n-1}&F_n\end{matrix}]=[\begin{matrix}F_{n-2}&F_{n-1}\end{matrix}]\cdot[\begin{matrix}0&1\\1&1\end{matrix}]$，则 $F_{2k}=F_k(2F_{k+1}-F_k),\allowbreak{}F_{2k+1}=F^2_{k+1}+F^2_k$。
+
+\begin{itemize}
+\item 卡西尼性质 $f_{n-1}f_{n+1}-f^2_n=(-1)^n$
+\end{itemize}
+
+\begin{itemize}
+\item 附加性质 $f(n+m)=f(n+1)f(m)+f(n)f(m-1)$
+
+令 $m=n$ 得 $f_{2n}=f_n(f_{n+1}+f_{n-1})$，
+
+可推导出 $f_n|f_{nk}$，且可逆即 $\forall f_a|f_b,a|b$
+\end{itemize}
+
+\begin{itemize}
+\item $\gcd(f_m,f_n)=f_{\gcd(m,n)}$
+\end{itemize}
+
+\begin{itemize}
+\item $\sum_{i=1}^nf(n)=f(n+2)-1$
+\end{itemize}
+
+\begin{itemize}
+\item $\sum_{i=1}^nf^2(i)=f(n)\times f(n+1)$
+\end{itemize}
+
+\begin{itemize}
+\item $f(n+1)<2f(n)<f(n+2)$
+\end{itemize}
+
+\begin{itemize}
+\item $f(n+2)<3f(n)$
+\end{itemize}
+
+\begin{itemize}
+\item $4f(n)<3f(n+1)\Rightarrow f(n)<f(n+1)<3f(n-1)$
+\end{itemize}
+
+\begin{notebox}
+齐肯多夫定理：任何正整数可以表示为若干个不连续的 Fibonacci 数之和
+\end{notebox}
+
+模数为 $p$，则 $f\bmod p$ 的循环节长度 $\pi(p)\le 6p$。(皮萨诺周期)
+
+\begin{itemize}
+\item $\pi(2)=3,\pi(5)=20$
+\item 若模数 $a,b$ 互质，则 $\pi(ab)=\gcd(\pi(a),\pi(b))$
+\item 对奇素数 $p\equiv1,4\pmod5$，$p-1|\pi(p)$
+\item 对奇素数 $p\equiv2,3\pmod5$，$2p+2|\pi(p)$
+\item 若 $\pi(p^{k-1})|m$，则 $\pi(p^k)|mp$。若 $\pi(p^{k-1})=m$ 则 $\pi(p^k)=mp$
+
+牛顿法求函数零点：$x_{i+1}=x_i-\dfrac{f(x_i)}{f'(x_i)}$
+
+尾 $0$ 数目可以将大数质因数分解，求 $\min(num_2,num_5)$ 即可。其他质因数都不能乘出 $0$
+
+任意整数转 Excel 列名：(列名本质是从 $1('A')$ 计数的 $27$ 进制)
+\end{itemize}
+
+\begin{minted}{cpp}
+#include <bits/stdc++.h>
+int n; std::string x;
+signed main()
+{   for(scanf("%d",&n);n;n=(n-1)/26) x=(char)('A'+(n-1)%26 )+x;
+    return std::cout<<x,0;  }
+\end{minted}
+
+闰年公式：满足其一 \cds{1} 为 $4$ 的倍数不为 $100$ 的倍数； \cds{2} 为 $400$ 的倍数
+
+\subsection{数论}
+
+\subsubsection{基础性质}
+
+设 $a,b,m\in Z^+$，有：$\lfloor\dfrac ab\rfloor=\lceil\dfrac{a+1}b\rceil-1$, $\lceil\dfrac ab\rceil=\lfloor\dfrac{a-1}b\rfloor+1$。
+
+\begin{adjustbox}{max width=\linewidth,center}
+$\begin{aligned}
+ab\ge m\Leftrightarrow a\ge\lceil\dfrac mb\rceil \Leftrightarrow b\ge\lceil\dfrac ma\rceil\\
+ab > m\Leftrightarrow a > \lceil\dfrac mb\rceil \Leftrightarrow b > \lceil\dfrac ma\rceil\\
+ab\le m\Leftrightarrow a\le\lfloor\dfrac mb\rfloor \Leftrightarrow b\le\lfloor\dfrac ma\rfloor\\
+ab <  m\Leftrightarrow a < \lfloor\dfrac mb\rfloor\Leftrightarrow b < \lfloor\dfrac ma\rfloor
+\end{aligned}$
+\end{adjustbox}
+
+\textbf{整除}的性质：( $x|y$ 那么 $x$ 是 $y$ 倍数，$y$ 是 $x$ 因数(约数)， $x,y\in Z,x\neq 0$ )
+
+\begin{itemize}
+\item $a|b\Leftrightarrow-a|b\Leftrightarrow a|-b\Leftrightarrow|a|\ |\ |b|$
+\item $a|b$ 且 $b|c$ $\Rightarrow a|c$
+\item $a|b$ 且 $a|c\Leftrightarrow \forall x,\allowbreak{}y\in Z,\allowbreak{}a|\gcd(xb+yc)$  (字面理解： $a$ 是 $b,c$ 公因数)
+\item $a|b$ 且 $b|a$ $\Rightarrow b=\pm a$
+\item $m\neq 0$ 且 $a|b\Leftrightarrow ma|mb$
+\item $b\neq 0$ 且 $a|b\Leftrightarrow |a|\le |b|$
+\item $a\neq 0,\allowbreak{}b=qa+c,\allowbreak{}a|b\Leftrightarrow a|c$
+\item $0$ 是所有非零整数的倍数，即 $0|x,x\neq 0$
+\end{itemize}
+
+\begin{notebox}
+真因数是对 $b\neq 0$ 时除去 $\pm 1,\pm b$ 外的全部因数。
+\end{notebox}
+
+\textbf{素数}的性质：
+
+\begin{itemize}
+\item 对合数 $a$ ，一定存在素数 $p\le\sqrt a$ 使得 $p|a$
+\item 所有大于 $3$ 的素数都可以表示为 $6n\pm 1$ 的形式
+\item 素数定理： $\pi(x)$ 为不超过 $x$ 的素数个数，则 $\pi(x)\approx \dfrac{x}{\ln x}$ ( $\pi(x)$ 一般大于后者，误差率约为 $10\%$ )
+
+\textbf{同余}($a\equiv b(\bmod m)$ 是 $m\neq 0,m|(a-b)$ ,称 $a$ 同余于 $b$ 模 $m,b$ 是 $a$ 对模 $m$ 的剩余)的性质：
+\end{itemize}
+
+\begin{itemize}
+\item 传递性：若 $a\equiv b(\bmod m),\allowbreak{}b\equiv c(\bmod m)$ 则 $a\equiv c(\bmod m)$
+\end{itemize}
+
+\begin{itemize}
+\item 线性运算：若 $a,\allowbreak{}b,\allowbreak{}c,\allowbreak{}d\in Z,\allowbreak{}m\in N^*,\allowbreak{}a\equiv b(\bmod m),\allowbreak{}c\equiv d(\bmod m)$ 则：
+
+$a\pm c\equiv b\pm d(\bmod m),\allowbreak{}ac\equiv bd(\bmod m)$
+\end{itemize}
+
+\begin{itemize}
+\item 若 $a,\allowbreak{}b\in Z,\allowbreak{}k,\allowbreak{}m\in N^*,\allowbreak{}a\equiv b(\bmod m)$ 则 $ak\equiv bk(\bmod mk)$
+\end{itemize}
+
+\begin{itemize}
+\item 若 $a,\allowbreak{}b\in Z,\allowbreak{}d,\allowbreak{}m\in N^*,\allowbreak{}d|a,\allowbreak{}d|b,\allowbreak{}d|m,\allowbreak{}a\equiv b(\bmod m)$ 则 $\dfrac ad\equiv\dfrac bd(\bmod \dfrac md)$
+\end{itemize}
+
+\begin{itemize}
+\item 若 $a,\allowbreak{}b\in Z,\allowbreak{}d,\allowbreak{}m\in N^*,\allowbreak{}d|m,\allowbreak{}a\equiv b(\bmod m)$ 则 $a\equiv b(\bmod d)$
+\end{itemize}
+
+\begin{itemize}
+\item 若 $a,\allowbreak{}b\in Z,\allowbreak{}d,\allowbreak{}m\in N^*,\allowbreak{}a\equiv b(\bmod m)$ 则 $\gcd(a,m)=\gcd(b,m)$ ,若 $m|d$ 且 $a|d,b|d$ 成立其一，那么 $a|d,b|d$ 均成立
+
+定义域是正整数的函数称为数论函数。
+
+\textbf{积性函数}是 $f(1)=1,\allowbreak{}\forall x,\allowbreak{}y\in N^*,\allowbreak{}\gcd(x,\allowbreak{}y)=1\Rightarrow f(xy)=f(x)f(y)$
+
+\textbf{完全积性函数}是  $f(1)=1,\allowbreak{}\forall x,\allowbreak{}y\in N^*\Rightarrow f(xy)=f(x)f(y)$
+
+若 $f,g$ 是积性函数，则 $f(x^p),\allowbreak{}f^p(x),\allowbreak{}f(x)g(x),\allowbreak{}\sum_{d|x}f(d)g(\dfrac xd)$ 都是积性函数。
+
+设 $x=\prod p_i^{k_i}$ ，积性函数满足 $f(x)=\prod f(p_i^{k_i})$ ，完全积性函数满足 $f(x)=\prod f(p_i)^{k_i}$
+\end{itemize}
+
+\begin{notebox}
+单位函数 $\epsilon(n)=[n=1]$ ,除数函数 $\sigma_k(n)=\sum_{d|n}d^k,\allowbreak{}\sigma_0(n)=d(n)=\tau(n),\allowbreak{}\sigma_1(n)=\sigma(n)$
+
+莫比乌斯函数 $\mu(n)=\begin{cases}1&n=1\\0&\exists d > 1,d^2|n\\(-1)^{\omega(n)}&otherwise\end{cases}$ , $\omega(n)$ 是 $n$ 的本质不同因子个数, $\omega$ 是加性函数
+
+利用唯一分解定理质因数分解的复杂度为 $O(\sqrt n)$ ，最坏复杂度在质数时取得 (也可以枚举素数，复杂度为 $O(\dfrac{n}{\ln n})$ ，但是需要素数筛预处理)
+\end{notebox}
+
+设 $x=\prod p_i^{a_i}$ ，则 $x$ 因子数、因子和分别为 $\prod(a_i+1),\allowbreak{}\prod(\sum_{j=0}^{a_i}p_i^j)=\prod\dfrac{p_i^{a_i+1}-1}{p_i-1}$
+
+\begin{notebox}
+根据上式可知完全平方数(1,4,9,...)有奇数个因数，其他数有偶数个因数。因子和是积性函数，设 $x$ 分解出一个素数 $p$ ，则 $f(x)=f(\dfrac xp)f(p)$ ，其中显然 $f(p)=p+1$
+\end{notebox}
+
+互质/最大公因数/最小公倍数的性质：
+
+\begin{itemize}
+\item (辗转相除法) \mintinline{text}|gcd(a,b)=b?gcd(b,a%b):a| 复杂度 $O(\log n)$ ; $[a,b]=\dfrac{ab}{(a,b)}$
+\item 若 $a,b\in N^*,(a,b)=k$ 则 $(\dfrac ak,\dfrac bk)=1$ ；若 $[a,b]=k$ 则 $(\dfrac ka,\dfrac kb)=1$
+\item 若 $p\bot q$ ，则 $(p^n,q^m)=1$ ，也意味着 $p^n\bmod q^m\neq 0$
+\item 若 $x(a,b)=a,y(a,b)=b$ 则 $(x,y)=1$ 即 $(\dfrac{a}{(a,\allowbreak{}b)},\allowbreak{}\dfrac{b}{(a,\allowbreak{}b)})=1$
+\item 若 $(a\cdot b)\bot(c\cdot d)$ 则 $a\bot c,\allowbreak{}a\bot d,\allowbreak{}b\bot c,\allowbreak{}b\bot d$
+\end{itemize}
+
+\begin{notebox}
+应用：从长为 $n$ 的环任意位置开始循环每次跳 $m$ 格走，能遍历全部位置充要条件是 $(n,m)=1$
+
+四平方和定理：所有自然数至多只要用四个数的平方和就可以表示
+\end{notebox}
+
+\subsubsection{素数}
+
+\hfive{素性测试}
+
+判断单个数是否是素数模板 ( $O(n)$ )：
+
+\begin{minted}{cpp}
+bool isprime(ll p)
+{
+    if(p==2||p==3) return true;
+    if(p<2||(p%6!=1&&p%6!=5)) return false;
+    for(ll i=5;i*i<=p;i+=6) if(p%i==0||p%(i+2)==0) return false;
+    return true;
+}
+\end{minted}
+
+\textbf{Miller Rabin算法}，复杂度 $O(k\log n)$ ，$k$ 是设定参数，能够以较高准确率判定是否为素数，建议设 $10$，见 \mintinline{text}|pollard-rho| 代码。
+
+\begin{notebox}
+$100$ 内质数为  $25$ 个 \mintinline{text}|2|,\allowbreak \mintinline{text}|3|,\allowbreak \mintinline{text}|5|,\allowbreak \mintinline{text}|7|,\allowbreak \mintinline{text}|11|,\allowbreak \mintinline{text}|13|,\allowbreak \mintinline{text}|17|,\allowbreak \mintinline{text}|19|,\allowbreak \mintinline{text}|23|,\allowbreak \mintinline{text}|29|,\allowbreak \mintinline{text}|31|,\allowbreak \mintinline{text}|37|,\allowbreak \mintinline{text}|41|,\allowbreak \mintinline{text}|43|,\allowbreak \mintinline{text}|47|,\allowbreak \mintinline{text}|53|,\allowbreak \mintinline{text}|59|,\allowbreak \mintinline{text}|61|,\allowbreak \mintinline{text}|67|,\allowbreak \mintinline{text}|71|,\allowbreak \mintinline{text}|73|,\allowbreak \mintinline{text}|79|,\allowbreak \mintinline{text}|83|,\allowbreak \mintinline{text}|89|,\allowbreak \mintinline{text}|97|
+\end{notebox}
+
+\hfive{埃氏筛}
+
+埃氏筛(复杂度 $O(n\log\log n)$ )
+
+\inputminted{cpp}{code/ext_003.cpp}
+
+\hfive{欧拉筛}
+
+欧拉筛：(洛谷P3383)
+
+\inputminted{cpp}{code/p3383_euler.cpp}
+
+求任意连续区间素数：(洛谷P1835-求素数个数 $1\le l\le r < 2^{31},\allowbreak{}r-l\le10^6$ )
+
+\inputminted{cpp}{code/p1835_euler.cpp}
+
+\begin{notebox}
+SCNUOJ1745 求 $\sum_{i=1}^n\varphi(i^k)\cdot\sigma(i^k)\bmod(10^9+7)$ ，$1\le n,k\le10^6$
+\end{notebox}
+
+对素数 $p$ 和正整数 $k$ ，有 $\varphi(p^k)=p^k-p^{k-1},\allowbreak{}\sigma(p^k)=\dfrac{p^k-1}{p-1}$
+
+\inputminted{cpp}{code/ext_004.cpp}
+
+$O(n)$ 求积性函数 $f$ ，条件：任意质数 $p$ 和正整数 $k$ ，可以 $O(1)$ 求出 $f(p^k)$ ，那么设合数 $n=\prod_{i=1}^kp_i^{\alpha_i}$ ，线性筛记录 $g_n=p_1^{\alpha_1}$ (即 $n$ 的第一个质数幂)，若 $n$ 被 $x\cdot p$ 筛掉( $p$ 是质数)，那么：
+
+\begin{adjustbox}{max width=\linewidth,center}
+$g_n=\begin{cases}g_x\cdot p&x\bmod p=0\\p&otherwise\end{cases}$
+\end{adjustbox}
+
+若 $n=g_n$ ，直接算 $f(n)$ ，否则 $f(n)=f(\dfrac n{g_n})f(g_n)$
+
+\begin{notebox}
+用欧拉筛可以在筛的时候求一些其他值，如例题：求 $\sum_{i=1}^nf(i^k)\bmod10^9+7,\allowbreak{}f$ 是因子和
+\end{notebox}
+
+\inputminted{cpp}{code/eg_euler.cpp}
+
+\hfive{pollard-rho算法}
+
+质因数分解的朴素复杂度是 $O(\sqrt n)$，在预处理素数表的情况下质因数分解复杂度为 $O(\sqrt{\dfrac n{\ln n}})$。注意不能只预处理 $\sqrt n$，以防大质数乘小质数情况(此时对大质数可以除法求出，然后做素性测试)和本身是大质数。
+
+若 $x|n,1 < x < n$(即 $1$ 和自身外的因子)，则 $x$ 是非平凡因子。能以 $O(n^{0.25})$ 分解出随机一个非平凡因数。
+
+\begin{notebox}
+P4718 给定 $t(\le 350)$ 个 $n(1 < n\le10^{18})$，判断 $n$ 为质数或输出它的最大质因子
+\end{notebox}
+
+\href{https://github.com/NULL-SF}{by NULL-SF}
+
+\inputminted{cpp}{code/p4718_pollard_rho.cpp}
+
+\hfive{Meissel-Lehmer算法}
+
+作用：准确地求出 $\pi(x)$ 值和 $[1,x]$ 内各素数，时间复杂度为 $O(\dfrac{x^{\frac23}}{\log^2x})$ ，空间复杂度为 $O(x^\frac13\log^3x\log\log x)$
+
+\inputminted{cpp}{code/meissel_lehmer.cpp}
+
+\inputminted{cpp}{code/p7884_meissel_lehmer.cpp}
+
+\subsubsection{拓展欧几里得定理}
+
+求下列关于$x,y$的不定方程的一组可行解：($a,b,x,y$都是整数)
+
+\begin{adjustbox}{max width=\linewidth,center}
+$ax+by=(a,b)$
+\end{adjustbox}
+
+裴蜀定理又称贝祖定理（Bézout's lemma）,设 $a,b\in\Z,ab\neq0$ ,则 $\exist x,y\in\Z$：
+
+\begin{adjustbox}{max width=\linewidth,center}
+$ax+by=(a,b)$
+\end{adjustbox}
+
+\begin{minted}{cpp}
+void exgcd(ll a, ll b, ll &x, ll &y)
+{
+    if (!b) x = 1, y = 0;
+    else exgcd(b, a % b, y, x), y -= a / b * x;
+}
+\end{minted}
+
+若要求 $ax+by=c$ 的一组整数解，需要先求出 $ax_0+by_0=(a,b)$ 的一组解，然后得到 $ax_0\times\dfrac{c}{(a,\allowbreak{}b)}+by_0\times\dfrac{c}{(a,\allowbreak{}b)}=(a,\allowbreak{}b)\times\dfrac{c}{(a,\allowbreak{}b)}$ ，若 $\dfrac{c}{(a,b)}$ 非整数，无解。
+
+显然有恒等式 $a(x+db)+b(y-da)=c$ ，令 $d=\dfrac1{(a,b)}$ ，可以得到最小非负数解 $x'=(x\bmod \dfrac b{(a,\allowbreak{}b)}+\dfrac b{(a,\allowbreak{}b)})\bmod \dfrac b{(a,\allowbreak{}b)}$ 。特别地若 $a<0$ 可以两边同时取负。
+
+\begin{notebox}
+洛谷P1082-求 $ax\equiv 1(\bmod b)$ 的最小正整数解 $x$ ，保证有解
+\end{notebox}
+
+本质是 $ax=by+1\to ax-by=1$ ,有解条件是 $(a,b)=1$ ,输出 $(x\bmod b+x)\bmod b$ 即可
+
+\begin{notebox}
+洛谷P5656-输入 $1\le a,b,c\le 10^9$ ，求 $ax+by=c$ 的整数解。无解输出 \mintinline{text}|-1| ，有正整数解( $x,y\in Z_+$ )输出正整数解数量，所有正整数解中 $x,y$ 的最小值，最大值。若无正整数解，输出 $x,y$ 代表整数解里 $x,y$ 的最小正整数值
+\end{notebox}
+
+\inputminted{cpp}{code/p5656_exgcd.cpp}
+
+\inputminted{cpp}{code/p5656_exgcd2.cpp}
+
+\subsubsection{取模公式}
+
+\hfive{费马小定理}
+
+若 $p$ 为素数， $a\in Z_+,a\bot p$ ，则 $a^{p-1}\equiv 1(\bmod p)$
+
+线性逆元公式(从 $1$ 开始)：$i^{-1}\equiv-\lfloor\dfrac pi\rfloor\times(p\bmod i)^{-1}(\bmod p)$   (实现时 $+p$ 再取模)
+
+任意 $n$ 数线性求逆元公式：记 $s_i$ 是前缀积，则 $a_i^{-1}\equiv s_{i-1}\cdot (s_i)^{-1}\bmod p$ (预处理 $s_{i-1}^{-1}\equiv s_i^{-1}\cdot a_i\bmod p$ )
+
+阶乘线性逆元公式：$((i-1)!)^{-1}=i\times(i!)^{-1}$  (推论： $\dfrac 1i\equiv({i!})^{-1}\times(i-1)!\bmod p$)
+
+\hfive{卢卡斯定理}
+
+\begin{adjustbox}{max width=\linewidth,center}
+$\begin{gathered}
+n=sp+q,m=tp+r,0\le q,r\le p-1,p\text{是质数，则}\\
+\begin{pmatrix}n\\m\end{pmatrix}\mod p=
+\begin{pmatrix}\lfloor\frac np\rfloor\\\lfloor\frac mp\rfloor\end{pmatrix}
+\cdot\begin{pmatrix}n\mod p\\m\mod p\end{pmatrix}\mod p
+\end{gathered}$
+\end{adjustbox}
+
+时间复杂度为$\Omicron(f+g\log n)$,f是预处理组合数复杂度(如阶乘逆元)，g是单次求组合数复杂度
+
+\begin{notebox}
+洛谷P3807-求 $C_{n+m}^n\bmod p,p$ 是质数， $1\le n,m,p\le10^5,1\le T\le10$
+\end{notebox}
+
+\inputminted{cpp}{code/p3807_lucas.cpp}
+
+\textbf{扩展卢卡斯定理}
+
+求 $C_n^m\bmod p$，将 $p$ 质因数分解为 $p_1^{\alpha_1}p_2^{\alpha_2}\cdots$，用中国剩余定理求方程组 $C_n^m\bmod p_1^{\alpha_i}$ 的最小解 $x$。如果 $p_i^{\alpha_1}$ 都是素数且较小可以预处理阶乘，直接对每个子算式上 lucas，否则用下述代码：
+
+不考虑 exCRT 复杂度时，预处理 $n!\div n\text{内}p\text{所有倍数乘积}\bmod p$ 复杂度为 $O(p+T\log p)$
+
+\begin{notebox}
+洛谷P4720-求 $C_n^m\bmod p,\allowbreak{}1\le m\le n\le 10^{18},\allowbreak{}2\le p\le 10^6$。
+\end{notebox}
+
+\inputminted{cpp}{code/p4720_exlucas.cpp}
+
+\hfive{欧拉定理}
+
+欧拉定理： $\gcd(a,m)=1$ 则 $a^{\varphi(m)}\equiv 1(\bmod m)$
+
+拓展欧拉定理
+
+\begin{adjustbox}{max width=\linewidth,center}
+$a^b\equiv\begin{cases}
+a^{b\ \bmod\ \varphi(p)},&\gcd(a,p)=1\\
+a^b,&\gcd(a,p)\neq1,b < \varphi(p)\\
+a^{b\ \bmod\ \varphi(p)+\varphi(p)},&\gcd(a,p)\neq1,b\ge\varphi(p)
+\end{cases}(\bmod p)$
+\end{adjustbox}
+
+合并为 $a^b\equiv a^{b\bmod\varphi(p)}\pmod p$。
+
+\begin{notebox}
+SCNUOJ2117-求 $(n!)^{n!}\bmod998244353$，$1\le n\le5000$，$T\le5000$ 次询问
+\end{notebox}
+
+\begin{minted}{python}
+p, phi, f, fp = 998244353, 998244352, [1, 1], [1, 1]
+for i in range(2, 5001):
+    f.append((f[-1] * i) % p)
+    fp.append((fp[-1] * i) % phi)
+for _ in range(int(input())):
+    n = int(input())
+    print(pow(f[n], fp[n], p))
+\end{minted}
+
+\begin{notebox}
+洛谷P5091-求 $a^b\bmod m,\allowbreak{}1\le a\le10^9,\allowbreak{}1\le m\le10^8,\allowbreak{}1\le b\le10^{2\times10^7}$
+\end{notebox}
+
+\inputminted{cpp}{code/ext_005.cpp}
+
+\hfive{线性快速幂}
+
+同底数和模数，即对变化的 $x$ 求 $a^x\bmod p$，可以时空 $O(\sqrt p)$ 预处理并 $O(1)$ 计算快速幂。
+
+对 $a^b\bmod p$，令 $s=\sqrt p$ 或 $2^k$(如 $k=16$)，可以将 $b$ 拆成 $\lfloor\dfrac bs\rfloor s+(b\bmod s)$，线性预处理出 $a^i,a^{is},0\le i\le s$。即计算 $(a^{\lfloor\frac bs\rfloor s}\times a^{b\ \bmod \ s})\bmod s$。
+
+\begin{notebox}
+LOJ 162 求 $n(\le5\times10^6)$ 次 $x^a\bmod 998244352(1 \le a < p)$
+\end{notebox}
+
+\inputminted{cpp}{code/ext_006.cpp}
+
+\hfive{威尔逊定理}
+
+对素数 $p$ 有 $(p-1)!\equiv -1\pmod p$
+
+\begin{notebox}
+杂项：一个数对9取模等于数位和对9取模
+\end{notebox}
+
+\subsubsection{欧拉函数}
+
+$\varphi(n)$ 表示正整数 $[1,n]$ 中与 $n$ 互质的数的个数，如 $\varphi(0)=0,\allowbreak{}\varphi(1)=1,\allowbreak{}\varphi(8)=len\{1,\allowbreak{}3,\allowbreak{}5,\allowbreak{}7\}=4$
+
+\begin{adjustbox}{max width=\linewidth,center}
+$\varphi(x)=x\cdot\prod_{i=1}^n(1-\frac 1{p_i}),p_i\text{为}x\text{的所有质因数},x\in\N_+$
+\end{adjustbox}
+
+欧拉函数性质：
+
+\begin{enumerate}
+\item $p$ 是素数时,  $\varphi(p)=p-1$
+\item $p$ 是素数时,  $k\in N^*$ , $\varphi(p^k)=p^k-p^{k-1}$
+\item 欧拉函数是积性函数， $\forall a,b\in Z,(a,b)=1$ , 有 $\varphi(ab)=\varphi(a)\varphi(b)$
+\item $\varphi(n)=\prod_{i=1}^m\varphi(p_i^{k_i})$
+\item 若 $p$ 是素数，$\varphi(i\cdot p)=\begin{cases}\varphi(i)\cdot(p-1)&,p\nmid i\\\varphi(i)\cdot p&,p\mid i\end{cases}$
+\item $n=\sum_{d|n}\varphi(d)$
+
+求一个数的欧拉函数： $O(\sqrt n)$
+\end{enumerate}
+
+\begin{minted}{cpp}
+ll t = phi = m;
+for (ll i = 2; i * i <= m; ++i) if (t % i == 0)
+{
+    phi = phi - phi / i;
+    while (t % i == 0) t /= i;
+}
+if (t > 1) phi = phi - phi / t; //phi为所求
+\end{minted}
+
+埃氏筛求 $[1,n]$ 欧拉函数：
+
+\inputminted{cpp}{code/ext_007.cpp}
+
+(洛谷P3601, 求 $\sum_{i=l}^r(i-\varphi(i))\bmod666623333,\allowbreak{}1\le l\le r\le10^{12},\allowbreak{}r-l\le10^6$ )
+
+求区间欧拉函数，复杂度为 $\sum_{p\in prime}\dfrac{r-l}p+1=\sqrt r+(r-l)\ln r$
+
+\inputminted{cpp}{code/p3601_euler_function.cpp}
+
+\subsubsection{中国剩余定理}
+
+CRT(Chnese Remainder Theorem) 求解如下方程最小正元 $x$ ：( $a_i$ 两两互质)
+
+\begin{adjustbox}{max width=\linewidth,center}
+$\begin{cases}
+x\equiv b_1(\mod a_1)\\
+x\equiv b_2(\mod a_2)\\
+\quad\quad\quad\ \ \ \vdots\\
+x\equiv b_k(\mod a_k)\\
+\end{cases}$
+\end{adjustbox}
+
+设 $p=\prod a$，通解为 $x+kp$。方程组数为 $n$ 则复杂度为 $O(n\log n)$。(exCRT 同)
+
+\begin{notebox}
+洛谷P1495-输入不等式数 $n$ 和 $a_i,b_i$ ( $a_i$ 互质)，求最小 $x$
+\end{notebox}
+
+\inputminted{cpp}{code/p1495_CRT.cpp}
+
+\textbf{拓展中国定理：} ( $a_i$ 不互质) 洛谷P4777- $n\le10^5,\allowbreak{}\gcd\le10^{18},\allowbreak{}1\le b_i,\allowbreak{}a_i\le10^{18}$
+
+设前 $i-1$ 个不定方程式的答案是 $ans$，前 $i-1$ 个模数的 $lcm$ 为 $m$，有：$ans+mx\equiv a_i\pmod{p_i}$，用 exgcd 求出新的 $x$，则新的 $ans+mx$ 为新答案。
+
+如果要求 $b_i x\equiv a_i\pmod{p_i}$，由于 $b_i$ 逆元不一定存在不能拉过去。转化为求不定方程 $b_i(ans+mx)\equiv a_i\pmod{p_i}$(那么初始值是 $an=0,m=1$ 从 $i=1$ 开始推)
+
+\inputminted{cpp}{code/ext_008.cpp}
+
+\subsubsection{BSGS}
+
+求最小非负整数 $x$ ，满足 $a^x\equiv b(\bmod p), p$ 是质数， $O(\sqrt p)$  (洛谷P4195)
+
+\inputminted{cpp}{code/p3846_bsgs2.cpp}
+
+\inputminted{cpp}{code/ext_009.cpp}
+
+若 $p$ 不是质数，使用 exBSGS 算法 (洛谷P4195) 复杂度 $O(\sqrt{\varphi(p)})$
+
+\inputminted{cpp}{code/ext_010.cpp}
+
+BSGS 的结构是一条链(exBSGS cnt 部分)加一条环。可以用 BSGS 求环长的依据：有环必然存在 $a^p\equiv a\pmod p$ 即 $a^{p-1}\equiv 1\pmod p$，故环长为 $p-1$。
+
+\subsection{计算几何}
+
+三角函数： 使用\textbf{弧度制}，弧度制 \mintinline{text}|deg| 跟角度制 \mintinline{text}|arg| 的转换公式：( $\pi=180°$ )
+
+\begin{adjustbox}{max width=\linewidth,center}
+$1=\dfrac{deg}{180°}=\dfrac{arg}{\pi}\Rightarrow 
+\begin{cases}
+arg=\dfrac{\pi\cdot deg}{180°}\\
+deg=\dfrac{180°\cdot arg}{\pi}
+\end{cases}$
+\end{adjustbox}
+
+三角函数是 \mintinline{text}|sin, cos, tan| ，反三角函数是 \mintinline{text}|asin, acos, atan, atan2(y, x)| ，其中 \mintinline{text}|atan2(y, x)=atan(y/x)| 。反三角函数求出的角度值域范围是：\mintinline{text}|asin, atan| 为 $[-\dfrac\pi2,\dfrac\pi2]$ ，\mintinline{text}|acos| 为 $[0,\pi]$ ，\mintinline{text}|atan2| 为 $[-\pi,\pi]$ 。
+
+注意这里 \mintinline{text}|atan2| 的含义是：向量 $(x,y)$ 与 $x$ 正半轴夹角的大小，即从 $X$ 轴逆时针旋转的角度，如果为负数就表示顺时针旋转的角度。与 \mintinline{text}|atan| 是本质不同的函数
+
+\subsubsection{向量}
+
+向量点乘，有结论： $\vec a\cdot \vec b$ 的符号大于 $0$ 夹角在 $[0,90°)$ ，等于 $0$ 为 $90°$ ；小于 $0$ 为 $(90°,180°]$ 。点乘的几何意义是 $\vec a$ 长度与 $\vec b$ 投影到 $\vec a$ 的长度的乘积或 $\vec b$ 长度与 $\vec a$ 投影到 $\vec b$ 的长度的乘积。即 $\vec a\cdot \vec b=|\vec a|\cdot|\vec b|\cos<\vec a,\allowbreak{}\vec b>$ 。如果是正的，说明投影后朝向一致，否则说明投影后朝向不一致
+
+向量 $\vec a,\vec b$ 叉乘得到一个向量 $\vec c$，其方向垂直这两向量形成的平面，如果 $\vec b$ 满足 $\vec a$ 经由 $180°$ 内的逆时针旋转可以与其平行，那么 $\vec c$ 的竖坐标是正的；如果是 $180°$ 内的顺时针，那么是负的。可以用右手定则表示：当右手的四指从 $\vec a$ 以不超过 $180°$ 的转角转向 $\vec b$ 时，竖起的大拇指指向是 $\vec a\times \vec b$ 的方向(向上正，向下负)，叉乘满足： $(\lambda \vec a)\times \vec b=\vec a \times(\lambda\vec b)=\lambda (\vec a\times \vec b)$ ,  $(\vec a+\vec b)\times\vec c=\vec a\times\vec c+\vec b\times \vec c$
+
+判断向量共线(平行)：两非零向量 $\vec a,\vec b$ 共线当且仅当存在唯一实数 $\lambda$ ，使得 $\vec b=\lambda \vec a$ ，或 $|\vec{a}\cdot \vec{b}|=|\vec a||\vec b|$ (也可以用 $\vec a\times \vec b=0$ )
+
+判断向量垂直： $a\cdot b=0$
+
+向量与原点的夹角： $\theta=\arctan\dfrac{y}{x}$ ，由角和长度 $l$ 逆求坐标 $(l\cos\theta,l\sin\theta)$
+
+两向量的夹角：$\cos<\vec a,\allowbreak{}\vec b>=\dfrac{\vec a\cdot\vec b}{|\vec a||\vec b|}$ ，再来个反三角函数  $\arccos$ 即可。
+
+\begin{notebox}
+若 $A,B,C$ 三点共线：那么对任意点 $O$ 有 $\vec{OB}=\lambda \vec{OA}+(1-\lambda)\vec{OC}$
+\end{notebox}
+
+向量旋转公式：设向量 $\vec a=(x,y)$ ，倾角为 $\alpha$ ，长度为 $l=\sqrt{x^2+y^2}$ ，即 $\vec a=(l\cos\alpha,\allowbreak{}l\sin\alpha)$ ，逆时针旋转 $\beta$ ，得到 $\vec{a'}=(l\cos(\alpha+\beta),\allowbreak{}l\sin(\alpha+\beta))$ 。展开化简得：
+
+\begin{adjustbox}{max width=\linewidth,center}
+$\begin{aligned}
+\vec{a'}&=(l(\cos\alpha\cos\beta-\sin\alpha\sin\beta),l(\sin\alpha\cos\beta+\cos\beta\sin\alpha))\\
+&=(x\cos\beta-y\sin\beta,x\sin\beta+y\cos\beta)
+\end{aligned}$
+\end{adjustbox}
+
+依次取 $\beta=90°,180°,270°$ ，对 $(x,y)$ 得到的分别为： $(-y,x),(-x,-y),(y,-x)$
+
+\inputminted{cpp}{code/ext_011.cpp}
+
+\subsubsection{线段}
+
+\hfive{点到直线距离}
+
+点 $P$ 到直线 $AB$ 的距离 $|PD|=\dfrac{|\vec{AB}\times \vec{AP}|}{|AB|}$
+
+\begin{minted}{cpp}
+double dis_lp(const Point &a, const Point &b, const Point &p)
+{
+    return abs(cross(b - a, p - a)) / (b - a).abs();
+}
+\end{minted}
+
+点到线段的距离：
+
+\inputminted{cpp}{code/ext_012.cpp}
+
+\hfive{线段相交判定}
+
+判断线段 $AB,CD$ 是是否相交：
+
+\begin{minted}{cpp}
+bool isIntersect(const Point &a, const Point &b, const Point &c, const Point &d)
+{
+    return cross(b - a, c - a) * cross(b - a, d - a) <= 0 && cross(d - c, a - c) * cross(d - c, b - c) <= 0;
+} // 条件: A,B,C,D 不共线
+\end{minted}
+
+\inputminted{cpp}{code/ext_013.cpp}
+
+直线 $AB$ 与线段 $CD$ ，那么只需要判断 $C,D$ 是否在 $AB$ 两端即可，不必反过来再判断一次，即只需要判断：
+
+\begin{adjustbox}{max width=\linewidth,center}
+$f(\vec{AB},\vec{AC})\cdot f(\vec{AB},\vec{AD})\le 0$
+\end{adjustbox}
+
+线段 $AB,CD$ 的距离，如果两线段相交，距离为 $0$ ，否则分别计算 $A,B$ 到线段 $CD$ 的 $C,D$ 到线段 $AB$ 的距离，取四者最小值即可
+
+\hfive{直线交点}
+
+直线 $AB,CD$ 交于点 $P$  ，则 $\vec{OP}=\vec{OC}+\dfrac{\vec{CA}\times\vec{AB}}{\vec{CD}\times\vec{AB}}\cdot\vec OD$
+
+\begin{minted}{cpp}
+Point intersect(const Point &a, const Point &b, const Point &c, const Point &d)
+{
+    return c + (d - c) * (cross(a - c, b - a) / cross(d - c, b - a));
+}
+\end{minted}
+
+线段 $AB,CD$ 交点，那么可以先判断 $AB,CD$ 是否相交，如果是的话同直线交点的处理方法，如果不相交，输出不存在
+
+\hfive{点在直线投影}
+
+点 $P$ 在直线 $AB$ 上投影点 $C$ 满足 $\vec{OC}=\vec{OA}+\dfrac{\vec{AB}\cdot\vec{AP}}{|AB|^2}\cdot\vec{AB}$
+
+\begin{minted}{cpp}
+Point project(const Point &a, const Point &b, const Point &p)
+{
+    return a + (b - a) * (dot(b - a, p - a) / (b - a).norm());
+}
+\end{minted}
+
+$P$ 关于 $AB$ 对称的点 $P'$ ，可以先求投影点 $P_0$ ，那么根据 $\vec{PP'}=2\vec{PP_0}$ ，可知 $\vec{OP'}=\vec{OP}+\vec{PP'}=\vec{OP}+2\vec{PP_0}$
+
+求圆 $P$ 与直线 $AB$ 的交点 $C,D$，求出 $P$ 在 $AB$ 的投影点及距离 $|PE|$ ，则：
+
+\begin{adjustbox}{max width=\linewidth,center}
+$\begin{gathered}
+\vec{OC}=\vec{OE}+\vec{EC}=\vec{OE}-\dfrac{\sqrt{r^2-|PE|^2}}{|AB|}\vec{AB}
+\\
+\vec{OD}=\vec{OE}-\vec{EC}=\vec{OE}+\dfrac{\sqrt{r^2-|PE|^2}}{|AB|}\vec{AB}
+\end{gathered}$
+\end{adjustbox}
+
+求两圆 $P,Q$ 的交点：由余弦定理，求出夹角 $\cos\theta=\cos\ang APQ=\cos\ang BPQ=\dfrac{|PQ|^2+r_1^2-r_2^2}{2r_1|PQ|}$ ，可得角度 $\theta$ 。根据反三角函数可知 $\vec{OP}$ 的夹角 $\alpha$ ，则 $\vec{PA}=(r_1\cos(\alpha+\theta),\allowbreak{}r_1\sin(\alpha+\theta))$ 且 $\vec{PB}=(r_1\cos(\alpha-\theta),\allowbreak{}r_1\sin(\alpha-\theta))$ ，那么 $\vec{OA}=\vec{OP}+\vec{PA},\allowbreak{}\vec{OB}=\vec{OP}+\vec{PB}$
+
+两圆是否相交(等)：圆心距离 $d$ 小于等于 $r_1+r_2$ 即 $d^2\le(r_1+r_2)^2$
+
+\subsubsection{多边形}
+
+由在同一平面且<u>不在同一直线上</u>的三条或三条以上的线段首尾顺次连结且<u>不相交</u>所组成的封闭图形叫做多边形。又称简单多边形。不满足“不相交”的就是复杂多边形。
+
+凸多边形是没有任何一个内角为优角(范围在区间 $(180°,360°)$ 的角)的多边形。凹多边形则至少有一个优角。凸多边形以任意一条边延长为直线，其他所有边都必然在直线的同一侧。凹多边形则存在不在同一侧的情况。凸多边形上的点或内部点间连线位于多边形都在多边形内部或边上。凹多边形存在两个点的连线不全在多边形内部
+
+多边形的性质：
+
+\begin{itemize}
+\item 无论凹凸， $n$ 边形的内角和是 $180°\cdot (n-2)$
+\end{itemize}
+
+\begin{itemize}
+\item 凸多边形外角和是 $360°$
+\end{itemize}
+
+\begin{itemize}
+\item $n$ 边形的对角线数量是 $\dfrac{n(n-3)}2$
+
+三角形的性质：
+\end{itemize}
+
+\begin{itemize}
+\item 设 $p=\dfrac12(a+b+c),R$ 是外接圆半径， $r$ 是内接圆半径，则面积公式：
+\end{itemize}
+
+\begin{itemize}
+\item $S=\sqrt{p(p-a)(p-b)(p-c)}=\dfrac{abc}{4R}=rp$
+\end{itemize}
+
+\begin{itemize}
+\item 三角形重心坐标是三点坐标的平均值。
+\end{itemize}
+
+\begin{itemize}
+\item 三角形外角和是 $360°$ ，等于不相邻内角之和。
+\end{itemize}
+
+\begin{itemize}
+\item 三角形中线将三角形划分为面积相等的两部分。
+\end{itemize}
+
+\begin{itemize}
+\item 直角三角形斜边中线等于斜边一半。
+\end{itemize}
+
+\begin{itemize}
+\item 三线合一：等腰三角形顶角平分线、底边中线、底边高是同一条直线
+
+\textbf{多边形面积公式}：(点按逆时针排序)
+\end{itemize}
+
+\begin{adjustbox}{max width=\linewidth,center}
+$S=\dfrac12\sum_{i=1}^n\vec{OA_i}\times \vec{OA_{i+1}}$
+\end{adjustbox}
+
+\textbf{PIP 问题}：点是否在多边形内部(或边上)问题。
+
+\begin{itemize}
+\item \textbf{光线投射算法}，从该点出发作射线(注意不是直线)，如果与奇数个点相交在多边形内，偶数个点相交在多边形外。实现上，可以作平行 $x$ 轴的射线，枚举每条线段，如果线段两端点坐标值都小于该点，那么忽略该线段，否则套用上文直线与线段相交的模板进行判断即可。特别注意，如果相交在端点，那么应当算相交了两次(相交时特判横坐标是否与其中一个端点相同即可)。
+\item \textbf{回转数算法}求这个问题。计算该点与每相邻两个顶点的夹角弧度制(取范围 $[-\pi,\pi]$ )，然后将其求和，判断是否为 $0$ ，是就在多边形外。实现上，$O(n)$ 枚举相邻边，利用 $<\vec a,\allowbreak{}\vec b>=\arccos\dfrac{\vec a\cdot\vec b}{|\vec a||\vec b|}$ 求角，累加，最后与 $0$ 判断即可(注意浮点误差)
+
+是否位于多边形边上，可以通过检查p与相邻两端点的向量(p为起点)是否在同一直线且方向相反(相同是可以内包的)
+\end{itemize}
+
+\inputminted{cpp}{code/ext_014.cpp}
+
+p3454-任意多边形的对称轴数：边长平方-两边差积(内角)交替组成序列，化环为二倍链，使用字符串哈希求每个长为 $2n$ 的序列区间是否是回文串。(/KMP/mahacher)
+
+\subsubsection{极角排序}
+
+如果极角大小值相同，可以规定按照离原点的远近排序(越近越小)
+
+atan2 参考代码：(范围是 $[-\pi,\pi]$ )
+
+\inputminted{cpp}{code/sortby_polar_angle_1.cpp}
+
+如果范围要求 $[0,2\pi]$ 的排序，那么更改 \mintinline{text}|ang| 函数的定义：
+
+\begin{minted}{cpp}
+db ang() const
+{
+    db v = atan2(y, x);
+    return v < 0 ? v + 2 * acos(-1) : v;
+}
+\end{minted}
+
+叉乘 (极角取值为 $[0,2\pi]$ ，最左下为原点):
+
+\inputminted{cpp}{code/sortby_polar_angle_2.cpp}
+
+任意点为原点：
+
+\inputminted{cpp}{code/sortby_polar_angle_3.cpp}
+
+\subsubsection{凸包}
+
+平面上能包含所有给定点的周长最小的凸多边形是凸包。(注意不是面积最小)。上凸壳是圆的第一第二象限逆时针方向朝向(含 $x$ 负半轴)，其余是下凸壳。
+
+\hfive{Graham}
+
+Graham算法：(洛谷P2742)
+
+\inputminted{cpp}{code/p2742_convex_hull.cpp}
+
+\hfive{Andrew}
+
+Andrew算法：(洛谷P2742)
+
+\inputminted{cpp}{code/p2742_convex_hull2.cpp}
+
+\hfive{直径}
+
+旋转卡壳模板-求凸包直径：(洛谷P1452)
+
+\inputminted{cpp}{code/p1452_rotating_calipers.cpp}
+
+如果每次以某个端点为原点进行极角排序，再枚举线段第二端点，配合单调栈，可以用 $O(n^2\log n)$ 实现枚举(但是处理概率连乘积乘除特别是 $1$ (对应概率为 $0$ )比较麻烦)，暂时没有什么好的实现方法
+
+\hfive{点与凸包相交}
+
+取其中的一个点，他和其他点可以组成n-2个三角形，利用二分判断差积，判断他是在当前三角形内，还是在三角形左边，还是在三角形右边，或者是三角形外 (UVALive 7281)
+
+或者用另一个实现(下文)。
+
+\inputminted{cpp}{code/ext_015.cpp}
+
+\hfive{两凸包相交}
+
+点集 $A,B$ 的闵可夫斯基和(Mincowski sum)是 $A+B=\{a+b|a\in A,b\in B\}$，即对 $a$ 每个点位置放一个 $B$ 的并。
+
+两凸包的闵可夫斯基和是凸包，可以 $O(n\log n)$ 求出。使用滑窗拼出然后复杂度在凸包重排。
+
+应用：判断凸多边形是否相交。(如果不凸，枚举一多边形每点 PIP $O(nm)$)
+
+判定：$\exists a\in A,b\in B,a=b$ 即 $a-b=0$，故设 $B=-B$，求 $A+B$ 的闵可夫斯基和，然后判断原点($B$ 左下角)是否在凸包内。
+
+\begin{notebox}
+p4557-给定凸包(不全共线，点不同) $A,B(n,m\le 10^5)$，有 $q\le10^5$ 个询问，每次将 $B$ 每个点平移 $d(dx,dy)$，问移动后 $A,B$ 交不交。
+\end{notebox}
+
+$A=B+d$ 可以转化为 $A-B=d$，所以对每个 $d$ 判断在不在闵可夫斯基和凸包即可。
+
+\inputminted{cpp}{code/p4557_convex_hull_intersect.cpp}
+
+\subsubsection{扫描线}
+
+矩形面积并
+
+\begin{notebox}
+洛谷P5490-输入 $n$ 和矩形左下角、右上角，输出 $n$ 矩形并集总面积
+\end{notebox}
+
+复杂度 $O(n\log n)$ ，先离散化，再线段树维护
+
+\inputminted{cpp}{code/p5490_scanning_line.cpp}
+
+矩形周长并 (洛谷P1856)
+
+\inputminted{cpp}{code/p1856_scanning_line.cpp}
+
+\subsubsection{杂项}
+
+\hfive{Pick定理}
+
+顶点为整点的简单多边形，面积 $A$ ，内部格点数目 $i$ ，边上格点数目 $b$ 满足：$A=i+\dfrac b2-1$ ，其中 $1$ 是多边形的欧拉特征数。
+
+边上格点数目，对于每一条边，其贡献量为：$\gcd(\Delta x,\Delta y)$ (闭环之后刚好每个顶点都被算了一次，所以不需要额外 $+1$ ，单边时就需要)，于是可以根据公式求出 $i$
+
+\begin{notebox}
+如果是平行四边形格点，同上；如果是三角形格点， $A=2i+b-2$ ；高维推广 Ehrhart 多项式
+\end{notebox}
+
+欧拉公式：$V-E+F=2$ ，$V,E,F$ 是简单几何体顶点数、边数、面数
+
+\begin{notebox}
+POJ1265-有多组测试，每组测试 $n(3\le n\le100)$ 个点，接下来输入若干坐标偏量，代表当前点离上一个点的坐标位移。求这个多边形的内部包含格点整点数、边上包含的格点整点数和多边形面积
+\end{notebox}
+
+\inputminted{cpp}{code/poj1265_pick_theorem.cpp}
+
+\hfive{平面最近点对}
+
+(洛谷P7883) 归并排序复杂度 $O(n\log n)$ ，若快排复杂度 $O(n\log^2n)$
+
+\inputminted{cpp}{code/p7883_closest_point_pair.cpp}
+
+\begin{notebox}
+拓展-洛谷P4423-求平面周长最小三角形(含共线三点)
+\end{notebox}
+
+\inputminted{cpp}{code/p4423_min_triangle.cpp}
+
+\hfive{随机增量法}
+
+洛谷P1742-最小圆覆盖(求圆的半径和坐标，使得圆覆盖 $n$ 个给定点) $O(n)$
+
+\inputminted{cpp}{code/p1742_min_circle_cover.cpp}
+
+\subsection{立体几何}
+
+直线参数方程：$A+t\vec{AB}$
+
+点 $P(x,y,z)$ 到直线 $A(x_0,y_0,z_0)+t(a,b,c)$ 的距离 $\dfrac{|\vec{PA} \times (a,\allowbreak{}b,\allowbreak{}c)|}{\sqrt{a^2+b^2+c^2}}$ (四边形面积(叉乘)=底($AB$ 长度)乘以高(距离))
+
+直线夹角 $\cos\varphi=\dfrac{|m_1m_2+n_1n_2+p_1p_2|}{\sqrt{m_1^2+n_1^2+p_1^2}\sqrt{m_2^2+n_2^2+p_2^2}}$
+
+直线垂直：$m_1m_2+n_1n_2+p_1p_2=0$
+
+空间向量的叉乘：
+
+\begin{adjustbox}{max width=\linewidth,center}
+$\vec a\times\vec b=\left|\begin{matrix}\vec i&\vec j&\vec k\\a_x&a_y&a_z\\b_x&b_y&b_z\end{matrix}\right|=(a_zb_x-a_xb_z)\vec i+(a_xb_y-a_yb_x)\vec j+(a_yb_z-a_zb_y)\vec k$
+\end{adjustbox}
+
+\begin{notebox}
+叉乘绝对值：$\vec i,\vec j,\vec k$ 的系数平方和开根。
+\end{notebox}
+
+直线平行：$a_zb_x-a_xb_z=a_xb_y-a_yb_x=a_yb_z-a_zb_y=0$ 等价于 $\dfrac{x_1}{x_2}=\dfrac{y_1}{y_2}=\dfrac{z_1}{z_2}$
+
+求过不共线三点 $A,B,C$ 的平面 $ax+by+cz+d=0$
+
+\begin{itemize}
+\item 求 $\vec{AB},\vec{AC}$，求出法向量为 $\vec{n} =\vec{AB}\times\vec{AC}=(a,\allowbreak{}b,\allowbreak{}c)$
+\end{itemize}
+
+\begin{itemize}
+\item 法向量垂直平面任一点 $P(x,y,z)$，设存在投影点 $P_0(x_0,y_0,z_0)$ 在平面内，则与其点积为 $\vec n\cdot\vec{PP_0}=0$，即 $a(x-x_0)+b(y-y_0)+c(z-z_0)$
+
+用 $A,B,C$ 任一取代 $P_0$，求出 $d=-(ax_0+by_0+cz_0)$
+
+直线 $(n,m,p)$ 与平面的夹角正弦值 $\sin\varphi=\dfrac{|am+bn+cp|}{\sqrt{a^2+b^2+c^2}\sqrt{m^2+n^2+p^2}}$
+
+直线与平面平行 $am+bn+cp=0$，垂直 $\dfrac am=\dfrac bn=\dfrac cp$
+
+点到平面距离公式：$d=\dfrac{|Ax+By+Cz+D|}{\sqrt{A^2+B^2+C^2}}$
+\end{itemize}
+
+\begin{notebox}
+球面一般方程：$x^2+y^2+z^2+Ax+By+Cz+D=0$ 若$A^2+B^2+C^2-4D>0$，是球面
+
+圆锥面方程：$z^2=k^2(x^2+y^2)$ , $z=\pm k\sqrt{x^2+y^2}$
+
+椭球面方程： $\frac{x^2}{a^2}+\frac{y^2}{b^2}+\frac{z^2}{c^2}=1$
+
+单叶双曲面(沿着 $z$ 延展的曲线)方程： $\frac{x^2}{a^2}+\frac{y^2}{b^2}-\frac{z^2}{c^2}=1$ ，双叶： $\frac{x^2}{a^2}+\frac{y^2}{b^2}-\frac{z^2}{c^2}=-1$
+
+抛物面(沿着 $z$ 正向)方程： $\frac{x^2}p+\frac{y^2}q=2z$
+
+双曲面方程： $\frac{x^2}p-\frac{y^2}q=2z$
+\end{notebox}
+
+\subsection{博弈论}
+
+P-position: (p:previous) 先手必败,  N-position: (n:next) 先手必胜
+
+局面的性质：(总结：只要能移动到 $P$ 就是 $N$ ，否则都是 $P$ )
+
+\begin{enumerate}
+\item 合法操作集合为空的局面是P-position
+\item 可以移动到P-position的局面是N-position
+\item 所有移动都只能到N-position的局面是P-position
+
+mex 函数：最小不属于某集合的非负整数 $mex(A)=\min\{k|k\in\complement_NA\}$
+
+SG 函数：所有后继中都未出现的最小值 $sg(x)=mex\{sg(y)|y\text{为}x\text{的直接儿子}\}$
+\end{enumerate}
+
+\begin{notebox}
+输出任意先手必胜方案： 找最大 sg 将它变成剩余的 sg 和，可证一定能找到
+\end{notebox}
+
+顶点 $x$ 所代表的局面是 P-position 当且仅当 $sg(x)=0$
+
+\textbf{SG定理}：由 n 个有向图组成的ICG，设它们的起点分别为 $s_1,s_2,\dots,s_n$ ，当且仅当 $SG(s_1)\oplus SG(s_2)\oplus\dots\oplus SG(s_1)\ne0$ 时，这个游戏先手必胜
+
+经典博弈：
+
+\begin{itemize}
+\item \textbf{巴什博奕} 有 n 个物品，两人轮流取物，每次至少取一个，最多取 m 个，最后取完者胜
+
+先手必败条件： $n\bmod (m+1)=0$
+\end{itemize}
+
+\begin{itemize}
+\item \textbf{Nim游戏} (所有ICG游戏都可以转化为Nim游戏求解) 有 n 堆数，每堆有 $s_i$ 个，每次可以从任意堆里取 1 到任意多个数
+
+先手必败条件： $\oplus_{i=1}^ns_i=0$
+
+先手必胜方案输出：当前异或和 $x\neq0$ 时，$O(\log a)$ 找 $b_i\oplus x < b_i$ ，将 $b_i$ 更改为 $b_i\oplus x$ ；否则任取完一堆；回合数可以不超 $2n$ (SCNUOJ1701)
+\end{itemize}
+
+\begin{itemize}
+\item \textbf{威佐夫博弈}  有两堆物品，轮流从一堆拿任意个或同时从两堆拿同样的任意个，取完者胜
+
+先手必败条件为 $(b,\allowbreak{}a),\allowbreak{}a > b,\allowbreak{} b=\lfloor\dfrac{1+\sqrt5}2\times(a-b)\rfloor$
+\end{itemize}
+
+\begin{itemize}
+\item \textbf{斐波那契博弈} 一堆物品，先手最少取一个且不能取完，之后每次取不能少于1或超过上次的二倍，取完者胜
+
+先手必败条件： 物品是斐波那契数列
+
+在普通SG游戏的基础上，新增一条规则：每次行动，每个可以移动的SG游戏都要移动，是Every-SG游戏
+\end{itemize}
+
+\begin{notebox}
+例如棋盘上有n个棋子在不同的位置，双方每次行动都要将每一个可以移动的棋子按规则移动，这就是典型的Every-SG游戏。
+\end{notebox}
+
+\begin{adjustbox}{max width=\linewidth,center}
+$step(v)=\begin{cases}
+0,&v\text{为终止状态}\\
+\max(step(u))+1,&sg(v)>0,sg(u)=0\\
+\min(step(u))+1,&sg(v)=0
+\end{cases}$
+\end{adjustbox}
+
+定理：Every-SG游戏先手必胜当且仅当单一游戏中最大的 step 为奇数
+
+\subsection{多项式}
+
+\begin{notebox}
+一个多项式全家桶模板见上文公式-组合数学-球盒问题。
+\end{notebox}
+
+\subsubsection{FFT}
+
+系数表示法：$F(x)=y=\sum_{i=0}^na_ix^i$，其中$\{a_i\}$是每一项的系数。
+
+点值表示法：$F(x)$可以被n个点$(x_i,f(x_i))$唯一确定
+
+两多项式相乘即求卷积： $f(x)\times g(x)={(x_i,\allowbreak{}f(x_i)\times g(x_i))}$ ，点值表示法下 $O(n)$
+
+将系数表示法转点值表示法为快速傅里叶变换(FFT), 点值转系数为IFFT , 均 $O(n\log n)$
+
+\begin{notebox}
+洛谷P3803-输入 $n,m$ 和 $n$ 次多项式 $F(x)$ , $m$ 次多项式 $G(x)$ , 求 $F(x)\cdot G(x)$ , 系数都是个位数
+\end{notebox}
+
+\inputminted{cpp}{code/p3803_fft.cpp}
+
+\subsubsection{NTT}
+
+快速数论变换，FNTT，简称为NTT number theory transform
+
+FFT 在模意义下的一种实现，功能上与 FFT 类似。FFT 的计算量大且存在浮点误差。
+
+欧拉定理：$a\in Z,m\in N^*$，若 $(a,m)=1$，则 $a^{\varphi(m)}\equiv 1\bmod m$
+
+阶：满足 $a^n\equiv1\bmod m$ 的最小正整数 $n$，记作 $\delta_m(a)$
+
+原根：$m\in N_+,a\in Z$，若 $(a,m)=1,\delta_m(a)=\varphi(m)$，则 $a$ 是模 $m$ 的原根
+
+$998244353$ 的原根是 $3$，$10^9+7$ 不能做 NTT(MTT 考虑 P4245)
+
+\begin{notebox}
+洛谷P3803
+\end{notebox}
+
+\inputminted{cpp}{code/p3803_ntt.cpp}
+
+\subsubsection{分治 FFT}
+
+\begin{notebox}
+SCNUOJ1806-求 $\prod_{i=1}^n(1+a_ix)$ 的 $x^k$ 系数对 $998244353$ 取模，$1\le k\le n\le10^5,\allowbreak{}1\le a_i\le10^9$
+\end{notebox}
+
+\inputminted{cpp}{code/ext_016.cpp}
+
+\subsubsection{FWT}
+
+快速沃尔什变换。求 $C_i=\sum_{i=j\oplus k}A_jB_k$，其中 $\oplus$ 是与/或/异或/同或。复杂度与 FFT 看齐。
+
+\begin{notebox}
+模板题 P4717-给定长为 $2^n(n\le 17)$ 的序列，分别求对或/与/异或后的序列，对 $P=998244353$ 取模
+\end{notebox}
+
+\inputminted{cpp}{code/p4717_fwt.cpp}
+
+\begin{notebox}
+lc982-给定整数数组 $a,|a|\le10^3,0\le a_i<2^{16}$，求 $a_i\&a_j\&a_k=0$ 的三元对的数目($i,j,k$ 可以取等)
+\end{notebox}
+
+设桶数组 $a$，即求 $\sum_{i\&j\&k=0}a_ia_ja_k=\sum_{i\&p=0}a_i\sum_{j\&k=p}a_ja_k$，即先对 $a$ 做 FWT，然后算 $fwt(b)=fwt(a)^3$，再逆运算得到 $b_0$ 作为答案。
+
+\inputminted{cpp}{code/fwt.cpp}
+
+\subsubsection{拉格朗日插值法}
+
+\begin{notebox}
+洛谷P4781-给定由 n 个点确定的多项式 $f(x)$，求 $f(k)\bmod998244353$ , $x_i$ 各异
+\end{notebox}
+
+复杂度为 $O(n^2)$ ，比高斯消元快 (但高斯消元对给出点坐标无要求) (若 $x_i=i$ 可以朴素 $O(n^2)$ 差分)
+
+\begin{adjustbox}{max width=\linewidth,center}
+$f(k)=\sum_{i=0}^ny_i\prod_{i\neq j}\frac{k-x_j}{x_i-x_j}$
+\end{adjustbox}
+
+\inputminted{cpp}{code/p4781_lagrange.cpp}
+
+\subsection{杂项}
+
+\subsubsection{矩阵加速}
+
+常见建模：
+
+\begin{adjustbox}{max width=\linewidth,center}
+$f_i=af_{i-1}+bf_{i-2}
+\Rightarrow
+\begin{pmatrix}
+a&b\\1&0
+\end{pmatrix}
+\begin{pmatrix}
+f_{i-1}\\f_{i-2}
+\end{pmatrix}
+=
+\begin{pmatrix}
+f_i\\f_{i-1}
+\end{pmatrix}$
+\end{adjustbox}
+
+\begin{adjustbox}{max width=\linewidth,center}
+$f_i=af_{i-1}+b^i
+\Rightarrow
+\begin{pmatrix}
+a&1\\0&b
+\end{pmatrix}
+\begin{pmatrix}
+f_{i-1}\\b^{i-1}
+\end{pmatrix}
+=
+\begin{pmatrix}
+f_i\\b^i
+\end{pmatrix}$
+\end{adjustbox}
+
+\begin{adjustbox}{max width=\linewidth,center}
+$f_i=af_{i-1}+i^3
+\Rightarrow
+\begin{pmatrix}
+a&1&0&0&0\\
+0&1&3&3&1\\
+0&0&1&2&1\\
+0&0&0&1&1\\
+0&0&0&0&1
+\end{pmatrix}
+\begin{pmatrix}
+f_{i-1}\\i^3\\i^2\\i\\1
+\end{pmatrix}
+=
+\begin{pmatrix}
+f_i\\(i+1)^3\\(i+1)^2\\i+1\\1
+\end{pmatrix}$
+\end{adjustbox}
+
+\begin{notebox}
+矩阵前 $k$ 项和：(SCNUOI1068 / GDCPC2022K) (直接用 A.P. 的问题是不一定可逆)
+\end{notebox}
+
+已知 $n$ 阶方阵 $A$，求 $A+A^2+A^3+\cdots+A^k$。
+
+令 $B_i=A+A^2+\cdots+A^i$，$n$ 阶单位阵为 $E$。若 $k$ 为偶数，上式可以转化为：
+
+\begin{adjustbox}{max width=\linewidth,center}
+$B_k=(A+A^2+\cdots+A^{\frac k2})+A^{\frac k2}(A+A^2+\cdots+A^{\frac k2})=B_{\frac k2}+A^{\frac k2}B_{\frac k2}=(E+A^{\frac k2})B_{\frac k2}$
+\end{adjustbox}
+
+若 $k$ 为奇数，可以直接用上一个偶数，即 $B_k=B_{k-1}+A^k$。
+
+其中，$A^i$ 可由矩阵快速幂计算，复杂度为 $O(n^3\log i)$。而 $B_k$ 的递推需要 $\log k$ 次，故总复杂度为 $O(n^3\log^2k)$。
+
+\begin{minted}{cpp}
+matrix psum(ll k)
+{
+    if (k == 0)
+        return matrix(n);
+    if (k == 1)
+        return *this;
+    if (k % 2 == 1)
+        return psum(k - 1) + pow(k);
+    return (unit(n) + this->pow(k / 2)) * psum(k / 2);
+}
+\end{minted}
+
+\subsubsection{高斯消元}
+
+优化的Gauss-Jordan消元法，复杂度 $O(n^3)$
+
+\begin{notebox}
+洛谷P3389-求实数线性方程组的唯一解或 \mintinline{text}|No solution| ，值域 $|a|\le10^4$
+\end{notebox}
+
+\inputminted{cpp}{code/p3389_gauss.cpp}
+
+\begin{notebox}
+洛谷P4783-求逆矩阵对 $10^9+7$ 取模或输出 \mintinline{text}|No Solution|
+\end{notebox}
+
+\inputminted{cpp}{code/p4783_gauss.cpp}
+
+\subsubsection{康托展开}
+
+树状数组优化后 $O(n\log n)$ 求 $[1,n]$ 的任意排列的排名(字典序排序序号)，公式：
+
+\begin{adjustbox}{max width=\linewidth,center}
+$1+\sum_{i=1}^n(n-i)!\times(\sum_{j=i}^n[a[j]<a[i]])$
+\end{adjustbox}
+
+\inputminted{cpp}{code/p5367_cantor.cpp}
+
+逆康托展开(UVA11525)-给定每个 $\sum_{j=i}^n[a[j]<a[i]]$ ，求排列：
+
+\inputminted{cpp}{code/uva11525_reverse_cantor.cpp}
+
+\subsubsection{自适应辛普森法}
+
+\begin{notebox}
+洛谷P4525-求 $\int_L^R\dfrac{cx+d}{ax+b}dx$ ，输入 $a,b,c,d,L,R$
+\end{notebox}
+
+\begin{adjustbox}{max width=\linewidth,center}
+$\int_a^bf(x)dx\approx\dfrac{(b-a)(f(a)+f(b)+4f(\dfrac{a+b}2))}6$
+\end{adjustbox}
+
+\inputminted{cpp}{code/ext_017.cpp}
+
+\section{数据结构}
+
+\subsection{ST表}
+
+以区间 gcd 为例(时间复杂没有两个 $\log$ 乘积，具体为 $O(n(\log w+\log n))$ )
+
+\inputminted{cpp}{code/st_table.cpp}
+
+笛卡尔树 LCA $\pm1$ RMQ 问题，预处理、查询复杂度是 $O(n), O(1)$ 。空间复杂度 $O(n)$ 。(以区间max为例洛谷P3865,$n\le10^5,m\le2\times10^6$ )
+
+\inputminted{cpp}{code/p3865_cartesian_tree.cpp}
+
+\subsection{线段树}
+
+凡是符合结合律的二目操作都可以使用线段树
+
+\subsubsection{常见应用}
+
+\hfive{区间加法}
+
+\begin{notebox}
+洛谷P3372：给定长为 $n(1\le n\le10^5)$ 的序列和 $m(1\le m\le10^5)$ 次操作：
+
+\begin{enumerate}
+\item \mintinline{text}|1 x y k| 区间 $[x,y]$ 每个数加上 $k$
+\item \mintinline{text}|2 x y| 输出区间 $[x,y]$ 的和
+\end{enumerate}
+\end{notebox}
+
+\inputminted{cpp}{code/p3372_segtree.cpp}
+
+\hfive{区间加乘}
+
+\begin{notebox}
+洛谷P3373，给定长为 $n(1\le n\le10^5)$ 的序列和 $m(1\le m\le10^5)$ 次操作和 $p$ ：
+
+\begin{enumerate}
+\item \mintinline{text}|1 x y k| 区间每个数乘 $k$
+\item \mintinline{text}|2 x y k| 区间每个数加 $k$
+\item \mintinline{text}|3 x y| 输出区间每个数的和对 $p$ 取模
+\end{enumerate}
+\end{notebox}
+
+先乘后加
+
+\inputminted{cpp}{code/p3373_segtree.cpp}
+
+\hfive{区间查重}
+
+\begin{notebox}
+SCNUOJ1454 $n$个柜子(编号从1开始)，每个柜子一开始放了一个编号为$a_i$的物品。维护下面的操作：
+
+\begin{itemize}
+\item \mintinline{text}|1 x| 取走第$x$个柜子的物品(保证此时存在物品)
+\item \mintinline{text}|2 l r| 判断$[l,r]$内的未被取走的物品是否有两个编号相同
+
+$1\le n,\allowbreak{}q\le 5\times10^5,\allowbreak{}1\le a_i\le10^6,\allowbreak{}1\le x,\allowbreak{}l\le r\le n$
+\end{itemize}
+\end{notebox}
+
+思路见代码注释：
+
+\inputminted{cpp}{code/ext_018.cpp}
+
+\hfive{区间最值}
+
+维护操作：\cds{1} 区间每个数与 $t$ 取 $\min$ \cds{2} 输出区间和 \cds{3} 输出区间最大值
+
+对每个节点区间：维护该区间最大值 $mx$、最大值出现次数 $cnt$ 、严格次大值 $se$
+
+对操作 $1$ ：
+
+\begin{itemize}
+\item 若 $mx\le t$ ，整个区间都没 $t$ 大，不操作 (相等也等于没操作)
+\item 若 $se < t < mx$  ，那么所有最大值都变成 $t$ ，次大值和更小的值都不变，所以 $cnt$ 个 $mx$ 被删掉，再加上 $cnt$ 个 $t$ ，即区间更新 $cnt(t-mx)$ ，并记录懒标记
+\item 若 $t\le se$ ，递归往下处理子区间
+
+对操作 $2,3$ ，有手就行
+
+处理 \mintinline{text}|pushup| ：
+\end{itemize}
+
+\begin{itemize}
+\item 若左右子区间最值一样， $cnt$ 取左右子之和， $se$ 取左右 $se$ 较大者， $mx$ 任取左右(都一样)
+\item 否则， $mx,cnt$ 取大者， $se$ 让小区间 $mx$ 和大区间 $se$ 取最值
+
+处理 \mintinline{text}|pushdown| ：
+\end{itemize}
+
+\begin{itemize}
+\item 懒标记是 $t$ 的懒标记，根据题意可以取一些诸如无穷小代表无懒标记
+
+处理建树：
+\end{itemize}
+
+\begin{itemize}
+\item 初始次大值建无穷小
+
+势能分析法知，对 $m$ 次询问，复杂度为 $O(m\log n)$
+\end{itemize}
+
+\begin{notebox}
+以 SCNUOJ1703 为例
+\end{notebox}
+
+\inputminted{cpp}{code/segtree_teacher_ji.cpp}
+
+\hfive{历史最值}
+
+\begin{notebox}
+洛谷P6242:长为 $n$ 的数列 $A$ , $m$ 次操作，每次操作后 $B_i=\max(B_i,A_i)$ ：
+
+\begin{enumerate}
+\item \mintinline{text}|1 l r k| 对 $A$ 区间加法( $k$ 可以是负数 )
+\item \mintinline{text}|2 l r v| 区间求 $A_i=\min(A_i,v)$
+\item \mintinline{text}|3 l r| 对 $A$ 区间求和
+\item \mintinline{text}|4 l r| 对 $A$ 求区间最大值
+\item \mintinline{text}|5 l r| 对 $B$ 求区间最大值
+
+$1\le n,\allowbreak{}m\le5\times10^5,\allowbreak{}-5\times10^8\le A_i,\allowbreak{}v\le5\times10^8,\allowbreak{}-2000\le k\le2000$
+\end{enumerate}
+\end{notebox}
+
+代码解释：
+
+四种不同的懒标记：
+
+\begin{itemize}
+\item add\textbackslash\{\}\_a ：该区间最大值的加法的懒标记。
+\item add\textbackslash\{\}\_a1 ：该区间非最大值的加法的懒标记。
+\item add\textbackslash\{\}\_b ：该区间最大的历史最大值的加法的懒标记。
+\item add\textbackslash\{\}\_b1 ：该区间非最大的历史最大值的加法的懒标记。
+
+可能后面两个懒标记比较难理解，但是一定要理解。
+
+其他就简单了：
+\end{itemize}
+
+\begin{itemize}
+\item l：该区间的左端点。
+\item r ：该区间的右端点。
+\item sum：该区间的的和。
+\item maxa ：该区间的最大值。
+\item se ：该区间的严格次大值。
+\item cnt ：该区间最大值的个数。
+\item maxb ：该区间的历史最大值。
+\end{itemize}
+
+\begin{itemize}
+\item k1：最大值要加的数。
+\item k2：最大的历史最大值要加的数。
+\item k3：非最大值要加的数。
+\item k4：非最大的历史最大值要加的数。
+\end{itemize}
+
+\inputminted{cpp}{code/p6242_segtree.cpp}
+
+\subsubsection{动态开点}
+
+动态开点线段树模板题，强制在线维护：(lc715)
+
+\begin{itemize}
+\item 将区间 $[l,r)$ 的所有点染色。
+\item 将区间 $[l,r)$ 的所有点取消染色。
+\item 查询区间 $[l,r)$ 是否每个点都被染色。
+
+其中操作数 $q=10^4$，值域 $n=10^9$。
+
+本质：懒开点的线段树，即仍然构造值域为 $[1,n]$ 的普通线段树。但是对所有节点，只有需要访问时，才使用内存分配给该点。对大部分不需要访问的点不开内存。
+
+点数估计：可以考虑走大约 $2q\log n$；如果 $q>n$，最坏点数约 $2n-1$。
+\end{itemize}
+
+\inputminted{cpp}{code/ext_019.cpp}
+
+\subsubsection{zkw线段树}
+
+\hfive{单点修改}
+
+单点增加修改，区间求和模板(洛谷P3374)
+
+\inputminted{cpp}{code/p3374_zkw_segtree.cpp}
+
+\hfive{区间修改}
+
+区间增加修改，区间求和模板 (洛谷P3372)
+
+\inputminted{cpp}{code/p3372_zkw_segtree.cpp}
+
+\subsubsection{树上二分}
+
+对单调问题，$O(\log n)$ 单次查询出固定左/右端点下，最长的右端点/左端点，区间内满足性质。
+
+\begin{notebox}
+2023GDCPC-F 给定长为 $n(\le 10^5)$ 的序列，有颜色 $c_i(1\le c_i\le n)$ 和值 $v_i(1\le v_i\le 10^9)$，$q(\le 10^5)$ 次询问，时限 5s，空间 1GB，要求维护：
+
+\begin{enumerate}
+\item \mintinline{text}|1 p x| 修改 $c_p$ 为 $x$
+\end{enumerate}
+
+\begin{enumerate}
+\item \mintinline{text}|2 p x| 修改 $v_p$ 为 $x$
+\end{enumerate}
+
+\begin{enumerate}
+\item \mintinline{text}|3 x k a_1 a_2 ... a_k| $\sum k\le 10^6$
+
+找到包含 $x$ 的最长区间 $[l,r]$ 满足 $k$ 个颜色 $a$ 在该区间全部覆盖
+\end{enumerate}
+\end{notebox}
+
+求某个区间出现的颜色是否都在 $A$，即求 $A$ 所有颜色在区间出现次数之和是否等于区间长度。可以维护线段树/树状数组，每个节点保存哈希表，表示该区间出现的颜色及其次数。每个维护值重复 $\log n$  次，故空间复杂度为 $O(n\log n)$。可以考虑用 \mintinline{text}|pb_ds| un map 卡常。
+
+二分找出从 $x$ 往左往右能到达的最大左右端点，求区间和。如果朴素二分，复杂度为 $O(\sum k \log^2 n)$，考虑使用线段树/树状数组上二分/倍增优化，为 $O(\sum k\log n)$。
+
+线段树上二分：
+
+\inputminted{cpp}{code/ext_020.cpp}
+
+树状数组上倍增：
+
+\inputminted{cpp}{code/ext_021.cpp}
+
+\subsubsection{猫树}
+
+\begin{notebox}
+洛谷P3865-求区间 max , $1\le n\le10^5,\allowbreak{}1\le m\le2\times10^6,\allowbreak{}a)i\in[0,\allowbreak{}10^9 ]$
+\end{notebox}
+
+\inputminted{cpp}{code/p3865_cattree.cpp}
+
+\subsubsection{主席树}
+
+\hfive{可持久化数组}
+
+\begin{notebox}
+洛谷P3919：给定长为 $n(1\le n\le10^6)$ 值域在 $[-10^9,10^9]$ 初始版本号为 $0$ 的数组，有 $m(1\le m\le 10^6)$ 次操作：
+
+\begin{enumerate}
+\item 修改版本号为 $ver$ 的数组下标为 $loc$ 位置值为 $x$
+\item 查询版本为 $ver$ 的数组下标为 $loc$ 位置值
+
+每次操作结束后，将当前版本号数组复制为 $ver$ 数组。
+\end{enumerate}
+\end{notebox}
+
+\inputminted{cpp}{code/p3919_presistent_seg.cpp}
+
+\hfive{静态区间第k小}
+
+\begin{notebox}
+洛谷P3824：长为 $n(1\le n\le2\times 10^5)$ 值域的序列，有 $m(1\le m\le2\times 10^5)$ 次询问，问区间 $[l,r]$ 内严格第 $k$ 小(不去重)的值是什么
+\end{notebox}
+
+设去重后长度为 $n'$ ，设主席树，版本为 $i(0\le i\le n)$ 的主席树代表前 $i$ 个数，当前节点维护排名(从小到大)区间 $[l,r]$ ，其值代表在该区间内有多少个数。对叶子节点，表示特定排名数字数目。
+
+可以通过前缀和思想来建树，每次继承上一个根节点主席树。通过二分查找找到第 $i$ 个数的排名。
+
+对于查询，对前缀和求差分，对查询的 $[l,r]$ 区间，取版本为 $r$ 的主席树节点与版本为 $l-1$ 的同一区间主席树节点作差，即得 $[1,r]$ 出现个数减去 $[1,l-1]$ 出现个数即 $[l,r]$ 出现个数。如果左子区间出现个数 $s$ 大于等于 $k$ ，也就是说左子区间里有当前子区间的第 $1$ 到第 $s$ 小，包含了第 $k$ 小，所以需要在左子区间里继续找。否则，证明第 $k$ 小在右子区间，因为左子区间有前 $s$ 小，所以分配到右子时，要减去 $s$ 。
+
+\inputminted{cpp}{code/p3834_presistent_seg.cpp}
+
+\subsection{树状数组}
+
+一种 $O(n)$ 建树方法：
+
+\begin{minted}{cpp}
+// C++ Version
+// O(n)建树
+void init() {
+  for (int i = 1; i <= n; ++i) {
+    t[i] += a[i];
+    int j = i + lowbit(i);
+    if (j <= n) t[j] += t[i];
+  }
+}
+\end{minted}
+
+\subsubsection{静态区间最值}
+
+以静态区间最小值为例。不支持可以反向变化的最值维护
+
+\inputminted{cpp}{code/ext_022.cpp}
+
+\subsubsection{动态整体第k小}
+
+\begin{notebox}
+洛谷P1168以求数组前 $1,3,5,\cdots$ 项中位数为例 $n\le10^5,a\le10^9$
+\end{notebox}
+
+\inputminted{cpp}{code/ext_023.cpp}
+
+\subsubsection{动态区间第k小}
+
+\begin{notebox}
+洛谷P2617:给定长为 $n$ 的数列 $a$ ，支持 $m$ 次两种操作：$1\le n,\allowbreak{}m\le10^5,\allowbreak{}0\le a_i,\allowbreak{}y\le10^9$
+
+\begin{itemize}
+\item \mintinline{text}|Q l r k| 查询区间第 $k$ 小
+\item \mintinline{text}|C x y| 将 $a_x$ 改为 $y$
+\end{itemize}
+\end{notebox}
+
+\inputminted{cpp}{code/p2617_presist_seg_on_fenwick.cpp}
+
+\subsubsection{二维树状数组}
+
+维护矩阵，支持单点修改和区间查询。可以维护一维能维护的内容，区间即二维上的子矩阵。注意空间复杂度是 $O(n^2)$
+
+以区间求和为例，更新和查询函数如下：
+
+\begin{minted}{cpp}
+for (int x = i; x < A.length; x += lowbit(x))
+    for (int y = j; y < A[i].length; y += lowbit(y))
+        C[x][y] += delta;
+\end{minted}
+
+\begin{minted}{cpp}
+int result = 0;
+for (int x = i; x > 0; x -= lowbit(x))
+    for (int y = j; y > 0; y -= lowbit(y))
+        result += C[x][y];
+return result;
+\end{minted}
+
+\begin{notebox}
+输入\mintinline{text}|X n m|给定$n\times m$矩阵，接下来输入若干行，每行可能输入\mintinline{text}|L a b c d delta|代表将顶点为$(a,b),(c,d)$的矩形区域每个数字加上$delta$，或输入\mintinline{text}|k a b c d|代表求矩形区域和。
+
+$1\le n,\allowbreak{}m\le2048,\allowbreak{}-500\le delta\le500,\allowbreak{}line\le2\times10^5$，过程在int内
+\end{notebox}
+
+考虑用二维差分数组$d[n][m]$维护区间修改的二维前缀和查询。设原数组为$a[n][m]$，二维前缀和数组为$s[n][m]$，则：
+
+\begin{adjustbox}{max width=\linewidth,center}
+$\begin{gathered}
+s[x][y]=\sum_{h=1}^x\sum_{k=1}^ya[h][k]\\
+a[i][j]=\sum_{i=1}^h\sum_{j=1}^kd[i][j]\\
+\therefore s[x][y]=\sum_{h=1}^x\sum_{k=1}^y\sum_{i=1}^h\sum_{j=1}^kd[i][j]
+\end{gathered}$
+\end{adjustbox}
+
+对求和化简，容易可得：
+
+\begin{adjustbox}{max width=\linewidth,center}
+$s[x][y]=\sum_{i=1}^x\sum_{j=1}^yd[i][j]\times(x-i+1)\times(y-j+1)$
+\end{adjustbox}
+
+分解得：
+
+\begin{adjustbox}{max width=\linewidth,center}
+$\sum_{i=1}^x\sum_{j=1}^yd[i][j]\cdot(xy+x+y+1)-d[i][j]\cdot i(y+1)-d[i][j]\cdot j(x+1)+d[i][j]\cdot ij$
+\end{adjustbox}
+
+可以维护四个差分数组：$d[i][j],\allowbreak{}d[i][j]\cdot i,\allowbreak{}d[i][j]\cdot j,\allowbreak{}d[i][j]\cdot ij$。
+
+接下来就可以跑二维差分模板和二维树状数组模板了：
+
+\inputminted{cpp}{code/p4514_2dim_fenwick.cpp}
+
+\subsection{平衡树}
+
+使用示例：(洛谷P6136) (目前该题平衡树均为别人的代码,后续版本可能改)
+
+\begin{notebox}
+题意：输入 $n,\allowbreak{}m(1\le n\le10^5,\allowbreak{}1\le m\le10^6)$ ，输入 $a_i(0\le a_i < 2^{30})$ ，接下来有 $6$ 种在线操作 ( $x=x\oplus last$ )：
+
+\begin{enumerate}
+\item 插入整数 $x(0\le x < 2^{30})$
+\item 删除整数 $x$ (若有多个相同，只删一个)
+\item 查询整数 $x$ 的排名(比它小的数个数 $+1$ )
+\item 查询排名为 $x$ 的数(不存在时查小于 $x$ 的最大数，保证 $x$ 不越当前界)
+\item 求 $x$ 前驱(小于 $x$ 的最大的数)
+\item 求 $x$ 后继(大于 $x$ 的最小的数)
+
+此题用 \mintinline{text}|pb_ds| 解法见本模板后面
+\end{enumerate}
+\end{notebox}
+
+\subsubsection{FHQ-Treap}
+
+\inputminted{cpp}{code/p6136_fhq_treap.cpp}
+
+\subsubsection{AVL}
+
+\inputminted{cpp}{code/ext_024.cpp}
+
+\subsubsection{Splay}
+
+\begin{notebox}
+洛谷P3391：对长为 $n(1\le n\le10^5)$ 的区间，进行 $m(1\le m\le10^5)$ 次 $[l,r]$ 翻转，输出最后结果
+\end{notebox}
+
+\inputminted{cpp}{code/p3391_splay.cpp}
+
+\subsection{K-D Tree}
+
+\begin{notebox}
+洛谷P4475-有 $n$ 人和 $m$ 巧克力，每个人有参数 $a,b,c$ ，巧克力有参数 $x,y,h$ ，每人只要对他自己 $ax+by\le c$ 的巧克力，求每人这样的巧克力的 $h$ 值之和 $1\le n,\allowbreak{}m\le5\times10^4,\allowbreak{}-10^9\le$ 参数 $\le10^9$
+\end{notebox}
+
+对二元函数 $f(x,y)=ax+by$ ，满足 $x,y$ 上单调性，所以节点维护的超长方体若边界都在肯定全部点都在，所以可以进行二分下去。
+
+\inputminted{cpp}{code/p4475_kd_tree.cpp}
+
+\begin{notebox}
+洛谷P4148-对 $n\times n(n\le5\times 10^5)$ 矩阵进行强制在线维护(每个值异或 $lastans$ )：
+
+\begin{enumerate}
+\item \mintinline{text}|1 x y A| 单点加 $A$ (下标值在 $[1,n]$)
+\item \mintinline{text}|2 x1 y1 x2 y2| 区间求和
+\item \mintinline{text}|3| EOF (操作数不大于 $2\times10^5$)
+\end{enumerate}
+\end{notebox}
+
+\inputminted{cpp}{code/p4148_kd_tree.cpp}
+
+\subsection{堆}
+
+\subsubsection{可删堆}
+
+\begin{notebox}
+例题：P2056洛谷(的一部分)
+\end{notebox}
+
+以 $O(\log n)$ 均摊实现：\cds{1}插入任意值 \cds{2}删除指定值 \cds{3}求最大值
+
+\begin{notebox}
+若要求次大值，可以弹两次堆顶，再把第一次弹的压进去，最后返回第二次弹的结果
+\end{notebox}
+
+\inputminted{cpp}{code/ext_025.cpp}
+
+\subsubsection{笛卡尔树}
+
+节点由 $(k,w)$ 组成， $k$ 满足二叉搜索树， $w$ 满足堆，若 $(k,w)$ 分别互不相同，那么结构唯一
+
+可以 $O(n)$ 构建。 例题P5854：给定排列，构建(满足小根堆的)笛卡尔树，输出me给节点 $i$ 的左右儿子(不存在为 $0$ )的 $\oplus_{i=1}^ni(l_i+1),\allowbreak{}\oplus_{i=1}^ni(r_i+1)$
+
+笛卡尔树不平衡，单调序列可以卡单次查询到 $O(n)$
+
+\inputminted{cpp}{code/p5854_cartesian_tree.cpp}
+
+\subsubsection{可并堆}
+
+左偏树。支持在 $O(\log n)$ 的时间复杂度内进行合并的堆式数据结构
+
+\textbf{外结点} ：左儿子或右儿子是空结点的结点。
+
+\textbf{距离} ： 一个结点 x 的距离 $dist_x$ 定义为其子树中与结点 x 最近的外结点到 x 的距离。特别地，定义空结点的距离为 -1。
+
+满足小根堆/大根堆性质，且满足左偏：每个节点 $dist_{lc}\ge dist_{rc}$
+
+基本结论：
+
+\begin{itemize}
+\item 节点 $x$ 的距离 $dist_x=dist_{rc}+1$
+\item 距离为 $n$ 的左偏树至少有 $2^{n+1}-1$ 节点且是满二叉树
+\end{itemize}
+
+\begin{notebox}
+但是向左的链也是左偏树
+
+例题洛谷P3377：一开始有 $n(\le10^5)$ 个小根堆，实现 $m(\le10^5)$ 次操作：
+
+\begin{itemize}
+\item \mintinline{text}|1 x y| 将第 $x$ 个数和第 $y$ 个数所在堆合并(若删掉或已在无视)
+\item \mintinline{text}|2 x| 输出第 $x$ 个数所在堆最小数，并删掉这个数(多个最小删先输入的)，已删输出 \mintinline{text}|-1| 并无视
+\end{itemize}
+\end{notebox}
+
+\inputminted{cpp}{code/p3377_leftist_tree.cpp}
+
+\subsection{珂朵莉树}
+
+骗分数据结构。核心操作：把值相同的区间合并成一个结点保存在 set 里面。在数据随机的情况下，复杂度为 $O(n\log\log n)$ ，链表为 $O(n\log n)$
+
+进行求取区间左右端点操作时，必须先 split 右端点，再 split 左端点。若先 split 左端点，返回的迭代器可能在 split 右端点的时候失效，可能会导致 RE
+
+\begin{notebox}
+(SCNUOJ1731)你有一个长度为 $n$ 的序列，下标从 $1$ 开始，一开始每个数都是 $1236895$ ，你需要维护 $m$ 次下列操作：
+
+\begin{enumerate}
+\item \mintinline{text}|1 l r x| 将区间 $[l,r]$ 的每个值都设为 $x$
+\item \mintinline{text}|2 l r x| 将区间 $[l,r]$ 的每个值都加上 $x$
+\item \mintinline{text}|3 l r| 查询区间 $[l,r]$ 的值之和
+
+$n,m(1\le n,m\le10^5)$ ，数据随机，$1\le x\le10^7$
+\end{enumerate}
+\end{notebox}
+
+\inputminted{cpp}{code/ext_026.cpp}
+
+\subsection{并查集}
+
+\subsubsection{种类并查集}
+
+种类并查集就是有多少个种类开多少倍长即可。
+
+\begin{notebox}
+洛谷P1892：有n个人m条关系，E a b代表a和b是敌人，F a b代表a和b是朋友；敌人的敌人是朋友，朋友的朋友是朋友；朋友间一定会结成同一帮派，求帮派数
+\end{notebox}
+
+使用反集。解法二是照搬二分图。
+
+\inputminted{cpp}{code/ext_027.cpp}
+
+\begin{notebox}
+例题洛谷P2024:存在食物环A->B->C->A，有n种动物，m条判断。判断类型为1 i j表示i,j同属A/B/C大类,2 i j表示i->j。先出现的判断在不产生矛盾的情况下变成真理。求m条判断中谬论数。(输入n,m,依次输入判断) $1\le n\le5\times10^5,\allowbreak{}1\le k\le10^5$
+\end{notebox}
+
+构建三倍并查集，其中i是自身，i+n是匿名猎物，i+2n是匿名天敌。另一种解法是加权并查集，三种关系分别是 $0,1,2$ ，用向量加减模 $3$ 得到新关系。加权并查集写法见下文
+
+\inputminted{cpp}{code/p2024_disjointset.cpp}
+
+\subsubsection{加权并查集}
+
+\begin{notebox}
+洛谷P1196 有 $30000$ 战舰，每次 \mintinline{text}|M i j| 将 $i$ 所在编队连在 $j$ 所在编队尾部成链。每次 \mintinline{text}|C i j| 查询 $i,j$ 链之间有多少个战舰。若 $i,j$ 不同编队输出 \mintinline{text}|-1| 。 $t\le 5\times10^5$
+\end{notebox}
+
+设前缀和 \mintinline{text}|cnt| 为离队首的距离，则所求为 $|cnt_i-cnt_j|+1-2$
+
+每次合并并查集时， \mintinline{text}|fa[find(i)]=find(j)| ，在这之前，更新 $cnt_x$ ，距离增加 $num_y$ ，即舰队数。且 $num_y$ 增加 $num_x$ ，并且清零 $num_x$ (否则反复合并会出锅)。\mintinline{text}|find| 用递归式，每次 \mintinline{text}|find| 时更新 $cnt_x=cnt_{fa_x}$ ，注意在更新 $fa$ 之前做，不然等于我赋值我自己。
+
+\inputminted{cpp}{code/p1196_weighted_disjointset.cpp}
+
+\begin{notebox}
+洛谷P2024 题面见上文
+\end{notebox}
+
+构造关系 $u\to v$ ，设为 $ty[u]$ 表示 $u$ 与根 $v$ 的关系，设 $0$ 表示同类， $1$ 表示捕食， $2$ 表示被捕食，显然构造出来的关系模 $3$ 结果符合传递性，即满足性质 $\because u\to v\to w\therefore ty[u\to w]=(ty[u\to v]+ty[v\to w])\bmod 3$
+
+那么可以构造加权并查集，使得压缩路径后，若 $u,v$ 同根，则根据向量加法， $u,v$ 见关系可以表示为 $(ty[u]-ty[v])\bmod 3$ 。并且如果要新建 $u,v$ 之间的关系，那么新建的 $fa_u,fa_v$ 之间，若设 $fa[fa_u]=fa_v$ ，则 $ty[fa_u]=(-ty[u]+new+ty[v])\bmod 3$
+
+\inputminted{cpp}{code/p2024_weighted_disjointset.cpp}
+
+\begin{notebox}
+P2294-有 $t(< 100)$ 组询问，每次给定 $n(< 100)$ 个月和 $m(< 10^3)$ 条账本，账本表示 $[u,v]$ 月份收入和为 $w$。问账本是否矛盾。
+\end{notebox}
+
+解法一：差分约束。
+
+设前 $i$ 个月收入之和为 $s_i$，则每条账本为：$s_v-s_{u-1}=w$，即：
+
+\begin{adjustbox}{max width=\linewidth,center}
+$\begin{cases}
+s_{u-1}&\le s_v-w\\
+s_v&\le s_{u-1}+w
+\end{cases}$
+\end{adjustbox}
+
+直接建图，建出来的图不一定是连通的，则可以对每个非连通子图都跑一次 SPFA，如果存在一个子图有负环就 false，否则 true。不管跑最短路还是最长路都能过(分别设不同的无穷初始值)，记得初始化全(不要漏了 \mintinline{text}|cnt| 等数组)。
+
+解法二：并查集。
+
+若已知 $s_a-s_b,s_b-s_c$，且发现新的 $s_a-s_c$，需要判断新的是否符合原有的。维护带权并查集，设 $c_u=s_{fa}-s_u$。当我们发现输入的 $a,b$ 在同一个并查集时，有 $c_a-c_b=s_{fa}-s_a-s_{fa}+s_b$，故判断原有的 $c_u-c_v$ 是否与 $w$ 相等即可。
+
+初始设 $c=0$，合并两并查集 $u,v$ 时，设 $fa_v$ 并到 $fa_u$ 去，因为已知 $s_v-s_u=w$，且原有 $c_u=s_{fa_u}-s_u,\allowbreak{}c_v=s_{fa_v}-s_v$。要求出新的 $s_{fa_u}-s_{fa_v}=(c_u+s_u)-(c_v+s_v)$ $=c_u-c_v-(s_v-s_u)$ $=c_u-c_v-w$。(类比向量加减法)
+
+对于路径压缩，设已知 $c_u=s_r-s_u,c_v=s_u-s_v$，需要更新 $s_r-s_v$，等于 $c_u+c_v$，即直接求边权和即可。
+
+\inputminted{cpp}{code/p2294_disjoint_set.cpp}
+
+解法三：贪心
+
+先按左端点为第一排序关键字，再排右端点，作为比较依据动态维护一个堆。之后就开始两两比较，如果左端点相等，就比较右端点，如果相等，就比较值，如果值不同，就直接输出false，否则输出true，如果右端点不等，就把相同的部分抵消掉，把新的区间再压入优先队列。直到不能操作，就输出true。
+
+其他例题：
+
+\begin{itemize}
+\item (洛谷P2661)出度均 $1$ 无自环 $n$ 点有向图，求最小环长度
+
+路径压缩时维护每个点到根的距离。枚举每条边，若端点在同一并查集那么环长 $=d[u]+d[v]+1$ ，否则合并并查集 ( $d[u]=d[v]+1,f_{f_u}=f_v$ ) ；也可以 DFS (带深度,重复访问时得环,深度相减)
+\end{itemize}
+
+\subsubsection{可撤销并查集}
+
+\begin{notebox}
+洛谷5787 $n(1\le n\le10^5)$ 点 $m(1\le m\le2\times10^5)$ 边无向图，每条边生存周期是 $[l,r)(1\le l < r\le10^5)$，问每个时刻图是不是二分图。
+\end{notebox}
+
+二分图判断：可撤销种类并查集 + 染色法。
+
+对节点 $i$，拆分为两个节点分属 $S,T$。若存在一个点，使得拆分的两点并在一起了，那么就不是二分图。
+
+按时间轴建立线段树，第 $i$ 个线段树节点维护时间区间内存在的所有边(从 $1$ 编号)，那么每次加一条边，会向最多 $\log k$ 个节点加边。
+
+然后按线段树顺序遍历节点，先序时把线段树节点的所有边在并查集上合并，即对边 $(u,v)$ 入图的话，将 $(u,v+n)$ 与 $(u+n,v)$ 在并查集合并，然后每次合并时，按秩合并，树高小的合到大的，并记录进行合并的操作顺序，然后记录这个节点一开始是在哪个操作记号，在再次回到该节点时(后序)，逐个撤销掉并查集操作，进行复原。
+
+设最大生存时间是 $k$，空间复杂度是 $O(m\log k)$，时间复杂度是 $O(k\log k+4k+m\log k+2n\log n)=O(m\log k+n\log n)$
+
+\inputminted{cpp}{code/p5787_segtree_partition.cpp}
+
+\begin{notebox}
+实现版本 2：CF813F(每次更改一条边 $(x,y)(x < y)$，若本来有就删否则加)，$n,m\le 10^5,m$ 是操作次数
+\end{notebox}
+
+\inputminted{cpp}{code/cf813f_segtree_partition.cpp}
+
+\subsubsection{可持久化并查集}
+
+\begin{notebox}
+洛谷U208135-给定 $n(1\le n\le10^5)$ 个集合，第 $i$ 个集合初始只有数 $i$ ，维护 $m(1\le m\le2\times10^5)$ 次操作：
+
+\begin{itemize}
+\item \mintinline{text}|1 a b| 合并 $a,b$ 所在集合
+\item \mintinline{text}|2 k| 回到第 $k$ 次操作之后的状态
+\item \mintinline{text}|3 a b| 问 $a,b$ 是否在同一集合(是输出 $1$ 否则 $0$ )
+\end{itemize}
+\end{notebox}
+
+\inputminted{cpp}{code/U208135_presistent_dsu.cpp}
+
+其他写法：
+
+\inputminted{cpp}{code/U208135_presistent_dsu2.cpp}
+
+\section{图论}
+
+\subsection{树}
+
+\subsubsection{重心}
+
+以树的重心为根时，所有子树的大小都不超过整棵树大小的一半。
+
+树中所有点到某个点的距离和中，到重心的距离和是最小的；如果有两个重心，那么到它们的距离和一样。
+
+把两棵树通过一条边相连得到一棵新的树，那么新的树的重心在连接原来两棵树的重心的路径上。
+
+在一棵树上添加或删除一个叶子，那么它的重心最多只移动一条边的距离。
+
+\begin{notebox}
+例题POJ1655：给定 $t(\le 20)$ 询问，每次节点为 $n(n\le2\times10^4)$ 的树，求最小编号重心及其最大子树节点数
+\end{notebox}
+
+\inputminted{cpp}{code/poj1655_tree_barycenter.cpp}
+
+\subsubsection{直径}
+
+直径是树的全源最长路径
+
+两次 DFS 法求直径
+
+\inputminted{cpp}{code/ext_028.cpp}
+
+\subsubsection{最近公共祖先}
+
+解法零：暴力
+
+\begin{minted}{python}
+if d[u]<d[v]:
+    u,v=v,u
+while d[u]>d[v]:
+    u=fa[u]
+while u!=v:
+    u,v=fa[u],fa[v]
+return u
+\end{minted}
+
+解法一：倍增法求 LCA 可以 $O(n\log n)$ 预处理和 $O(\log n)$ 查询
+
+\inputminted{cpp}{code/ext_029.cpp}
+
+解法二：欧拉序上 RMQ ，可以 $O(n\log n)$ 预处理和 $O(1)$ 查询
+
+欧拉序就是每个点进入时记录一次，从每一个子树出来时记录一次
+
+\inputminted{cpp}{code/p3379_lca2.cpp}
+
+解法三：tarjan 离线，复杂度取并查集的
+
+\inputminted{cpp}{code/lca_tarjan.cpp}
+
+解法四：LCA 为两个游标跳转到同一条重链上时深度较小的那个游标所指向的点。
+
+树链剖分的预处理时间复杂度为线性，单次查询的时间复杂度为对数，并且常数较小。
+
+\subsubsection{树上k级祖先}
+
+倍增：(lc1483, 不存在输出 -1)
+
+\inputminted{cpp}{code/ext_030.cpp}
+
+\begin{notebox}
+例题P5903：给定 $n(2\le n\le5\times10^5)$ 点有根树， $q(1\le q\le5\times10^6)$ 询问，随机种子 $s$ 。接下来输入每个点的父亲 ( $0$ 为根)，然后有根据随机种子生成的询问，每次求节点 $x$ 的 $k$ 级祖先。输出 $\oplus_{i=1}^qi\times ans_i$ 。s
+\end{notebox}
+
+长链剖分，先一次性跳到长链，而后在链上 $O(1)$ 解决。结论：跳 $\lceil\log k\rceil$ 次一定在长链上
+
+长链： 重子节点表示其子节点中子树深度最大的子结点。长链剖分从一个节点到根的路径的轻边切换条数是 $\sqrt n$ 级别的
+
+设重链长 $d$ ，且存在 $i$ 满足 $2^i < k < 2^{i+1}$ ，那么 $k-2^i < 2^i\le d$
+
+\inputminted{cpp}{code/p5903_k_ancestor.cpp}
+
+\subsubsection{LCA应用}
+
+\hfive{前缀和差分}
+
+路径点权和：$s[u]+s[v]-s[lca]-s[fa_{lca}]$
+
+路径边权和： $s[u]+s[v]-2s[lca]$
+
+路径点差分：$s[u],s[v]$ 加一， $s[lca],s[fa_{lca}]$ 减一
+
+路径边差分：$s[u],s[v]$ 加一， $s[lca]$ 减二
+
+\hfive{两点距离}
+
+在 LCA 的基础上，设深度为 $d[x]$ ，则距离为 $d[u]+d[v]-2d[lca]$ 。
+
+\begin{notebox}
+也可以表示为：$|d[u]-d[LCA]|+|d[v]-d[LCA]|$
+
+注：暴力思路是从 $u$ 出发 DFS 到 $v$ 即可
+\end{notebox}
+
+\hfive{路径相交}
+
+对 $AB,CD$ ，分别求出 $LCA$ 为 $X,Y$ ，若两点距离满足 $|AY|+|BY|=|AB|$ 或 $|CX|+|DX|=|CD|$ ，证明相交
+
+\hfive{其他}
+
+从树上三个点出发，求一个目的点，使得路径和最小，输出最小路径和
+
+两两求LCA，可以发现必然有一个重复点，并且可以发现不重复点必然是最优解，设深度为d，最小路径和为：
+
+\begin{adjustbox}{max width=\linewidth,center}
+$d_a+d_b+d_c-(d_{lca(a)}+d_{lca(b)}+d_{lca(c)})$
+\end{adjustbox}
+
+此外，目的是三个LCA深度最大的一个，可以得知，最深的是不重复的
+
+\subsubsection{树链剖分}
+
+性质：
+
+\begin{enumerate}
+\item DFS序新编号的重建树，保证子树\mintinline{text}|x|的节点范围是\mintinline{text}|[x,x+siz[x]-1]|。因此，对于重建树，可以使用线段树等结构维护节点值。
+\item 任意一条路径可以表示为不超过$\Omicron(\log n)$条连续重链(或部分重链)。
+
+因此初始化的时间复杂度是$\Omicron(n)$，使用线段树维护时，单路径查询的时间复杂度是$\Omicron(\log^2n)$，单子树查询的时间复杂度是$\Omicron(\log n)$。
+\end{enumerate}
+
+\begin{notebox}
+P3384例题：给定 $n,m,r,p$ ，$r$ 是根节点编号。对 $m$ 次操作：
+
+\begin{enumerate}
+\item \mintinline{text}|1 x y z| 将 $x,y$ 路径上全部点加上 $z$
+\item \mintinline{text}|2 x y| 查询路径和对 $p$ 取模
+\item \mintinline{text}|3 x z| 将 $x$ 为根节点的子树(含根下同)全部点加上 $z$
+\item \mintinline{text}|4 x| 查询子树节点和对 $p$ 取模
+
+$1\le n,\allowbreak{}m\le10^5,\allowbreak{}1\le p\le2^{31}-1$
+\end{enumerate}
+\end{notebox}
+
+\inputminted{cpp}{code/p3384_treelink_split.cpp}
+
+\subsubsection{启发式合并}
+
+dsu on tree
+
+预处理过程：DFS 一次，得到轻重儿子关系和 DFN 序(后者可选)
+
+核心 DFS 合并过程：
+
+\begin{enumerate}
+\item DFS 轻儿子，合并所有轻子树上答案值
+\item DFS 重儿子，合并重子树上的答案并保存当前总合并答案
+\item 遍历当前节点的轻子树和当前节点，累加子树各点的答案值，保存答案
+\item 遍历当前节点的轻子树，删掉轻子树合并值
+
+简单理解就是，先 DFS 轻的部分，然后直接计算并保存其答案；然后因为其兄弟节点子树也有轻的，而当前子树不会给兄弟节点子树贡献，所以要把当前的答案全部丢弃，然后再计算兄弟节点子树。当轻子树都计算完后，计算重子树，但是不进行丢弃，此时回到当前的根，再次遍历全部轻子树永久加上轻子树的贡献。
+
+在树上启发式合并里，整个板子是基本不用动的，唯一需要更改的地方是合并函数的增删处理。
+
+用途：求出静态有根树的每个子树(显然共 $n$ 个子树)的某个要求的值，这个过程是 $O(n\log n)$ 的
+
+根据轻重链剖分的性质可知，经过一条轻边时，子树的大小至少会除以二，所以树上任意一条路径最多包含 $\log n$ 条轻边。如果某点到根节点经过了 $x$ 条轻边，那么它的大小 $y$ 满足： $y <\dfrac n{2^x}$
+
+一个节点被遍历的次数等于它到根节点上轻边的数目+1(重节点只被遍历一次)，根据上述性质，即一个节点最多被遍历 $\log n+1$ 次，所以时间复杂度为 $O(n\log n)$
+
+边权问题可以把边权在 DFS1 时叠到点权(\mintinline{text}|v==fa continue|后)，把 \mintinline{text}|add(u)| 和 \mintinline{text}|ans[u]=tot| 顺序对换
+\end{enumerate}
+
+\begin{notebox}
+例题洛谷U41492：$n(n\le 10^5)$ 个节点的树，每个节点有不同的颜色( $10^5$ 种)，问每个节点为根的子树中，所有节点有多少种不同的颜色；$m(m\le 10^5)$ 次询问，每次问一棵子树
+\end{notebox}
+
+写法一：DFN序
+
+\inputminted{cpp}{code/u41492_dsu_on_tree.cpp}
+
+写法二：不带DFN序
+
+\inputminted{cpp}{code/ext_031.cpp}
+
+\subsubsection{虚树}
+
+virtual tree
+
+对于原树上的 $k$ 个关键点，它们及其两两LCA所组成的树是虚树
+
+实现方法是把关键点按 DFS 序排序，对两两相邻的关键点求 LCA，哈希表判重。根据原树的祖先后代关系建树。
+
+在虚树里，只要保证祖先后代的关系没有改变，就可以随意添加原树的非关键点。
+
+使用单调栈建立虚树。先把根节点 $1$ 加入栈。按 DFS 序遍历节点，若当前节点与栈顶节点的 LCA 是栈顶，直接入栈；否则，把 LCA 连栈顶建虚树，栈顶弹栈。根据栈顶节点 DFS 序和次大节点(栈顶下方节点) DFS 序与 LCA 作比较，判断 LCA 是否入栈过，如果 LCA 未入栈，则 LCA 入栈。然后才新节点入栈。遍历结束后，栈内形成链，两两相连即可。
+
+细节优化是可以把清空邻接表改成有一个从未入栈的元素入栈的时候清空该元素对应的邻接表。
+
+\begin{notebox}
+例题洛谷P2495：有 $n(2\le n\le2.5\times10^5)$ 节点的树，边带权，有 $m(1\le m\le5\times10^5)$ 次询问，每次询问有 $k(1\le k\le n,\allowbreak{}\sum k\le5\times10^5)$ 个点，对每次询问，删掉树上若干边，使得删的边权和最小，满足删后根节点 $1$ 不能到达任一个给定询问点
+\end{notebox}
+
+\inputminted{cpp}{code/p2495_virtual_tree.cpp}
+
+\subsubsection{点分治}
+
+求解问题：枚举所有路径，计算相关的信息
+
+树上路径可以分为两种：一种是经过根的，一种是不经过的；对前者，一种根作为端点，一种不作为端点，其中后者等效于两条前者。
+
+预处理：求重心，然后求以重心为根各子树的大小。然后从重心开始点分治。
+
+在每次点分治过程：当前重心为根，DFS计算所有以该点为端点的路径所要求的值，然后删掉该点，对该点的每个子树，再次求重心，然后求新重心为根各子树大小，然后以新重心为根继续递归执行上述过程。
+
+经过点分治，可以求出满足可加的每一条路径的值。点分治的复杂度是 $O(n\log n)$
+
+\begin{notebox}
+例题洛谷P3806：$n(1\le n\le10^4)$ 点带边权树，$m(1\le m\le100)$ 次询问，每次询问求树上是否有距离为 $k$ 的点对，有就输出 \mintinline{text}|AYE|
+\end{notebox}
+
+\inputminted{cpp}{code/ext_032.cpp}
+
+\subsubsection{Prufer 序列}
+
+常用于解决与度数相关的树上计数问题
+
+将无根代表号树与整数序列一一对应的方法
+
+树转 Prufer 序列：每次选择一个编号最小的叶结点并删掉它，然后在序列中记录下它连接到的那个结点。重复 $n-2$ 次后就只剩下两个结点
+
+Prufer 序列转树：每次选择度为 $1$ 的节点与当前点连接
+
+Prufer 序列性质：剩下的 $2$ 个节点其中一个是编号最大节点；每个节点在序列出现的次数是度数减一
+
+Cayley 公式：完全图 $K_n$ 有 $n^{n-2}$ 棵生成树
+
+\begin{notebox}
+有 $n$ 点树，给定度数，则树可能的形态数为 $\dfrac{(n-2)!}{\prod_{i=1}^n(d_i-1)!}$
+
+含未知度数时，设已知点数为 $k$ ，已知度数和为 $\sum(d_i-1)=s$ ，则答案为 $\dfrac{C_{n-2}^ss!(n-k)^{n-2-s}}{\prod_{i=1}^k(d_i-1)!}$
+
+$n$ 点 $m$ 边带标号无向图有 $k$ 个连通块，添加 $k-1$ 条边使得图连通，方案数为 $n^{k-2}\prod_{i=1}^k s_i$ ， $s_i$ 是每个连通块数量，有 $\sum_{i=1}^ns_i=n$
+
+例题洛谷P6086：输入 $n,\allowbreak{}m(2\le n\le5\times10^6,\allowbreak{}1\le m\le2)$ ，设根为 $n$ ，$m=1$ 时输入 $[1,n-1]$ 的父亲序列，$m=2$ 输入 Prufer 序列，将其转为另一方。设一个序列的值为 $\oplus_{i=1}^{len}i\times a_i$ ，求转换后序列权值
+\end{notebox}
+
+\inputminted{cpp}{code/p6086_prufer.cpp}
+
+\subsubsection{二叉树遍历}
+
+\hfive{先中求后}
+
+离散化优化，复杂度 $O(n)$ ，以洛谷P1827为例(顶点值不重复)
+
+\inputminted{cpp}{code/p1827_pre_mid_to_post.cpp}
+
+\hfive{中后求先}
+
+离散化优化，复杂度 $O(n)$ ，洛谷P1030为例
+
+\inputminted{cpp}{code/p1030_mid_post_to_pre.cpp}
+
+\hfive{先后求中}
+
+离散化，答案数为先序中 $AB$ 与后序中 $BA$ 相等数 $x$ 的 $2^x$ ，复杂度 $O(n)$ (SCNUOJ 1423为例)
+
+\inputminted{cpp}{code/ext_033.cpp}
+
+\subsubsection{杂项}
+
+\hfive{随机游走}
+
+\begin{notebox}
+给定一棵树，树的某个结点上有一个硬币，在某一时刻硬币会等概率地移动到邻接结点上，问硬币移动到邻接结点上的期望距离。
+\end{notebox}
+
+设 $f(u)$ 为 $u$ 节点走到父节点 $p_u$ 的期望距离，有：
+
+\begin{adjustbox}{max width=\linewidth,center}
+${r}
+f(u)=\sum_{(u,t)\in E}w(u,t)+\sum_{v\in son_u}f(v)$
+\end{adjustbox}
+
+若 $w=1$ 则即 $u$ 子树所有节点的度数和，即 $u$ 子树大小的二倍减一。
+
+设 $g(u)$ 代表 $p_u$ 走向子节点 $u$ 的期望距离，有：
+
+\begin{adjustbox}{max width=\linewidth,center}
+$g(u)=g(p_u)+f(p_u)-f(u)$
+\end{adjustbox}
+
+显然初始值是 $f_{leaf}=1,g_{root}=0$。
+
+\inputminted{cpp}{code/tree_random_walk.cpp}
+
+\hfive{最小距离和}
+
+\begin{notebox}
+例题P1364：给定 $n(1\le n\le100)$ 节点二叉树(输入为 $w,u,v$ 为第 $i$ 个节点点权和左右儿子( $0$ 是无子))，求最小距离和(以某点为原点各点点权乘以路径长)( $1\le w\le10^5$ )
+\end{notebox}
+
+设 $dp$ 为距离和，对 $u$ 的邻点 $v$ ，有 $dp[v]=dp[u]+size[1]-2size[v]$
+
+在dp[u]的基础上当根从u变为v的时候，v的子树的所有结点的距离都减少1，那么总距离就减少size[v]，同时，以v为根的子树以外的所有节点路程都增加了1，总路程就增加了size[1]-size[v]
+
+\inputminted{cpp}{code/p1364_tree_sumdistance.cpp}
+
+\subsection{基本概念}
+
+\begin{notebox}
+这一章节主要用作英文题面阅读理解和单词/符号翻译，并提供简单图论性质(下划线)
+\end{notebox}
+
+\textbf{起点} (tail) ，\textbf{终点} (head) 是有向边 (又称\textbf{弧} arc )  $u\to v$ 。点数是\textbf{阶} (order) 。无向图里，边 $e$ 和点 $v$ \textbf{关联} (incident)是 $e$ 的一个\textbf{端点} (endpoint) 为 $v$ ，点的领域记作 $N(v)$ ，即相邻点
+
+度为 $d(v)=1$ 的节点称为\textbf{叶节点}或\textbf{悬挂点} (leaf/pandant vertex) , 按度数奇偶称\textbf{奇/偶点} (odd/even vertex)，<u>奇点个数一定是偶数</u> ，\textbf{支配点} (universial vertex) 是度为 $|V|-1$ 的点。最小度记作 $\delta(G)$ ，最大度记作 $\Delta(G)$ ，\textbf{入度} (in-degree) 记作 $\delta^-(v)$ ，\textbf{出度} (out-degree) 记作 $\delta^+(v)$
+
+无 \textbf{自环} (loop)、 \textbf{重边} (multiple edge) 的图是\textbf{简单图} (simple graph) ，否则是\textbf{多重图} (multigraph) 。<u>具有至少两顶点的简单无向图一定存在度相同的节点</u>(抽屉原理) 。有向图 $u\to v,v\to u$ 不是重边。序列能作为图/简单图的度数列称为序列是可图化/可简单图化的。
+
+\textbf{途径}(walk)是若干点连接起来的边的集合， \textbf{迹}(trail)是边互不相同的途径。\textbf{路径}(path)/\textbf{简单路径}(simple path)，\textbf{回路}(circuit)是除首尾点，其余点互不相同的迹。边的数量(或边权和)是长度(该段落定义视具体题目题面)
+
+若点集和边集都是某图子集，那么是\textbf{子图} (subgraph) $H\subseteq G$ 。\textbf{真子图}称为 proper-subgraph 。若子图只删点( $\forall u,\allowbreak{}v\in V_H,\allowbreak{}(u,\allowbreak{}v)\in E_G\to(u,\allowbreak{}v)\in E_H$ )，是\textbf{导出子图/诱导子图} (induced subgraph)，只由点集决定，记作 $G[V']$ 。若顶点与母图一样，那么称为\textbf{生成子图/支撑子图} (spanning subgraph) 。原图或空图称为\textbf{平凡子图} (trivial subgraph)。$k-$ \textbf{正则图} (k-regular graph) 是每个点度均为 $k$ 的无向图。若无向图生成子图 $F$ 是 $k-$ 正则图，那么 $F$ 是原图的 $k-$ 因子 (k-factor)。若有向图导出子图的每个点 $v$ 满足 $(v,u)\in E$ (在原图边集)且 $u$ 在导出子图，那么称为\textbf{闭合子图} (closed subgraph)。从图删去 $V'$ 的点记作 $G[V\backslash V']$ 。删边同理。删点可记作 $G-V$ 。
+
+\textbf{连通}(connected) 是无向图任两点可达。 \textbf{强连通}是任意两点连通的有向图，\textbf{弱连通}是有向图转无向图后成为连通图的图。有\textbf{连通块(连通分量)}概念及其强/弱连通分量 (SCC)概念。连通图\textbf{点割集} (vertex cut/separating set)大小为 $1$ 叫做\textbf{割点} / 割顶 (cut vertex) 。若 $|V|\ge k+1$ 且不存在 $k-1$ 大小点割集，图是 $k-$ \textbf{点连通的} (k-vertex-connected) , 其最大 $k$ 叫\textbf{点连通度}(vertex connectivity) 记作 $\kappa(G)$ (非完全图是最小点割集大小，完全图是 $n-1$ )。使得本可达的 $u,v$ 不连通的最小点割集(不考虑其他点连通性)大小是局部点连通度 (local connectivity) 记作 $\kappa(u,v)$ 。同理可以定义边割集和桥， $k-$ 边连通的，边连通度 $\lambda(G)$ 和局部边连通度 $\lambda(u,v)$ 。点双连通 (binoeected) 是除单边双点图外的 $2-$ 点连通(是没有割点的连通图)。边双连通等于 $2-$ 边连通。类似有(极大)点/边双连通分量。 <u>Whitney 定理：任意图 $G$ $\kappa(G)\le \lambda(G)\le\delta(G)$</u>
+
+一般边数接近点数平方叫稀疏图 (sparse graph)，否则稠密图 (dense graph)。\textbf{补图} (complement graph) $\overline G$ 是 $(u,v)\in E(\overline G)$ 当且仅当 $(u,v)\notin E(G)$ 补图是无向简单图。\textbf{反图} (transpose graph) 是有向图每条边反向。\textbf{完全图} (complete graph) 是无向简单图，任两点有边，记作 $K_n$ 。有向图任两点有两条互为反向的边记作\textbf{有向完全图} (complete digraph)。有向简单图两点间有一条单向边是\textbf{竞赛图} (tournament graph) 。边集是空叫\textbf{零图} (null graph)，记作 $N_n$ 。无向简单图所有边构成一个圈称为\textbf{环图/圈图} (cycle graph) , $n\ge 3$ 记作 $C_n$ ，<u>充要条件是为 2-正则连通图</u>。若无向简单图满足一个点是支配点，其他点无边相连，称为\textbf{星图/菊花图} (star graph), $n\ge1,n+1$ 阶星图记作 $S_n$ 。无向简单图满足一个点是支配点，其他点构成一个圈是轮图 (wheel graph) $n+1(n\ge 3)$ 阶轮图是 $W_n$ 。无向简单图所有边构成简单路径，称为\textbf{链} (chain/path graph)，记作 $P_n$ 。无向连通无环图是\textbf{树}。无向连通、恰含一环是\textbf{基环树} (pseudotree)。有向弱连通，入度均 $1$ 图是基环外向树，出度均为 $1$ 是基环内向树。多棵树组成\textbf{森林}(基环同理)。基环内向森林：functional graph。无向连通图每条边最多在一个环内是\textbf{仙人掌} cactus ，仙人掌组成沙漠。\textbf{二分图} bipartite graph，任何两个不在同一部分的点都有连边是\textbf{完全二分图} (complete bipartite graph/biclique) 记作 $K_{n,m}$ 。
+
+若 $E'\in E$ 且 $E'$ 任两条不同的边没有公共端点，且不是自环，那么 $E'$  是一个\textbf{匹配} (matching)/\textbf{边独立集} (independent edge set)。若一个点是匹配中某边的端点，称为\textbf{被匹配的}(matched)/\textbf{饱和的}(saturated)，否则是\textbf{不被匹配的}(unmatched)。边数最多的匹配是一张图的\textbf{最大匹配}(maximum-cardinality matching)，记作 $v(G)$ 。权重和最大的匹配是\textbf{最大权匹配}(maximum-weight matching)。匹配加入任意边后不再是匹配，称为\textbf{极大匹配}(maximal matching)。最大的极大匹配就是最大匹配，任何最大匹配都是极大匹配。极大匹配一定是边支配集，但边支配集不一定是匹配。最小极大匹配和最小边支配集大小相等，但最小边支配集不一定是匹配。若一个匹配里所有点都是被匹配的，称为\textbf{完美匹配} /完备匹配/完全匹配(perfect matching)。只有一个点不被匹配是准完美匹配(near-perfect matching)。对匹配 $M$ ，若一条路径以非匹配点为起点，每相邻两条边的一条在匹配中另一条不在，称为\textbf{交替路径}(alternating path)，在非匹配点终止的交替路径称为\textbf{增广路经}(augmenting path)。<u>托特定理： $n$ 阶无向图 $G$ 有完美匹配当且仅当 $\forall V'\subset V(G),\allowbreak{}p_\text{奇}(G-V')\le |V'|$  (奇数阶连通分支数)，任何无桥3-正则图都有完美匹配。</u>
+
+若 $V'\subseteq V$ 且 $\forall e\in E$ 满足 $e$ 至少一个端点在 $V'$ 中，称 $V'$ 为一个\textbf{点覆盖}(vertex cover)。<u>点覆盖集必为支配集，但极小点覆盖集不一定是极小支配集。一个点集是点覆盖的充要条件是其补集是独立集，因此最小点覆盖的补集是最大独立集。一张图的任何一个匹配的大小都不超过其任何一个点覆盖的大小。完全二分图 $K_{n,m}$ 的最大匹配和最小点覆盖大小都为 $\min(n,m)$ 。</u>
+
+若 $E'\subseteq E$ 且 $\forall v\in V$ 满足 $v$ 与 $E'$ 至少一条边相邻，称为\textbf{边覆盖}(edge cover)，最小边覆盖的大小记作 $\rho(G)$ 。<u>对于所有非匹配点，将其一条邻边加入最大匹配中，即得到了一个最小边覆盖。也可以由最小边覆盖求得：对于最小边覆盖中每对有公共点的边删去其中一条。满足 $\rho(G)+v(G)=|V(G)|$ 且 $v(G)\le \rho(G)$ 特别地，完美匹配一定是一个最小边覆盖，这也是上式取到等号的唯一情况。一张图的任何一个独立集的大小都不超过其任何一个边覆盖的大小。完全二分图 $K_{n,m}$ 的最大独立集和最小边覆盖大小都为 $\max(n,m)$ 。</u>
+
+一张图可以画在一个平面内，无两条边在非端点处相交，是\textbf{平面图} (planar graph)，任何子图都不是 ${K_5}$ 或 ${k_{3,3}}$ 是为平面图的充要条件。 简单连通平面图若 $V\ge 3$ 则 $|E|\le 3|V|-6$ 。
+
+若存在双射 $f:V(G)\to V(H)$ ，满足 $(u,v)\in E(G)$ ，当且仅当 $(f(u),f(v))\in E(H)$ 称 $f$ 为 $G$ 到 $H$ 的一个\textbf{同构}(isomorphism)，图是同构的(isomorphic)，记作 $G\cong H$ ，必须满足点数边数相同，结点度非增序列相同且存在同构导出子图。
+
+图的交、并是点集、边集分别作交、并。图的和/直和 (sum/direct sum)是任意构造 $H'\cong H$ 使得 $V(H')\cap V_1=\emptyset$ ($H'$ 可以等于 $H$) ，此时与 $G\cup H'$ 同构的任何图叫做 $G$ 和 $H$ 的和/直和/不交并，记作 $G+H$ 或 $G\oplus H$ 。若点集本身不交，则 $G\cup H=G+H$ 。如森林是各树的和。可以理解为，“并”会让两张图中“名字相同”的点、边合并，而“和”则不会。
+
+若 $E'\subseteq E$ 且 $\forall e\in(E\backslash E')$ 存在 $E'$ 中的边与其有公共点，称 $E'$ 是图 $G$ 的一个边支配集(edge dominating set)。若 $V'\subseteq V$ 且 $V'$ 中任意两点都不相邻，则 $V'$ 是一个\textbf{独立集}(independent set)。大小记作 $\alpha(G)$ 。若 $V'\subseteq V$ 且 $V'$ 任意两个不同顶点都相邻，则 $V'$ 是一个团(clique)，团的导出子图是完全图。如果一个团在加入任何一个顶点后都不再是一个团，则这个团是一个极大团 (Maximal clique)。最大团大小是 $w(G)$ ，满足 $w(G)=\alpha(\overline G)$ 。
+
+求最大团、最小点覆盖、最大独立集、最小边支配、最小支配集是 NP 困难的，求完美匹配个数是 \#P 完全的。
+
+\textbf{网络}(流网络)(flow network)是有向图，边权为容量 $c$ capacity，有\textbf{源点}source和\textbf{汇点}sink。\textbf{流量} $f(u,v)$ 不超容量限制，反流量与其相加为零，源点流出流量等于汇点流入流量。网络流量是源点发出的流量和。\textbf{剩余容量}residual capacity $c_f(u,v)$ 为 $c(u,v)-f(u,v)$ 。剩余容量大于 $0$ 的边构成的子图是\textbf{残量网络} residual network $G_f$ 。\textbf{增广路} augmenting path：从源点到汇点所有边剩余容量大于零。\textbf{最小割}：删掉 $X$ 条边使得源点汇点不通，让 $X$ 条边加起来的流量总和最小。
+
+\subsection{最短路}
+
+最短路存在的条件为无负环。
+
+\subsubsection{floyd}
+
+全源最短路，适用于任何无负环的图。记得初始化为半倍max/极大值，留意重边
+
+\begin{minted}{cpp}
+for (k = 1; k <= n; k++) 
+  for (i = 1; i <= n; i++)
+    for (j = 1; j <= n; j++) 
+      f[i][j] = min(f[i][j], f[i][k] + f[k][j]);
+\end{minted}
+
+第 $k$ 次循环时，表示只经过前 $k$ 个节点时，最短路的大小。记录路径可以获得更小时设 \mintinline{text}|pre[i][j]=k| 。
+
+可以求最长路(输入负，输出再负一次)或者上述改为 max。
+
+输出方案：
+
+\inputminted{cpp}{code/ext_034.cpp}
+
+应用：
+
+\begin{notebox}
+hdu1599-给定 $n(\le100)$ 点和 $m(\le10^3)$ 双向带权路，从任一点出发经过共至少 $3$ 个不同点然后回到该点成一个环，求最小带权环，无环输出 \mintinline{text}|It's impossible.|
+\end{notebox}
+
+环长等于 $d(a,b)+e(b,c)+e(c,a)$ ，枚举起点 $k$ ，跑 floyd 最短路。
+
+\inputminted{cpp}{code/hdu1599_floyd.cpp}
+
+\begin{notebox}
+poj3660-给定 $n(1\le n\le100)$ 点和 $m(1\le m\le4500)$ 关系，每个关系表示点 $u$ 优于点 $v$ ，问根据这些关系能确定多少个点的排名(保证无自环和环，无矛盾)
+\end{notebox}
+
+floyd跑传递闭包，得到可达矩阵。如果一个点同时被 $n-1$ 个点可达(无论是自己大于这些点还是这些点小于它)，就表明它的位置唯一确定， floyd 更新代码用：
+
+\begin{minted}{cpp}
+f[i][j] |= (f[i][k] & f[k][j]);
+\end{minted}
+
+如果用 bitset 优化，复杂度还可以达到 $O(\dfrac{n^3}w)$ ：
+
+\inputminted{cpp}{code/poj3660_floyd_bitset.cpp}
+
+拓展：如果要求出完整排序，可以判拓扑排序是否无环且能遍历到所有点，其完整排序就是拓扑排序序列
+
+\subsubsection{Bellman-Ford}
+
+不断尝试对图上每一条边进行松弛。我们每进行一轮循环，就对图上所有的边都尝试进行一次松弛操作，当一次循环中没有成功的松弛操作时，算法停止。复杂度 $O(nm)$ 。
+
+可以求出有负权的图的最短路，并可以对最短路不存在的情况进行判断。最严谨的做法是建立一个超级源点，向图上每个节点连一条权值为 0 的边，然后以超级源点为起点执行 Bellman-Ford 算法。若第 n 轮迭代仍有结点的最短路能被更新，则图中有负环
+
+\begin{notebox}
+洛谷P3385-多组样例，输入 $w$ 为正是无向边，负是有向边 ( $u\to v$ )，问是否存在从顶点 $1$ 出发可达的负环 $T\le10,\allowbreak{}1\le n\le2\times10^3,\allowbreak{}1\le m\le3\times10^3$
+\end{notebox}
+
+\inputminted{cpp}{code/ext_035.cpp}
+
+若求最长路，可以设初始值为 $-1$ (或负无穷)，松弛反号(起点不为 $-1$ 可以继续)。
+
+\subsubsection{SPFA}
+
+队列优化的 SPFA(某些随机图跑得很快) ，用途是判负环。最坏情况仍然是 $O(nm)$ (<u>堆/栈优化</u>可以被卡指数级复杂度)。记录最短路经过了多少条边，当经过了至少 n 条边时，说明 s 点可以抵达一个负环。在没有负权边时最好使用 Dijkstra 算法。下面是负环模板：
+
+\inputminted{cpp}{code/ext_036.cpp}
+
+求负环并输出方案：
+
+\inputminted{cpp}{code/ext_037.cpp}
+
+\subsubsection{Dijkstra}
+
+非负权图适用。从未确定最短路点集里选最短路最小节点移到已知点集里，把已知点集节点出边松弛。稀疏图二叉堆更优，稠密图暴力做法更优。
+
+暴力：(洛谷P3371) $O(n^2+m)$
+
+\inputminted{cpp}{code/ext_038.cpp}
+
+优先级队列优化：(洛谷P4771) $O(m\log m)$
+
+\inputminted{cpp}{code/ext_039.cpp}
+
+如果要输出路径本身，那么每次松弛时让 $v$ 指向起点 $u$ ；然后从终点倒序遍历这个指向数组，然后再顺着输出。如果要计数最短路数目，或求最短时点权最值最大的路径等，也在松弛时修改。(==时不用push)
+
+可以修改松弛条件，来求别的最短路，如路径最大边权最小的路：(也可以最小生成树上DFS)(SCNUOJ1458 / lc1631)
+
+\begin{adjustbox}{max width=\linewidth,center}
+$dis[j]=\min(dis[j],\max(dis[mink],ma[mink][j]))$
+\end{adjustbox}
+
+同理最大边权最大的最短路取 $dis=\infty$ ($dis_0=0$) 且：(lc1631)
+
+\begin{minted}{cpp}
+if(max(dist[u], w) < dist[v]) dist[v] = max(dist[u], w)
+\end{minted}
+
+非负权图跑 $n$ 次可以实现全源最短路，复杂度 $O(nm\log m)$ 。不能求单源最长路。
+
+\begin{notebox}
+lc2699-给定 $n(\le100)$ 点稠密图，有一些边边权不确定($-1$)，给出一种构造正边权方案，使得指定的两点单源最短路为特定值
+
+解法一：无解的充要条件：\cds{1}所有边赋 1 无解；\cds{2}所有边赋无穷无解。
+
+设在上述第一种情况跑出来的 $source$ 单源最短路是 $d_{i,0}$，当有解时，根据 dijkstra 的特性，只要按照 dijkstra 遍历顺序去修改边，就不会在修改后对已确定的最短路产生影响。
+
+所以在第一种情况下，再跑一遍 dijkstra，此时跑出的结果为 $d_{i,1}$，对可修改的边 $(u,v)$，设边权改为 $w$，则所求路径 $s\to \cdots\to x\to y\to\cdots\to t$ 由三部分组成：
+
+\begin{enumerate}
+\item $d_{x,1}$ 即 $s\to\cdots\to x$
+\end{enumerate}
+
+\begin{enumerate}
+\item $x\to y = w$
+\end{enumerate}
+
+\begin{enumerate}
+\item $y\to\cdots\to t$，如果 $y$ 确实在最短路上，对所有边赋 $1$ 的最短路是 $d_{t,0}$，其在后半段的最短路长度可以直接路径相减，即 $d_{t,0}-d_{y,0}$。
+
+如果 $y$ 不在最短路上，那么这次修改无效，可以直接忽略修改。
+
+要满足题意，即构造 $d_{x,\allowbreak{}1}+w+d_{t,\allowbreak{}0}-d_{y,\allowbreak{}0}=target$，即 $w=target-d_{t,\allowbreak{}0}+d_{y,\allowbreak{}0}-d_{x,\allowbreak{}1}$。
+\end{enumerate}
+\end{notebox}
+
+解法二：设可修改的边的权列表是 $w$，为书写方便令 $D=target$，则 $w$ 的所有可能性不超过 $O(D^2)$ 种，分别为：$[1,\allowbreak{}1,\allowbreak{}\cdots,\allowbreak{}1],\allowbreak{}[2,\allowbreak{}1,\allowbreak{}\cdots,\allowbreak{}1],\allowbreak{}\cdots,\allowbreak{}[D,\allowbreak{}1,\allowbreak{}\cdots,\allowbreak{}1],\allowbreak{}[D,\allowbreak{}2,\allowbreak{}\cdots,\allowbreak{}1],\allowbreak{}\cdots[D,\allowbreak{}D,\allowbreak{}\cdots,\allowbreak{}D]$ 种。
+
+注意到 $[1,D,\cdots,1]$ 这样的可能性不计，这是因为只用上述顺序在有解的情况下一定可以构造出，且每次增加总 $\sum w$ 为 $1$ 下，最多只增加 $1$ 的答案最短路长度。也就是说不需要指数级的所有可能性都枚举出来，只需要枚举所有可能性的一个特定 $D^2$ 子集就一定能覆盖到有解的情况。
+
+复杂度为 $O(2\log Dn^2)$。
+
+\subsubsection{Johnson}
+
+复杂度 $O(nm\log m)$ ，适用于所有图，能判负环
+
+\begin{notebox}
+洛谷P5905-有向，可能负边权、自环重边、卡SPFA $n(1\le n\le3\times10^3),\allowbreak{}m(1\le n\le6\times10^3,\allowbreak{}|w|\le3\times10^5)$ ，若负环输出 $-1$ ，否则输出 $n$ 行，设最短路为 $dis_{i,j}$ ，输出 $\sum_{j=1}^nj\times dis_{i,j}$ 。不存在路径设 $dis_{i,j}=10^9$  ，$dis_{i,i}=0$
+\end{notebox}
+
+\inputminted{cpp}{code/p5905_johnson.cpp}
+
+\subsubsection{差分约束}
+
+对 $n$ 个变量 $x_i$ 和 $m$ 个不等式 $x_i-x_j\le c_k,c_k\in R$，求一组解 $x$ 使得每个不等式都满足，或者判断无解。
+
+将其变为 $x_i\le x_j+c_k$，联想单源最短路三角不等式，所以对每个约束条件构造 $j\to i$ 的权为 $c_k$ 的有向边，且建立超级源点 $x_0$ 向每个点连权为 $0$ 的边。若负环无解，否则最短路数组 $-d$ 是一组解，这组解是最小的。注意到若 $x$ 是合法解，则 $x+C$ 也是合法解。用 Bellman-Ford / SPFA 即可，都是 $O(nm)$。
+
+构造技巧：
+
+\begin{enumerate}
+\item 如果有约束条件 $x_i=y_i$，等价于两个约束条件 $x_i\le y_i+0,y_i\le x_i+0$
+\item 如果有约束条件 $\dfrac{x_i}{x_j}\le c_k$，等价于 $\log x_i-\log x_j\le\log c_k$
+\item 反向差分约束，即全部改为 $x_i\ge x_j+c_k$ 连 $j\to i$ 的 $c_k$ 才能有超级源点的图，求最大的跑该不等式的 SPFA 最长路(类似于工程图最晚)，一般用于求最小解
+\item 要求 $\max(x_v-x_u)$，等价于求 $u$ 到 $v$ 的最短路；要求 $\min(x_v-x_u)$ 求 $u$ 到 $v$ 最长路(建的图不一样)
+\end{enumerate}
+
+\begin{notebox}
+P1260-给定 $n$ 个变量 $t$ 和 $m$ 个不等式 $t_i-t_j\le b$。问能否构造出 $t$ 或输出无解。输出构造非负解且至少一个 $0$。$n\le 10^3,\allowbreak{}m\le 5\times10^3,\allowbreak{}b\in(-100,\allowbreak{}100)$。
+\end{notebox}
+
+\inputminted{cpp}{code/p1260_diff_constraints.cpp}
+
+\begin{notebox}
+附：差分约束 P5960 模板题代码 (输入输出与本题类似，但任意解即可)
+
+\inputminted{cpp}{code/ext_040.cpp}
+\end{notebox}
+
+\subsection{拓扑排序}
+
+有向图存在环则无法进行拓扑排序。通常用的为 Kahn 算法，复杂度 $O(E+V)$
+
+下面程序判断有向图是否有环(含考虑非连通、自环、重边)
+
+\inputminted{cpp}{code/ext_041.cpp}
+
+如果要判无向图的环，把上面初始度(出+入)为 $1$ 的入队，当度剩 $1$ 时继续入队，最后剩 $2$ 度的在一个环内(如下蓝桥-发现环例题：求基环树环上所有节点编号)(也可以DFS做，遍历记录深度和prev，发现浅于自己的就不断走prev)
+
+\inputminted{cpp}{code/topo2.cpp}
+
+将队列改成最大堆/最小堆可以 $O(E+V\log V)$ 实现字典序最大/最小的拓扑排序
+
+拓扑排序可以求(从入度0开始的点的)有向图单源最长路。对其他同样入度 $0$ 的点，先把它们 BFS 一次删掉(预拓扑删掉它们带来的路径)
+
+\subsection{最小生成树}
+
+\subsubsection{kruskal}
+
+$O(m\log m)$ (在排序上)复杂度，对稀疏图较好，反向排序可以最大生成树，可以判无解
+
+(例题洛谷P3366)
+
+\inputminted{cpp}{code/ext_042.cpp}
+
+部分应用示例：
+
+\begin{itemize}
+\item (SCNUOJ1124)求最长边与最短边差值最小的最小生成树
+
+每次从第 $i$ 短边开始跑 Kruskal ，必然贪心地得到当前第 $i$ 短时最小的最长边。复杂度为 $O(m\log m+m^2)=O(m^2)$
+\end{itemize}
+
+\begin{itemize}
+\item (洛谷P4047) 给定 $n$ 点聚为 $m$ 类，求两类间最短距离最大值
+
+跑 Kruskal 直到还剩 $m$ 个连通块，此时生成树下一条边长就是答案
+\end{itemize}
+
+\subsubsection{prim}
+
+暴力 $O(n^2+m)$ ，二叉堆优化 $O((n+m)\log n)$ ， Fib 堆 $O(n\log n+m)$
+
+暴力：(适合完全图) (洛谷P1265 求坐标轴上点的最小生成树)
+
+\inputminted{cpp}{code/p1265_prim.cpp}
+
+二叉堆：
+
+\inputminted{cpp}{code/ext_043.cpp}
+
+\subsubsection{Borůvka}
+
+可以用于求解边权互不相同的无向图的最小生成森林。权值相同会导致两个连通块互相连的时候出现环，那么此时就需要再按照另一个维度严格排序，常用标号大小排序。即边权相同时，认为编号小的边短。复杂度 $O(m\log n)$ ，每次迭代连通块数量至少减半。
+
+\inputminted{cpp}{code/p3366_Boruvka.cpp}
+
+\subsubsection{严格次小生成树}
+
+\begin{notebox}
+洛谷P4180-可能含自环， $n\le10^5,m\le3\times10^5$ ，保证有解，边权 $[0,10^9]$ ，求严格次小生成树权值和
+\end{notebox}
+
+复杂度为 $O(m\log m)$ ，解法是 Kruskal + LCA + 倍增
+
+\inputminted{cpp}{code/p4180_less_mst.cpp}
+
+注：下述代码的 85-92 行改为 \mintinline{text}|ans = max(ans, mx[u][i]);| 即求非严格的次小生成树的代码。非严格次小生成树与最小生成树权值是否相同可以判断最小生成树是否唯一。(POJ1679) (对较小数据，可以暴力：)
+
+\begin{notebox}
+\inputminted{cpp}{code/poj1679_second_mst.cpp}
+\end{notebox}
+
+\subsection{连通性}
+
+\subsubsection{连通分量}
+
+无向图求连通分量：并查集 / DFS $O(n+m)$
+
+有向图求强联通分量：Tarjan 算法  $O(n+m)$
+
+求无向图割点：$u$ 为割点当\cds{1} $u$ 非根节点且 $\exists low_v\ge dfn_u$ \cds{2} $u$ 为根节点且儿子不少于 $2$ 个
+
+求无向图桥：修改 low ，限定非树边不能是子到父的反向边时，如果 p 是 q 的父节点，并且  $low_q\ge dfn_p$ ，那么 $p\leftrightarrow q$ 是桥
+
+有向图环缩点重建图：跑完 tarjan 后枚举边，不在同一强连通分量的在缩点图上连新边
+
+\begin{notebox}
+可以解决：求有向图可重复走边/点的最长路 (缩点图跑拓扑排序求最长路)
+\end{notebox}
+
+\hfive{强连通分量}
+
+\begin{notebox}
+洛谷P2863-给定有向图，求点数大于 $1$ 的强连通分量的个数
+\end{notebox}
+
+\inputminted{cpp}{code/ext_044.cpp}
+
+\hfive{割点}
+
+\begin{notebox}
+洛谷P3388-无向图(不保证连通)求割点数和按编号顺序输出每个割点
+\end{notebox}
+
+\inputminted{cpp}{code/ext_045.cpp}
+
+\hfive{桥}
+
+\begin{notebox}
+UVA796-求有向图桥数量并按字典序输出每个桥的端点
+\end{notebox}
+
+\inputminted{cpp}{code/uva796_bridge.cpp}
+
+\hfive{点双连通分量}
+
+\begin{notebox}
+P8435 $n(\le5\times10^5)$ 点 $m(\le2\times10^6)$ 边无向图，找出点双数量，输出每个点双的点
+\end{notebox}
+
+点双定义见下文圆方树
+
+\inputminted{cpp}{code/p8435_ppint_biconnect.cpp}
+
+\hfive{边双连通分量}
+
+定义为无向图上没有桥的极大连通图。
+
+\begin{notebox}
+牛客暑假7-L 给定带互异边权 $[-10^9,10^9]$ 的无向连通图 $3\le n\le m\le10^5$，求环上边权最大最小值差最大的差值，并以任意顺序时针输出该环
+\end{notebox}
+
+找环 $O(n)$，就是在边双上找最大和最小。然后用网络流输出方案。
+
+\inputminted{cpp}{code/ext_046.cpp}
+
+\subsubsection{圆方树}
+
+圆方树（Block forest 或 Round-square tree）是一种将图变成树的方法从而把一般图上的某些问题转化到树上考虑
+
+在圆方树中，原来的每个点对应一个 \textbf{圆点}，每一个点双对应一个 \textbf{方点}。 所以共有 $n+c$ 个点，其中 $n$ 是原图点数， $c$ 是原图点双连通分量的个数。
+
+而对于每一个点双连通分量，它对应的方点向这个点双连通分量中的每个点连边。 每个点双形成一个“菊花图”，多个“菊花图”通过原图中的割点连接在一起（因为点双的分隔点是割点）
+
+如果原图连通，则“圆方树”才是一棵树，如果原图有 $k$ 个连通分量，则它的圆方树也会形成 $k$ 棵树形成的森林。如果原图中某个连通分量只有一个点，则需要具体情况具体分析，我们在后续讨论中不考虑孤立点。
+
+点双是不存在割点的分量，一个点可能属于多个点双。使用 tarjan 算法求点双及每个点双包含的点。那么每个点双上的点都是圆点，连向一个新增的方点
+
+\subsubsection{2-SAT}
+
+\begin{notebox}
+洛谷P4782 有 $n$ 个布尔值变量 $x$ 和 $m$ 个要满足的条件 $x_i$ 为 $a$ 或 $x_j$ 为 $b$ ，构造一组解或报告无解 $1\le n,m\le10^6$
+\end{notebox}
+
+对每个变量 $x$ ，存两个点 $x,\lnot x$ 分别表示 $x$ 取 $1/0$ ，编号为 $i,i+n$ 。在建图后，同一强连通分量内变量值一定相等。若 $x,\lnot x$ 在同一 SCC ，那么一定无解。当 $x$ 所在 SCC 的拓扑序在 $\lnot x$ 所在 SCC 拓扑序之后的话令 $x$ 为真。复杂度 $O(n+m)$
+
+\inputminted{cpp}{code/p4782_2_sat.cpp}
+
+\subsection{匹配问题}
+
+\subsubsection{二分图}
+
+二分图性质：
+
+\begin{enumerate}
+\item 不存在长为奇数的环  (也是判定方法，直接点 DFS 染二色即可判断)
+\item 最小顶点覆盖数等于最大匹配数 $v(G)$
+\item 最大独立集数 $\alpha(G)=n-v(G)$
+
+转二分图：把每个点拆成两个点，分别加入二分图的两个点集，原图中一条由a到b的边在二分图中是一条由第一个点集中的第a个点到第二个点集中的第b个点
+\end{enumerate}
+
+\begin{notebox}
+POJ1422-多组测试，给定 $n$ 点 $m$ 边；可以用多少条路径覆盖全部边使得每个点仅被一条路径访问
+\end{notebox}
+
+DAG 最小不可相交路径覆盖 = $n-v(G)$
+
+对每条边按上文拆分，求得最大匹配 $v(G)$ ，答案为 $n-v(G)$
+
+\begin{notebox}
+POJ2594-给定有向图(可能零图)，求至少多少条路径可以遍历全部点
+\end{notebox}
+
+DAG 的最小可相交路径覆盖就先 floyd 求传递闭包，在闭包新图跑最大匹配，答案依然为 $n-v(G)$
+
+\subsubsection{最大匹配}
+
+匈牙利算法又名 KM 算法，邻接矩阵复杂度为 $O(n^3)$ ，邻接表为 $O(nm)$，可以求二分图最大匹配以及二分图最大权匹配(有完美时可求出完美)
+
+也可以使用网络最大流 Dinic 算法以 $O(\sqrt n m)$ 求出
+
+DFS 写法求二分图最大匹配数及其方案 (洛谷P2756-左部点权 $[1,m]$ ，右部 $[m+1,n]$ 若干条边)：
+
+\inputminted{cpp}{code/p2756_hungarian.cpp}
+
+\subsubsection{完美匹配}
+
+\begin{notebox}
+洛谷P6577-题面类似 $n_l=n_r$ ，求完美匹配(无重边，保证有完美匹配)
+\end{notebox}
+
+BFS 版本：(复杂度 $O(n^3)$ )
+
+对于允许非完美匹配的题目，我们允许选取虚边，也就是将虚边边权设为0即可
+
+\inputminted{cpp}{code/ext_047.cpp}
+
+\subsubsection{最大权匹配}
+
+\begin{notebox}
+UOJ80-左部点数 $n_l$ ，右部 $n_r$ ，编号依次 $1$ 开始， $m$ 条加权边，求最大权匹配以及第 $i$ 个左部点匹配哪个右部点 ( $0$ 代表无匹配)
+\end{notebox}
+
+BFS写法
+
+\inputminted{cpp}{code/uoj80_hungarian.cpp}
+
+\subsubsection{最小边覆盖}
+
+\begin{notebox}
+lc1595-求最小边覆盖(用权和最小的边集覆盖所有的点)
+\end{notebox}
+
+最小权边覆盖可以转化为最小权匹配。边覆盖=匹配+额外边。
+
+额外边是加了之后只多覆盖一个点的边，对不在匹配的每个点，选择最小的边，不会影响其他不在匹配的点。对邻接矩阵，二分图左边第 $i$ 个点的最优额外边是 $\min e_{i,:}$，右边第 $j$ 个点的最优额外边是 $\min e_{:,j}$。即分别为行列最小值。
+
+显然一种较差的解是每个点都直接选择最小的额外边，称为基本解。在基本解的前提下，引入匹配，每加入一条匹配边 $(u,v)$，首先去掉了两边的额外边，再加上这条边的边权，即 $e_{i,\allowbreak{}j}-\min e_{i,\allowbreak{}:}-\min e_{:,\allowbreak{}j}$。在费用网络流建立一个流量为 $1$，费用为上述值的边。然后源点跟左边、右边跟汇点都连流量为 $1$ 费用为 $0$ 的边，即求朴素的最小权匹配。
+
+使用 MCFN，复杂度为 $O(\min(n,m)^2\max(n,m))=O(n^3)$。
+
+一个包装良好的复杂长板子：
+
+\begin{notebox}
+前置依赖：
+
+\inputminted{cpp}{code/ext_048.cpp}
+
+网络流算法：
+
+\inputminted{cpp}{code/ext_049.cpp}
+\end{notebox}
+
+本题代码：
+
+\inputminted{cpp}{code/ext_050.cpp}
+
+\subsection{网络流}
+
+\subsubsection{最大流}
+
+洛谷P3376为例
+
+\hfive{EK 算法 }
+
+$O(nm^2)$
+
+\inputminted{cpp}{code/p3376_ek.cpp}
+
+\hfive{Dinic算法}
+
+最坏 $O(n^2m)$ ，二分图 $O(\sqrt nm)$ ，以下代码可解决自环
+
+若输出方案，
+
+\inputminted{cpp}{code/ext_051.cpp}
+
+\subsubsection{最小费用最大流}
+
+\begin{notebox}
+洛谷P3381-输入边及其流量限制、单位流量费用；输出最大流以及在最大流量时的最小费用(无负费用)( $1\le w,\allowbreak{}c\le10^3,\allowbreak{}1\le n\le5\times10^3,\allowbreak{}1\le m\le5\times10^4$ )
+\end{notebox}
+
+\inputminted{cpp}{code/p3381_mcmf.cpp}
+
+\begin{notebox}
+牛客2022暑假集训10-E 有 $n(1\le n\le400)$ 人 $m(1\le m\le400)$ 稿。若 $a_{ij}=1$ 则第 $i$ 人可读第 $j$ 稿。每人只能读一篇稿。问是否存在分配方案使得每人都能读稿(不能输出 \mintinline{text}|-1|)，在此前提下输出使得最大化每篇稿被读次数的方案。
+\end{notebox}
+
+最小费用最大流。不考虑费用时显然源点向每个人连一条流量为 $1$ 的边，每个人向他能读的稿连流量为 $1$ 的边，而每篇稿子向汇点连流量为入度的边。显然，题意无解即有人没读到，即流量不为 $n$。所有有解都是没人读一篇稿，接下来就是稿的分配了，要使得每稿尽可能多人。但这样建图只能最大化流量，即使得总流量最大，而总流量最大不能保证最小流量最大。为此，将流向汇点的流量为入度的边拆分为若干条流量为 $1$，代价递增的边。这样可以在总流量最大的情况下，让分配更加地平均。
+
+\inputminted{cpp}{code/min_cost_max_flow.cpp}
+
+\subsubsection{最小割}
+
+\begin{notebox}
+SCNUOJ1975-给定 $n,\allowbreak{}m(2\le n\le10^n,\allowbreak{}1\le m\le10^5)$ 的有向简单连通图，保证点 $1$ 对 $n$ 可达且任意 $1<x<n$ 出入度均不为零。求删掉最少多少边使得 $1,n$ 不连通并输出方案。
+\end{notebox}
+
+割将原点和汇点分在两个不同点集的点划分方案，容量为分属两点集的边的数目。本题显然是最小割模板。
+
+最大流最小割定理：能够从源点到达汇点的最大流量等于从网络中移除导致网络流中断的边集的最小容量和。
+
+Dinic $O(n\sqrt m)$，残余网络搜索有流量的可达边集及其反集，连接两集合的边可删。
+
+\inputminted{cpp}{code/ext_052.cpp}
+
+\subsection{杂项}
+
+\subsubsection{欧拉图}
+
+欧拉路径：经过每条边一次且仅一次的路径(起点不为终点)
+
+欧拉回路：经过每条边一次且仅一次的回路
+
+有向图欧拉路径：恰好存在一个点出度比入度多一(起点)，一个点入度比出度多一(终点)，其他点入度与出度相同
+
+有向图欧拉回路：所有点入度=出度，起点和终点任选
+
+无向图欧拉路径：恰好存在 $2$ 点度数是奇数(分别是起点终点)，其他点度数是偶数
+
+无向图欧拉回路：所有点度数是偶数(起点终点任选)
+
+若存在欧拉回路也一定存在欧拉路径
+
+此外，还应该判定图是否是连通图(满足上面条件也有非连通图)显然可以用并查集来做。
+
+具有欧拉回路的无向或有向图是欧拉图；具有欧拉通路而不具有回路的是半欧拉图。(直观理解回路即任意点开始可以一笔画完图；通路只有特定点开始可以)
+
+\begin{notebox}
+洛谷 P7771 输出 $n,m$ 有向图的最小字典序欧拉路径，若不存在输出 \mintinline{text}|No| $1\le n\le10^5,\allowbreak{}1\le m\le2\times10^5$
+\end{notebox}
+
+下面代码模板没有判定联通，要判并查集/tarjan即可
+
+\inputminted{cpp}{code/p7771_euler_path.cpp}
+
+\begin{notebox}
+P2731洛谷-给定无向图边数 $m$ ，点在 $[1,500]$ 编号，必然有解且联通，输出字典序最小欧拉路
+\end{notebox}
+
+\inputminted{cpp}{code/p2731_euler_path.cpp}
+
+\subsubsection{哈密顿图}
+
+哈密顿通路：经过图中所有顶点一次且仅一次的通路
+
+哈密顿回路：经过图中所有顶点一次且仅一次的回路
+
+具有哈密顿回路的图为哈密顿图
+
+具有哈密顿通路，不具有哈密顿回路的图为半哈密顿图
+
+设 $p(x)$ 是图 $x$ 的连通分支数，对哈密顿图任意非空子集 $V_1$，均有 $p(G-V_1)\le |V_1|$。对半哈密顿图有 $p(G-V_1)\le |V_1|+1$
+
+完全图 $K_{2m+1}(m\ge1)$ 含 $m$ 条边不重的哈密顿回路，且加起来含完全图中所有边。完全图 $K_{2m}(m\ge 2)$ 含 $m-1$ 条边不重的哈密顿回路，删掉全部回路后所得图含 $m$ 条互不相邻边。
+
+充分条件：对无向简单图 $G(|V|\ge 2)$，若任意不相邻顶点 $v_i,v_j$ 度数满足 $d(v_i)+d(v_j)\ge n-1$ 则存在哈密顿通路。若 $|V|\ge $3 且满足 $d(v_i)+d(v_j)\ge n$ 则存在哈密顿回路。若任意顶点均有 $d(v_i)\ge\dfrac n2$ 则存在哈密顿回路。
+
+$n\ge 2$ 阶竞赛图具有哈密顿通路，含竞赛图子图也具有哈密顿通路。强联通竞赛图有哈密顿回路。含强联通竞赛图作为子图具有哈密顿回路。
+
+已经证明“判断一个图存不存在哈密顿回路”是NPC。
+
+\subsubsection{竞赛图}
+
+兰道定理：判定竞赛图。设比分序列是竞赛图出度排序后的序列 $s$，序列能是竞赛图当且仅当
+
+\begin{adjustbox}{max width=\linewidth,center}
+$\forall1\le k\le n,\sum_{i=1}^ks_i\ge\dbinom k2$
+\end{adjustbox}
+
+且 $k=n$ 时必须取等。注意并不是说 $s$ 每个还原图都是竞赛图，只是证明存在至少一种正确。
+
+竞赛图如果存在环，至少是三元环。
+
+\section{动态规划}
+
+\subsection{模板}
+
+\subsubsection{背包问题}
+
+\textbf{01背包}：
+
+\begin{minted}{cpp}
+for (int i = 1; i <= n; i++) //W容量 v价值
+  for (int l = W; l >= w[i]; l--) f[l] = max(f[l], f[l - w[i]] + v[i]);
+\end{minted}
+
+\begin{notebox}
+方案数：(洛谷P1164)
+
+\begin{minted}{cpp}
+dp[0]=1;
+for(int i=0;i<n;++i)
+    for(int j=m-a[i];j>=0;--j) 
+        dp[j+a[i]] += dp[j];
+\end{minted}
+\end{notebox}
+
+\textbf{完全背包}：(可以选取无限次) (将01背包第二维修改顺序即可)
+
+\begin{minted}{cpp}
+for (int l = w[i]; l <= W; l++)
+\end{minted}
+
+\textbf{多重背包}：(每种物品有 $k_i$ 个) 将 $k_i$ 拆分为 $2^i$ ，然后用 01 背包解决
+
+二维费用背包：(有两个重量维度) (加一层循环, 加一维数组枚举, 同 01 背包解决)
+
+\textbf{分组背包}：(每组内物品冲突，只能选组内一个)
+
+\begin{minted}{cpp}
+for (int k = 1; k <= ts; k++)          // 循环每一组
+  for (int i = m; i >= 0; i--)         // 循环背包容量
+    for (int j = 1; j <= cnt[k]; j++)  // 循环该组的每一个物品
+      if (i >= w[t[k][j]])
+        dp[i] = max(dp[i],
+                    dp[i - w[t[k][j]]] + c[t[k][j]]);  // 像0-1背包一样状态转移
+\end{minted}
+
+\textbf{依赖背包}：将依赖关系转化为分组关系，用分组背包求
+
+\subsubsection{字符DP}
+
+\begin{notebox}
+atcoder-contest122-d 求有多少长为 $n$ ，只含字符 \mintinline{text}|ACGT| 且满足 \cds{1}无子串 \mintinline{text}|AGC| \cds{2} 交换相邻两位仍无子串 \mintinline{text}|AGC| ; 对 $10^9+7$ 取模
+\end{notebox}
+
+设$dp[h][i][j][k]$是长为$h$且最后一、二、三个字符分别为$i,j,k$的字符串的答案 $O(n4^4)$
+
+\inputminted{cpp}{code/ext_053.cpp}
+
+\subsubsection{树上DP}
+
+\begin{notebox}
+$n$ 点有点权树, 选当前节点就不能选全部直接子节点,求选择方案使得点权和最大,输出最大值(洛谷P1352)
+\end{notebox}
+
+设 $dp[i][j]$ , $j=0$ 表示不选 $i$ 时 $i$ 子树最大值; $j=1$ 表示选 $i$ 时 $i$ 子树最大值
+
+\inputminted{cpp}{code/p1352_dp_on_tree.cpp}
+
+\subsubsection{区间DP}
+
+区间 DP 的复杂度是 $O(n^3)$
+
+\begin{notebox}
+洛谷P1880-(a,b)合并获得值a+b，若干石子成环(数大于等于0)的最大最小值
+\end{notebox}
+
+\inputminted{cpp}{code/p1880_dp_on_interval.cpp}
+
+\begin{notebox}
+P1063洛谷-如果前一颗能量珠的头标记为m，尾标记为r，后一颗能量珠的头标记为r，尾标记为n，则聚合后释放的能量为m×r×n，新产生的珠子的头标记为m，尾标记为n。给出成环的n和各个标记，求最大能量
+\end{notebox}
+
+\inputminted{cpp}{code/p1063_dp_on_interval.cpp}
+
+\subsubsection{状压DP}
+
+枚举每个二进制状态，并降序枚举每个状态的子集状态，复杂度为 $O(3^n)$
+
+\begin{minted}{cpp}
+for (int m = 0; m < (1 << n); ++m)// 降序遍历 m 的非空子集
+  for (int s = m; s; s = (s - 1) & m) // s 是 m 的一个非空子集
+\end{minted}
+
+\begin{notebox}
+洛谷P1896-在 $n\times n$ 格子放 $k$ 人，每人周围八方向不得有人，求方案数 $1\le n\le9,0\le k\le n^2$
+\end{notebox}
+
+设每一行的状态为 $j$ ，即 $n$ 个 $0/1$ 组合的 $2^n$ 个状态，设 $dp[i][j][k]$ 表示只考虑前 $i$ 行，第 $i$ 行的分布为 $j$ ，已经放置了 $k$ 个人的方案数；先暴力处理一行内所有可能的情况(某状态对应多少个人)
+
+复杂度 $O(2^n+n2^{2n})$
+
+\inputminted{cpp}{code/p1896_dp_on_state.cpp}
+
+\subsubsection{数位DP}
+
+\begin{notebox}
+lc233-问 $[1,n](n\le 10^9)$ 的整数出现了多少个 $1$
+\end{notebox}
+
+$f$ 是从左到右构造好了 $i$ 个位，造好里已经出现了 $cnt_1$ 个 $1$，当前位是否被 $n$ 限制。$dp$ 是已造好 $i$ 个位，出现了 $j$ 个 $1$ 的答案。$O(\log^2n)$。
+
+\inputminted{cpp}{code/ext_054.cpp}
+
+\begin{notebox}
+牛客2022寒假第五场D-求区间 $[l,r]$ 内满足如下条件的数字个数\cds{1}相邻两数位和是素数 \cds{2}至少有一个数位1 \cds{3}无前导0 $1\le l\le r\le10^{10}$
+\end{notebox}
+
+设 $dp[i][j][k]$ 表示从个位开始数的 i 位，最大的位数字是 j ， k 表示是否出现过 1，相邻数位和都是数组的方案数，即 $i$ 位数区间 $[\overline{j0\cdots 0},\allowbreak{}\overline{j9\cdots 9}]$ 范围
+
+根据定义，初始化为 $dp[1][1][1]=1$ , $dp[1][j][0]=1 (0\le j\le 9,\allowbreak{} j\neq 1)$ ，表示十个个位数的情况
+
+递推方程为若 $j+j'$ 是素数，那么 $k'=k\cup k'\cup j==1\cup j'==1$  时可以加上去(具体看代码)
+
+特别地，设 $dd[i]$ 表示区间 $[1,10^{i-1}-1]$ 的答案，则：
+
+\begin{adjustbox}{max width=\linewidth,center}
+$dd[i]=dd[i-1]+\sum_{j=1}^9dp[i-1][j][1]$
+\end{adjustbox}
+
+对 $[1, r]$ 的区间内的答案计数，对 $r=\overline{a_k\cdots a_2a_1}$ ，先用 $dd[k]$ 计数前 $k$ 位数的答案，然后讨论 $k$ 位数答案，对第 $i$ 位，$> i$ 的位都取 $r$ 值即 $a_h(h > i)$，第 $i$ 位进行枚举 $[0, a_i)$ ，得到一个范围内的答案；注意若 $> i$ 时出现过 $1$ ，则 $dp$ 第三维度任取，否则只能取 $1$
+
+答案为 $[1,r]$ 内答案减去 $[1,l-1]$ 内答案
+
+\inputminted{cpp}{code/nk2022w5D_dp_on_digit.cpp}
+
+\subsection{杂项}
+
+\subsubsection{最长公共子序列}
+
+LCS, 如abcbdab,bdcaba的最长子序列是bcba
+
+\inputminted{cpp}{code/ext_055.cpp}
+
+\subsubsection{编辑距离}
+
+\begin{notebox}
+lc72-有字符串x,y；每次只能进行如下编辑的一种：删除/插入/修改一个字符，求最小编辑次数，使x=y。
+\end{notebox}
+
+定义$dp[i][j]$表示将长为i的x子串编辑为长为j的y子串的编辑距离。
+
+\begin{minted}{cpp}
+int minDistance(string s, string t) {
+    int n = s.length(), m = t.length(), f[2][m + 1];
+    for (int j = 0; j <= m; ++j) f[0][j] = j;
+    for (int i = 0; i < n; ++i) {
+        f[(i + 1) % 2][0] = i + 1;
+        for (int j = 0; j < m; ++j)
+            f[(i + 1) % 2][j + 1] = s[i] == t[j] ? f[i % 2][j] : min(min(f[i % 2][j + 1], f[(i + 1) % 2][j]), f[i % 2][j]) + 1;
+    }
+    return f[n % 2][m];
+}
+\end{minted}
+
+\subsubsection{约瑟夫问题}
+
+$n$ 人从 $1$ 开始编号排列成环，每次数到第 $q$ 个人杀掉，求最后活着的人编号
+
+当 $q=2$ 时，$n=2^k, J=1$ ，否则 $J(2^k+t)=2t+1$ (做掉$t$人后，变成了一个$2^k$环，在这个$2^k$环上，最后活下来的是环的第一个人)
+
+一般情况(设编号从 $0$ 开始)： $J_{n,q}=(J_{n-1,q}+q)\bmod n$ ，初始状态为 $J_{1,q}=0$
+
+\section{字符串}
+
+\subsection{字符串哈希}
+
+\begin{adjustbox}{max width=\linewidth,center}
+$\begin{cases}
+h(1)=s_1\\
+h(i)=h(i-1)\times p+s_i\quad ,i > 1
+\end{cases}\bmod2^{64}$
+\end{adjustbox}
+
+\begin{adjustbox}{max width=\linewidth,center}
+$h(x)=\sum_{i=1}^{x}s_i\cdot p^{x-i}=s_1p^{x-1}+s_2p^{x-2}+\cdots +s_xp^0\bmod2^{64}$
+\end{adjustbox}
+
+对子串 $S[l..r]$ ，有  $h(S[l..r])=h(S[1..r])-h(S[1..l-1])\times p^{r-l+1}$
+
+\begin{notebox}
+以字符串匹配为例 SCNUOJ1713 求 $s$ 里 $t$ 的每个出现位置下标
+\end{notebox}
+
+\inputminted{cpp}{code/ext_056.cpp}
+
+\subsection{KMP}
+
+$\pi(x)$ 是长为 $x$ 的子串最长真前缀与真后缀相等的长度；无解为 $0$
+
+\begin{notebox}
+以字符串匹配为例 SCNUOJ1713
+\end{notebox}
+
+\inputminted{cpp}{code/ext_057.cpp}
+
+应用：
+
+\begin{itemize}
+\item 定义 $\exists p\in N,\allowbreak{}\forall i\in [1,\allowbreak{}|S|-p]$ 都有 $S[i]=S[i+p]$ ，那么 $p$ 是 $S$ 的周期，则最短周期为 $|S|-\pi(|S|)$ (SCNUOJ1716)
+
+定义 $S$ 的 border 是前缀和后缀相等的一段前缀。所有 border 长度为 $\pi(|S|),\pi(\pi(S)),\cdots$ 。周期数等于 border 数且串长-周期长度=border长度。
+\end{itemize}
+
+\begin{itemize}
+\item 串 $S$ 的每个真前缀在串 $S$ 出现次数：(SCNUOJ1717)
+
+\begin{minted}{cpp}
+fill(ans + 1, ans + 1 + n, 1);
+for (ll i = n; i >= 1; --i)
+    ans[kmp[i]] += ans[i];
+\end{minted}
+
+串 $S$ 的每个真前缀在串 $T$ 出现次数：(SCNUOJ1718)
+
+重构 $S=S+$ \mintinline{text}|#| $+T$ ，继续执行上述过程 ( $n'=n+m+1$ )，取 $ans_{1..n}$
+\end{itemize}
+
+\begin{itemize}
+\item 将 $s$ 拼接最小长度字符串使其成为回文串 (lc214)
+
+设 $s$ 为模式串，$s'$ (逆)为原串，用 KMP 在 $s'$ 里匹配出最长的 $s$ 前缀，就是最长的回文串。也可以 manacher 或字符串哈希做
+\end{itemize}
+
+\begin{itemize}
+\item 环上长为 $n$ 的回文串数目(多边形对称轴)  (p3454)
+
+二倍长链 $s$ 并求单倍长逆 $t'$，求 $s$ 中 $t'$ 的数目
+\end{itemize}
+
+\subsection{manacher}
+
+\begin{notebox}
+洛谷P3805-只由小写英文字符组成，求：最长回文子串长度
+\end{notebox}
+
+\inputminted{cpp}{code/ext_058.cpp}
+
+回文子串数目：$\sum\lfloor\dfrac{p_i}2\rfloor$。
+
+最长回文前缀：$i-p_i+1=1$ 时更新最值为 $2p_i-1$。
+
+长为 $2k$ 的回文串数目(p3454)：\mintinline{text}|for(int i=2*k+1;i<=4*k;i++)res+=(p[i]>=n);|
+
+\subsection{字典树}
+
+\begin{notebox}
+主要是01字典树相关的一些总结。
+\end{notebox}
+
+对多个数 $a$ 找一个数 $a_i$ 使得所有 $a$ 里 $a_i$ 异或指定数 $k$ 得到的值 $r$ 最大：
+
+对这些数 $a$ 建立01trie，然后以 $k$ 遍历 trie ，贪心选择与 $k$ 二进制数位相反的路径
+
+\begin{minted}{cpp}
+ll res = 0, u = rt; //取字典树根节点
+for(ll i = 11; i >= 0; --i)
+{
+    ll c = (k >> i) & 1; //k的第i位是c
+    if (ch[u][c ^ 1]) //存在该位相反的数a,异或得1<<i
+        u = ch[u][c ^ 1], res += (1 << i);
+    else u = ch[u][c];//不存在
+} //伪代码
+\end{minted}
+
+\subsection{AC自动机}
+
+失配指针：状态 $u$ 的失配指针 $fail$ 指向另一个状态 $v$ ，满足 $v$ 是 $u$ 的最长后缀。复杂度 $O(Cn)$
+
+\begin{notebox}
+洛谷P3808-求有多少个模式串在主串出现过(模式串和,主串长度 $\le10^6$ )
+\end{notebox}
+
+\inputminted{cpp}{code/p3808_ac_automaton.cpp}
+
+\begin{notebox}
+洛谷P3796-求所有出现次数最多的字符串(每个模式串长度不超过 $70$ )
+\end{notebox}
+
+思路：对模式串AC自动机，对主串遍历时每个遍历到的节点，不断跳 fail ，跳到的点对应的模式串出现次数都加一，复杂度 $O(70n+Cn)$
+
+\begin{notebox}
+洛谷P5357-求每个模式串的出现次数，模式串总长度不超过 $2\times10^5$
+\end{notebox}
+
+思路：在P3796基础上，对模式串 $T$ 去个重。建自动机时，把每个真实连接的 fail 指针(而不是失配 fail) 指向的节点增加一个入度，使用拓扑排序跳 fail ，复杂度 $O(|S|+26|T|)$
+
+\inputminted{cpp}{code/p5357_ac_automaton.cpp}
+
+\subsection{后缀数组}
+
+\subsubsection{基础}
+
+下标从 $1$ 开始，后缀 $i$ 表示以第 $i$ 个字符开头的后缀。后缀间大小比较依据是字典序
+
+数组 \mintinline{text}|sa[i]| 表示将所有后缀排序后第 $i$ 小后缀的编号
+
+数组 \mintinline{text}|rk[i]| 表示后缀 $i$ 的排名
+
+满足性质： \mintinline{text}|sa[rk[i]] == rk[sa[i]] == i|
+
+定义 $LCP(x,y)$ 为后缀 $x,y$ 的最长公共前缀
+
+定义 \mintinline{text}|height[i]| ： 为 $LCP(sa[i],sa[i-1])$ ，规定 $height[1]=0$
+
+定义：\mintinline{text}|H[i]| : 为 $height[rk[i]]$
+
+性质： $H[i]\ge H[i-1]-1$
+
+洛谷P3809 $|S|\le10^6$ ; 复杂度 $O(n\log n)$
+
+\inputminted{cpp}{code/p3809_suffix_array.cpp}
+
+$O(n)$ 求 height 数组：
+
+\begin{minted}{cpp}
+for (i = 1, k = 0; i <= n; ++i) {
+  if (rk[i] == 0) continue;
+  if (k) --k;
+  while (s[i + k] == s[sa[rk[i] - 1] + k]) ++k;
+  height[rk[i]] = k;
+}
+\end{minted}
+
+应用：
+
+\begin{itemize}
+\item 字符串匹配：模式串 $T$ 若出现必然是主串 $S$ 后缀的前缀，二分 $sa$ ，复杂度为 $O(|T|\log|S|)$ ，可以一并求出出现次数和位置
+\item 字典序最大子串：必然是一个后缀，对全体后缀跑后缀数组即可
+\item 求两字符串的最长公共子串：将其拼接起来，求 height数组最值(取得 height 的两项要求一个在左原串一个在右)
+\item 求循环同构串里字典序最小的 (最小表示法算法的第二解法) (可以离散化)
+\item 两子串的最长公共前缀 $lcp(sa[i],\allowbreak{}sa[j])=\min(height[i+1..j])$
+\item 比较两个子串的大小关系： $A=S[a..b],B=S[c..d]$ ，若 $lcp(a,\allowbreak{}c)\ge \min(|A|,\allowbreak{}|B|)\text{，}A < B\Leftrightarrow |A|<|B|$ ，否则 $A < B\Leftrightarrow rk[a] < rk[c]$
+\item 本质不同的子串的数目 $\dfrac{n(n+1)}2-\sum_{i=2}^nheight[i]$
+\item 出现至少 k 次的子串的最大长度：出现至少 k 次意味着后缀排序后有至少连续 k 个后缀的 LCP 是这个子串。所以，求出每相邻 k-1 个 height 的最小值，再求这些最小值的最大值就是答案。可以使用单调队列 $O(n)$ 解决
+\item 是否有某字符串在文本串中至少不重叠地出现了两次：可以二分目标串的长度 |s|，将 h 数组划分成若干个连续 LCP 大于等于 |s| 的段，利用 RMQ 对每个段求其中出现的数中最大和最小的下标，若这两个下标的距离满足条件，则一定有长度为 |s| 的字符串不重叠地出现了两次
+\item 连续的若干个相同子串：枚举连续串的长度 |s| ，按照 |s| 对整个串进行分块，对相邻两块的块首进行 LCP 与 LCS 查询
+\end{itemize}
+
+\subsubsection{LCP}
+
+\begin{notebox}
+例：求 LCP 和 LCS(两前缀的最长公共后缀)
+\end{notebox}
+
+\inputminted{cpp}{code/ext_059.cpp}
+
+用单调栈线性求 $\sum_{1\le i < j\le n}lcp(i,j)$，意义：任选两个不同位置子串，子串相同的方案数。一种实现：
+
+\inputminted{cpp}{code/ext_060.cpp}
+
+\subsubsection{SA-IS}
+
+时空复杂度 $O(n)$
+
+\begin{notebox}
+例：牛客2022暑假3H，长为 $n(n\le 10^5)$ 的 $A$ 串对应权值序列 $v(|v_i|\le10^9)$，有 $k$ 个询问，每次问长为 $m(m,k\le10^5,mk\le10^6)$ 的 $B$ 串所有子串能匹配到所有 $A$ 的子串区间里，区间和最大值
+\end{notebox}
+
+后缀数组求高度数组 lcp，即第 $i$ 大后缀与第 $i+1$ 大后缀的最长公共前缀，在其上面建立 ST 表，可求任意两后缀的 LCP 为 $query_{\min}(rank_x,\allowbreak{} rank_y - 1)$，假设 $rank_x < rank_y$。
+
+对 $B_i$ 的每个位置 $j(1\le j\le m)$，求 $j$ 开始的最长子串，且在 A 出现过，即找到最长 $len$，满足 $B[j..j+len-1]$ 是 $A$ 子串。再找 $j$ 为左端点，长在 $len$ 内所有区间权值和最大值，即 $\max(\sum_{k=j}^lv_k)(j\le l\le j+len-1)$。这部分对数组 $v$ 前缀和数组建 ST 表，求 $[j,j+len-1]$ 区间最大值。
+
+将 $A$ 和所有 $B_i$ 以 \mintinline{text}|$| 或其他不在字符集的分割符连起来得到 $S$，对 $S$ 跑后缀数组，维护每个 $B_i$ 在 $S$ 的起始下标，第 $i$ 个字符对应原来哪个串。(注意 $A,B$ 间用别的分割符)
+
+按字典序遍历所有后缀，可以知道当前后缀对应哪个 $B_i$ 或 $A$，若当前后缀对应 $B_i$，找到离它最近的属于 $A$ 的后缀，求 $lcp$ 即上文的 $len$。
+
+\inputminted{cpp}{code/sa_is.cpp}
+
+\subsection{后缀自动机}
+
+构造时空复杂度 $O(n)$ ，在线算法
+
+\begin{notebox}
+洛谷P3804-求出现次数不为 $1$ 的子串的出现次数乘长度的最大值
+\end{notebox}
+
+\inputminted{cpp}{code/ext_061.cpp}
+
+\subsection{FFT字符串匹配}
+
+字符串 $A$ 与 $B$ 以第 $x$ 位结束的连续 $m$ 位完全匹配可以表示为：(从 $0$ 开始下标)
+
+\begin{adjustbox}{max width=\linewidth,center}
+$P(x)=\sum_{i=0}^{m-1}[A(i)-B(x-(m-1)+i)]^2$
+\end{adjustbox}
+
+设 $S(x)=A(m-x-1)$ ，则：
+
+\begin{adjustbox}{max width=\linewidth,center}
+$\begin{gathered}
+P(x)=\sum_{i=0}^{m-1}[S(m-i-1)-B(x-m+i+1)]^2\\
+=\sum_{i=0}^{m-1}S(i)^2+\sum_{i=x-m+1}^xB(i)^2-2\sum_{i+j=x}S(i)B(j)
+\end{gathered}$
+\end{adjustbox}
+
+设通配符的ASCII为$0$，则：
+
+\begin{adjustbox}{max width=\linewidth,center}
+$C(x,y)=[A(x)-B(y)]^2A(x)B(y)$
+\end{adjustbox}
+
+完全匹配函数即：
+
+\begin{adjustbox}{max width=\linewidth,center}
+$\begin{gathered}
+P(x)=\sum_{i=0}^{m-1}C(i,x-m+i+1)\\
+=\sum_{i+j=x}S(i)^3B(j)+\sum_{i+j=x}S(i)B(j)^3-2\sum_{i+j=x}S(i)^2B(j)^2
+\end{gathered}$
+\end{adjustbox}
+
+带幂的可以先预处理每一项的系数做幂运算。伪代码如下：
+
+\inputminted{cpp}{code/ext_062.cpp}
+
+\begin{notebox}
+给定带通配符\mintinline{text}|*|的字符串$a,b,|a|=m,|b|=n$，下标从$1$开始，求$a$的首位作为$b$的第$k$位时能够匹配的所有解和解数目。$1\le m\le n\le3\times10^5$
+\end{notebox}
+
+对 $b$ ，设$P(i)$，一共需要计算$m-n+1$个$P$。事实上，卷积的时候，由于计算的是所有$i\times j$,然后对于某一次只取$i+j=C$的，那么可以对计算出来的结果一次FFT计算后分别累加到不同的$P$上。
+
+\inputminted{cpp}{code/string_fft.cpp}
+
+\subsection{子序列自动机}
+
+对 $S$ 每个字符，升序记录它出现的位置，设字符 $i$ 出现的位置的集合为 $pos_i$。
+
+判断 $T$ 是否是 $S$ 的子序列，每次二分找 $T_i$ 在上一次匹配 $S_j$ 后的最近下标，如果一直能找到则是子序列。复杂度取 $T\log |S|$。
+
+\begin{notebox}
+P5826-字符集大小 $10^5$，$|S|\le10^5,\sum |T|\le 10^6$。上述问题。
+\end{notebox}
+
+\inputminted{cpp}{code/p5826_seg_automaton.cpp}
+
+第二种建图方式：$nxt_{i,j}$ 表示 $i$ 位置后的第一个 $j$ 的位置，$0$ 是根节点。
+
+\begin{minted}{cpp}
+for(LL i=n;i>=1;--i){
+    for(LL j=1;j<=a;++j) nxt[i-1][j]=nxt[i][j];
+    nxt[i-1][s[i]]=i;
+}
+\end{minted}
+
+\begin{notebox}
+当字符集较大时，可套用可持久化，在叶子节点放一个 id，表示出边。
+\end{notebox}
+
+将 $T$ 输入自动机，可以检验是否是子序列。
+
+求本质不同子序列个数：记忆化 DFS，设 $x$ 的 DFN 子树有 $f_x$ 个子序列，答案为 $f_0$，转移为 $f_u=1+\sum f_v$。非空就 $f_0-1$。
+
+\inputminted{cpp}{code/lc940_seg_automaton.cpp}
+
+求两串公共子序列个数，类比且一下：
+
+\begin{minted}{cpp}
+LL Dfs(LL x,LL y){
+    if(f[x][y]) return f[x][y];
+    for(LL i=1;i<=a;++i)
+        if(nxt1[x][i]&&nxt2[y][i])
+            f[x][y]+=Dfs(nxt1[x][i],nxt2[y][i]);
+    return ++f[x][y];
+}
+\end{minted}
+
+回文子序列
+
+\begin{minted}{cpp}
+LL Dfs(LL x,LL y){
+  if(f[x][y]) return f[x][y];
+  for(LL i=1;i<=a;++i)
+    if(nxt1[x][i]&&nxt2[y][i]){
+      if(nxt1[x][i]+nxt2[y][i]>n+1) continue;
+      if(nxt1[x][i]+nxt2[y][i]<n+1) f[x][y]++;
+      f[x][y]=(f[x][y]+Dfs(nxt1[x][i],nxt2[y][i]))%mod;
+    }
+  return ++f[x][y];
+}
+\end{minted}
+
+\subsection{最小表示法}
+
+\begin{notebox}
+可以用 SAM, SA, Lyndon 分解等做
+\end{notebox}
+
+求循环同构串里字典序最小的串，复杂度 $O(n)$
+
+\inputminted{cpp}{code/p1368_minimal_string.cpp}
+
+\subsection{Lyndon分解}
+
+\begin{notebox}
+SAM 也可以做 Lyndon 分解
+\end{notebox}
+
+对于一个字符串，若其本身就是其最小后缀，则称它为 Lyndon 串，即若一个串的字典序比他所有后缀的字典序小。
+
+任意一个字符串都可以被唯一的分解成若干个字典序非严格递减的 Lyndon 串。对于长度为 n的字符串 s，存在唯一的若干个 Lyndon 串 $t_{1\dots m}$ ，满足 $s=t_1 + t_2 + \cdots + t_m$ 且 $ t_1 \ge t_2 \ge \cdots \ge t_m$。
+
+Duval 算法可以在 $O(n)$ 的时间求出一个字符串的 Lyndon 分解
+
+\begin{notebox}
+洛谷P6114-求所有Lyndon串右端点的异或和
+\end{notebox}
+
+\inputminted{cpp}{code/p6114_lyndon.cpp}
+
+\begin{notebox}
+改成 \mintinline{text}|, ans = i <= n ? i : ans| 可以求最小表示法的起点
+\end{notebox}
+
+\section{杂项}
+
+\subsection{排序}
+
+归并、计数、基数是稳定排序。
+
+\subsubsection{计数排序}
+
+参考代码：(设值域是 $[1,k]$ 的整数)
+
+\inputminted{cpp}{code/ext_063.cpp}
+
+前缀和写法：
+
+\inputminted{cpp}{code/ext_064.cpp}
+
+\subsubsection{基数排序}
+
+以下代码以 $1\le n\le8\times 10^6$ ，值域在 $2^{31}$ ， $q$ 次询问排序后位置为例(下标从 $1$ 开始) (SCNUOJ 1577)
+
+\inputminted{cpp}{code/ext_065.cpp}
+
+\subsubsection{归并求逆序对}
+
+参考代码：(洛谷P1908)
+
+\inputminted{cpp}{code/p1908_mergesort.cpp}
+
+\begin{notebox}
+例题蓝桥-小朋友排队:将小朋友从低到高排序，每次只能交换相邻两个，交换使得他们不高兴程度增加，增加幅度是上次他增加的数量+1(一开始的上次是0)，求排序后他们的不高兴程度之和的最小值。
+\end{notebox}
+
+总不高兴程度最小时，一个小朋友被交换次数等于他前边比他高的人数+后边比他低的人数，由此可以套用归并排序求逆序对的公式并加以改变：
+
+\inputminted{cpp}{code/eg_mergesort.cpp}
+
+归并排序求其他内容：
+
+\begin{itemize}
+\item lc315-每个元素右边比它小的元素数
+
+归并合并 $a_i\le a_j$ 时，$j$ 是第一个 $\le$ 的，故 $[mid,j)$ 全满足，对当前 $i$ 的原下标累加贡献。用离散化权值树状数组也行。
+\end{itemize}
+
+\begin{itemize}
+\item lc493-翻转对-求二倍逆序对(前者两倍严格大于后者)的数目
+
+归并合并前，双指针累加符合的区间数，算完了再合并当前的。
+\end{itemize}
+
+\begin{itemize}
+\item lc327-区间和在 $[l,u]$ 的区间个数
+
+归并合并前，双指针累加符合的区间数，算完了再合并当前的。
+\end{itemize}
+
+\subsection{二分}
+
+整数三分公式：(以求U型区间最小值/单调区间最小值为例)
+
+\inputminted{cpp}{code/ext_066.cpp}
+
+此三分无法处理 \mintinline{text}|lv==rv|，可以通过离散化去除连续段。
+
+\subsubsection{最长单调序列}
+
+LIS (longest increase sequence)
+
+单调栈上二分 复杂度 $O(n\log n)$
+
+Dilworth定理：偏序集的最少反链划分数等于最长链的长度
+
+即：求一个序列最少能分成多少个最长不上升序列，可以求最长上升序列的长度即为答案。其他情况类推。
+
+\inputminted{cpp}{code/ext_067.cpp}
+
+规律：
+
+\begin{itemize}
+\item 对降的(严格降、非严格降(即不升))，一律用 \mintinline{text}|upper_bound| + \mintinline{text}|greater<>()| 求第一个小于它的，将这个位置改成更大，得更优解
+\item 对升的，一律用 \mintinline{text}|lower_bound| 求第一个大于它的，将这个位置改成更小，得更优解
+
+模板题
+\end{itemize}
+
+\begin{notebox}
+P1020 导弹拦截  输入至多 $10^5$ 个数，求最长不下降序列的长度和可以划分为多少个最长不下降序列(不是不下降子串)
+\end{notebox}
+
+\inputminted{cpp}{code/p1020_LIS.cpp}
+
+\begin{notebox}
+例题 P2782 友好城市 南北岸有 $n$ 个不同城市，在不同坐标，北岸每个城市与南岸一个城市相连，连线不能相交，求最多能留多少条连线 $1\le n\le2\times10^5,\allowbreak{}0\le x\le10^6$
+\end{notebox}
+
+以一个岸为基准结构体排序，然后求另一个岸的最长单调上升子序列长度即可
+
+\begin{notebox}
+lc354-求长宽同时严格单调上升的最长子序列
+\end{notebox}
+
+先按 $w$ 升序排序，再第二关键字将 $h$ 降序排序，从而避免了相同下存在递增。再第二关键字将 $h$ 降序排序，从而避免了相同下存在递增。
+
+\subsubsection{最长公共排列}
+
+LCS(longest common sequence)(见DP)
+
+假设元素互不重复，将一个序列重定义为它的每个元素在另一个序列里出现的位置，即设 $h[a[i]]=i$ ，令 $b[i]=h[b[i]]$ 。那么，只需要求该序列的最长上升子序列即可。
+
+\begin{notebox}
+模板题 P1439 最长公共子排列 $(n\le10^5)$
+\end{notebox}
+
+\inputminted{cpp}{code/p1439_LCS.cpp}
+
+\subsubsection{二分答案}
+
+\hfive{最小中位数子矩阵}
+
+\begin{notebox}
+(SCNUOJ1464)有$n\times n$矩阵$a$，找一个$k\times k$子阵，使得在所有$k$阶子阵里，这个子阵的中位数(第$\lfloor\frac{k^2}2+1\rfloor$大数)最小，输出中位数。$1\le k,\allowbreak{}\le n\le800,\allowbreak{}0\le a_{i,\allowbreak{}j}\le10^9$
+\end{notebox}
+
+这题不能暴力枚举(或者用二维双指针法)，无法解决$O(1)$找中位数所以都会TLE。复杂度是$n^3\log n$。
+
+考虑二分，设答案为二分对象，显然这个值越大它的排位越大，所以可以检验排位，从一个方向逐渐逼近中位排位，即$\lfloor\frac{k^2}2+1\rfloor$，每次检验二分值，使得答案逼近于唯一的真实答案。可以证明二分到的一定是存在的最小的中位数。
+
+\inputminted{cpp}{code/eg1_binaryans.cpp}
+
+\hfive{最大子串平均值}
+
+\begin{notebox}
+例题洛谷P1419-长为n的连续序列，定义平均值为区间和除以区间长度，求长度在[s,t]之间的子序列的最大平均值 $1\le n\le10^5,\allowbreak{}1\le s\le t\le n,\allowbreak{}-10^4\le a_i\le10^4$
+\end{notebox}
+
+答案满足单调性,设区间[l,r]，则其平均值x的算式为：
+
+\begin{adjustbox}{max width=\linewidth,center}
+$\frac{\sum_{i=l}^ra_i}{r-l+1}=x\text{，即}\sum_{i=l}^ra_i=x\times(r-l+1)$
+\end{adjustbox}
+
+当某个区间平均值优于已算出的平均值x时，有：
+
+\begin{adjustbox}{max width=\linewidth,center}
+$\begin{gathered}
+\frac{\sum_{i=l}^ra_i}{r-l+1}\ge x\text{，即}\sum_{i=l}^ra_i\ge x\times(r-l+1)\\\text{即}\sum_{i=l}^ra_i\ge\sum_{i=l}^rx\text{，即}\sum_{i=l}^r(a_i-x)\ge0
+\end{gathered}$
+\end{adjustbox}
+
+\inputminted{cpp}{code/p1419_binaryans.cpp}
+
+\hfive{其他}
+
+点权最小最短路
+
+\begin{notebox}
+洛谷P1462 无向加权图(可能有自环/重边)，而且点加权，从1走到n，在路径长不超过b的前提下，使得经过点集点权的最大值最小，求这个最小值 $\text{点数}n\le10^4,\allowbreak{}\text{边数}m\le5\times10^4,\allowbreak{}\text{边权、点权、}b\le10^9$
+\end{notebox}
+
+二分最小值，把大于最小值的点都删了，然后看看能不能有不超过 $b$ 的最短路
+
+环转链最短距离最大值
+
+\begin{notebox}
+(SCNUOJ1479)有$n$个点，编号$[1,n]$，第$i$个点和下一个编号的点连第$i$条无向边，成环。有$m$个点对$(a,b)$，现在删掉一条边，求删掉边后这$m$个点对的两两最短路的最大值最少是多少。$2\le n\le2\times10^5,\allowbreak{}1\le m\le2\times10^5$,$1\le a_i,b_i\le n,1\le i\le m$，有多组测试，保证$\sum n,\sum m\le2\times10^5$
+\end{notebox}
+
+显然对一个点对$(a,b),a\le b$，最短路要么是$b-a,$要么是$n-(b-a)$。二分最小值，然后把所有超过这个值的段区间标记(差分+前缀和)
+
+\inputminted{cpp}{code/ext_068.cpp}
+
+\subsubsection{整体二分}
+
+主体思路：把多个离线查询一起解决
+
+需要满足以下性质：
+
+\begin{enumerate}
+\item 询问的答案可以二分
+\item 修改对判定答案的贡献相互独立，修改之间不影响效果
+\item 修改若对判定答案有贡献，则贡献为一个确定的与判定标准无关的值
+\item 贡献满足交换律、结合律、具有可加性
+\item 题目允许离线算法
+
+时间复杂度 $O(T\log n)$ 。当使用别的结构(如树状数组)时，叠加复杂度
+\end{enumerate}
+
+\begin{notebox}
+例题洛谷P1527-给定 $n\times n(1\le n\le500)$ 矩阵，有 $q(1\le q\le6\times10^4)$ 次询问，每次求矩阵左上角 $(x_1,y_1)$ 和右下角 $(x_2,y_2)$ 的子矩阵的第 $k$ 小数(不去重)( $1\le a_{i,j}\le10^9$ )
+\end{notebox}
+
+整体二分+离散化+二维树状数组。复杂度为 $O((n^2+q)\log^3n)$
+
+\inputminted{cpp}{code/p1527_parallel_binsearch.cpp}
+
+\begin{notebox}
+洛谷P2617例题-给定长为 $n$ 的数列 $a$ ，支持 $m$ 次两种操作：$1\le n,\allowbreak{}m\le10^5,\allowbreak{}0\le a_i,\allowbreak{}y\le10^9$
+
+\begin{itemize}
+\item \mintinline{text}|Q l r k| 查询区间第 $k$ 小
+\item \mintinline{text}|C x y| 将 $a_x$ 改为 $y$
+\end{itemize}
+\end{notebox}
+
+因为涉及修改，所以不要重排序操作。那么在修改前的询问是不受后续修改的影响的。初始修改放在操作的最前面。下面代码没有使用到离散化。
+
+还有一个小要点，就是对于脏数据的处理。脏数据也就是会对计算结果产生影响的数据。对于本题而言，值大于等于mb的操作在[lb,mb)中是没有影响的，但是在[mb,ub)的操作中，值小于mb的操作会产生影响，但是显然如果减去一个k，那么就可以消除这个影响。
+
+\inputminted{cpp}{code/ext_069.cpp}
+
+\subsubsection{wqs二分}
+
+王钦石二分(Alien Trick)。
+
+\begin{notebox}
+lc188/SCNUOI1069-有 $n(1\le n\le10^5)$ 天，当日股票价格 $p_i(1\le p_i\le 10^9)$，每天可以买入或卖出股票，但最多持有一股，问最大收益。
+\end{notebox}
+
+设恰好完成 $k$ 次买卖时，最大收益是 $g_k$。设增量(/导数)为 $g'_k=g_k-g_{k-1}$那么可以得到一个结论，增量 $g'_k$ 一定单调不降(不严格单调递增)。当 $k$ 不断增大到最大 $n$($n$ 次交易即都当天买当天卖等价于 $0$ 次交易)时，$g_k$ 会降到 $0$，即 $g_0=g_n=0$，一阶导 $g'_k$ 单调递减，不难判断 $g$ 呈倒 U 型。
+
+任务是求出 $g$ 数列(/离散函数)的最大值 $\max g$。用几何思路，考虑作直线与 $g$ 图像相切，设枚举了斜率为 $c(c > 0)$ 的直线，过所有点 $g_i(1\le i\le n)$ 作 $n$ 条直线。
+
+由于 $c > 0$，所以 $y$ 截距最大的直线一定是相切的。设有斜率为 $c$ 过点 $(k,g_k)$ 的直线，不难计算得截距是 $b=g_k-kc$。回到要求的问题上，可以将截距抽象成进行了 $k$ 次买卖，净利润为 $g_k$，但每次卖出需要付手续费 $c$。抽象为已知手续费 $c$，且不限交易次数，求出最大的含手续费利润 $b$。
+
+因为不限交易次数，考虑贪心，即只要能赚的钱不低于手续费就买卖一次。由此可以 $O(n)$ 计算出对固定的斜率 $c$ 得到的最大切线截距 $b=g_k-kc$ 及其 $k$ 值($sellcnt$)。对答案 $\max g = b+gk$ 而言，$b$ 相等时要尽可能大的 $k$，所以在上述贪心时，在利润最大化的同时，应当再最大化交易次数。
+
+注意到斜率一定不会超过增量的最大值即 $\max p$，故二分上界取 $\max p$ 即可。分母为 $1$，故折线斜率为整数，即二分只需要在整数范围内即可。如果题给的 $k$ 在 $g$ 单调递减时取得(即最高点 $k' < k,g_{k'} > g_k$)，也就是说不限次数地贪心得到的 $sellcnt < k$，那么此时也可以直接不限次数贪心求出 $\max g$，只要 $p_i > p_{i-1}$ 就可以前一天买今天卖。
+
+时间复杂度是 $O(n\log \max p)$。
+
+\inputminted{cpp}{code/ext_070.cpp}
+
+\subsection{前缀和/差分}
+
+\begin{notebox}
+树上前缀和/差分及其例题见图论-树-LCA应用。
+\end{notebox}
+
+高维前缀和可以考虑压缩数组，叠前缀和时可以容斥原理，也可以逐维叠加，即以每个维度进行一次一维前缀和，其他维度不变。
+
+对 $a=(1,1,\cdots)$ 的 $k$ 阶前缀和 $s_n$ 是 $\dfrac{n(n+1)\cdots(n+k-1)}{k!}=C_{n+k-1}^k$。
+
+对任意 $a$ 的 $y$ 阶前缀和 $s_{y,\allowbreak{}x}=\sum_{i=1}^xC_{y+x-i-1}^{y-1}a_i=\sum_{i=1}^xC_{x-i}^{y-1}a_i$，可以 $O(x)$ 求。要求一段前缀和的和，可以求它更高一阶的两边界值。
+
+\textbf{常见应用：}
+
+一维前缀和/差分：
+
+\begin{itemize}
+\item (SCNUOJ1410猜数)有一个目标数字，猜了若干次，反馈结果为比目标大/小/相等，问结果里最多多少个是对的
+
+把每个猜的结果转化为坐标轴的一段猜对目标数字取值区间，用差分累加所有区间，然后离散化枚举每个区间边界，被多少个区间覆盖猜对了多少次， $O(n\log n)$
+\end{itemize}
+
+\begin{itemize}
+\item (蓝桥-最大子阵)求矩阵的最大非空子矩阵的元素和
+
+先计算每列一维前缀和，然后枚举子矩阵最下行 $i$ ，枚举行跨度 $j(\le i)$ ，枚举列 $k$ ，逐列累加跨 $j$ 行后的新元素和，如果更大加入答案，如果当前和小于 $0$ 舍弃全部，否则继续累加 ，复杂度 $O(n^2 m)$
+
+\begin{minted}{cpp}
+for(int i=1;i<=n;++i) for(int j=1;j<=m;++j) 
+    scanf("%d",&v),s[i][j]=s[i-1][j]+v;//当前行前缀和 
+for(int i=1;i<=n;++i) for(int j=1;j<=i;++j) //矩阵右下角为(i,j) 
+    for(int k=1,v=0;k<=m;++k) //使用O(m)计算二维前缀和 
+    {
+        v+=s[i][k]-s[j-1][k];//当前矩阵前缀和 
+        mx=max(mx,v);
+        v=max(v,0); //负数特判 
+    }
+\end{minted}
+\end{itemize}
+
+\begin{itemize}
+\item (蓝桥-k倍区间) 求有多少个连续子序列的和是 $k$ 的倍数
+
+是 $k$ 的倍数 $\to$ 前缀和模 $k$ 得 $0$ $\to s[r]\equiv s[l-1]\bmod k$ ，即求多少个相等前缀和对，即(解法一) $\sum_{i=1}^k C_2^{s[i]}$ ( $O(n+k)$ ) 或(解法二)每次求得新相等时与原本相等数累加。注意特判本有 $s[0]=1$ 。若 $k$ 过大，可以选择离散化
+
+\begin{minted}{cpp}
+scanf("%d%d",&n,&k);
+for(int i=1;i<=n;++i)
+    scanf("%d",&v),(cnt+=v)%=k,sum+=vis[cnt]++;
+printf("%lld",sum+vis[0]);
+\end{minted}
+\end{itemize}
+
+\begin{itemize}
+\item (SCNUOJ1193子段异或) 求异或和为 $0$ 的连续子段数
+
+异或为 $0\to$ 前缀异或满足 $s[r]=s[l-1]$ ，与上题类似，$O(n\log a)$ (离散化)
+
+\begin{minted}{cpp}
+for(scanf("%lld",&n),++m[0];n;--n) //m:map
+    scanf("%lld",&v),ans+=m[c^=v]++;
+return printf("%lld",ans)&0;
+\end{minted}
+\end{itemize}
+
+\begin{itemize}
+\item (SCNUOJ1433周游山区) $n$ 个加油站成环，离顺时针下一个加油站距离 $d_i$ ，可加油 $p_i$ ，问从每个加油站出发(本站油量为起始油量)能否顺或逆时针走完一圈
+
+走完一圈后油量可以为0，但没走完之前不可以为0；但是如果考虑子问题，那么只需要考虑大于等于0，在顺时针时，从$i$出发，可以走回 $i$ 的条件为同时满足以下等式：(需要注意 $d_0=0$ ) , $O(n)$
+
+\begin{adjustbox}{max width=\linewidth,center}
+$\begin{cases}
+(p_i-d_{i})\ge0\\
+(p_i-d_{i})+(p_{i+1}-d_{i+1})\ge0\\
+\dots\\
+(p_i-d_{i})+(p_{i+1}-d_{i+1})+\dots+(p_{i+n-1}-d_{i+n-1})\ge0
+\end{cases}$
+\end{adjustbox}
+
+设前缀和 $s_n=\sum_{i=1}^n p_i-d_i$ ，即需要同时满足：
+
+\begin{adjustbox}{max width=\linewidth,center}
+$\begin{cases}
+s_i-s_{i-1}\ge0\\
+s_{i+1}-s_{i-1}\ge0\\
+\dots\\
+s_{i+n-1}-s_{i-1}\ge0
+\end{cases}$
+\end{adjustbox}
+
+即在 $[i,i+n-1]$ 内， $s_{\min}-s_{i-1}\ge0$  ，逆时针同理：
+
+\begin{adjustbox}{max width=\linewidth,center}
+$(s_i-s_j)_{\min}\ge0\quad j\in[i-n+1,i]\Rightarrow s_i-s_{\max}\ge0$
+\end{adjustbox}
+
+可以用单调队列维护一个最小值(逆则最大)。注意单调区间长度不可以大于等于 $n$
+
+\inputminted{cpp}{code/ext_071.cpp}
+
+二维前缀和/差分：
+\end{itemize}
+
+\begin{itemize}
+\item (SCNUOJ1226守卫农田)矩阵内有若干个子矩形被覆盖，若干次询问某个子矩阵是否都被覆盖
+
+覆盖过程可以二维差分；得出布尔值化的原数组后再求一个二维前缀和，查询时就能 $O(1)$ 比较子矩阵面积与被覆盖大小 $O(n^2)$
+
+高维前缀和/差分：
+\end{itemize}
+
+\begin{itemize}
+\item (蓝桥-三体攻击)有立方体舰队阵列，每次攻击使一个子立方体全员受到定值伤害，求首次出现死亡时是第几次攻击
+
+二分答案+三维差分。把攻击做成差分数组，二分攻击次数，判断是否出现负数即可 $O(n^3\log t)$
+
+前缀和/差分思想：
+\end{itemize}
+
+\begin{itemize}
+\item (洛谷P2926)给定 $n$ 个值域在 $w$ 的可重复数，求每个数有多少数能被它整除
+
+先计数每个数出现了几次，然后对每个因子其所有倍数叠加一遍， $O(n\log n)$
+
+\inputminted{cpp}{code/p2926_prefixsum.cpp}
+\end{itemize}
+
+\subsection{搜索}
+
+调整 BFS 的顺序，可以达到最短路径字典序最小等要求。对未知有限步数，有时可以设一个大数作为搜索深度边界。遇事不决剪枝记忆化。
+
+一些数字类/字典序/倍数因数的题目也可以搜索每个位数来逐个求解所有可能的值。
+
+\subsubsection{IDA*}
+
+启发式搜索不保证绝对准确性，建立在其基础之上的A\textbackslash\{\}*和IDA\textbackslash\{\}*也不保证绝对的准确性。因为估价函数的估计值并不一定是答案。
+
+其中IDA\textbackslash\{\}*是每次限定搜索深度(逐次增加)的DFS来模拟BFS。好处是空间开销小。不加A\textbackslash\{\}*的该方法为迭代加深搜索
+
+\begin{notebox}
+洛谷P1379 把 $3\times 3$ 棋盘 $1\sim 8$ 数字 ( $0$ 是空格)转化为 \mintinline{text}|123804765| 状态，问最小步数
+\end{notebox}
+
+这题也可以BFS+记忆化，双向BFS，康托展开来做
+
+\inputminted{cpp}{code/p1379_ida_star.cpp}
+
+\subsubsection{双向搜索}
+
+对BFS而言，将规模$a^n$缩减为$2a^{\frac n2}$
+
+从起点开始和从终点开始的点分别标注为1和2，那么相加为3必然相遇。
+
+while条件为两队列均不为空还是for和dx,dy搜索。代码类似BFS，很好写
+
+\subsubsection{折半搜索}
+
+对DFS而言，第一次搜索前半部分，第二次搜索后半部分，最后再组合两部分，将搜索的复杂度指数降低一半，并将空间复杂度提升到时间复杂度等同
+
+\begin{notebox}
+洛谷P4799-有n场比赛，可用m元，比赛入场需要门票钱x，请问他有多少种参加方案。 $1\le n\le40,\allowbreak{}1\le m\le10^{18},\allowbreak{}1\le x\le10^{16}$
+\end{notebox}
+
+第一次搜索前一半比赛并将小于m的全部花费记录。第二次搜索后一半比赛并同样记录，得到的记录数目为$2\times2^{\frac n2}$，时间复杂度也是如此(01背包型搜索)。最后合并，取余额为$m-a_i$，即减去第一次搜索得到的一个花销和，然后在第二次二分搜索(排序后)里寻找大于等于余额的下标，下标即方案数。这里运用了前缀和思维的计数，使用$O(len\log len)$的复杂度完成了合并。总时间时间复杂度为$\Omicron(2^{\frac n2+1}\log2^{\frac n2})=\Omicron(n2^{\frac n2})$，空间复杂度为$\Omicron(2^{\frac n2+1})$
+
+\inputminted{cpp}{code/p4799_meet_in_the_middle.cpp}
+
+\begin{notebox}
+洛谷P3067-给定n个数x，选出一些数划分为两堆和相等的数，求方案数。($2\le n\le20,1\le x\le10^8$)
+\end{notebox}
+
+显然不会爆int。由于划分的两堆数数目不定，所以需要使用搜索，单纯搜索时，有三种分支，即当前数不加入，当前数放左堆，当前数放又堆，是三进制背包DFS，复杂度为$\Omicron(3^n)$不通过。
+
+考虑折半搜索。并考虑利用状态压缩、vis数组去重和map离散化。第一次搜索前面一半的数，设sum为左堆-右堆的差值，第二次设sum为右堆-左堆的差值，如果第二次的sum等于第一次的，证明合起来之后，这两堆的和相等。最后统计有效状态即可。
+
+时间复杂度为$\Omicron(3^{\frac n2})$，空间复杂度为$\Omicron(2^n)$，空间复杂度来自于状态压缩(选了什么数)。
+
+\inputminted{cpp}{code/p3067_meet_in_the_middle.cpp}
+
+\subsection{随机化}
+
+\begin{adjustbox}{max width=\linewidth,center}
+$(1-\dfrac1n)^n\le\dfrac 1e,\forall n\ge 1$
+\end{adjustbox}
+
+意义：有 $n$ 个\textbf{相互独立}的坏事件，且设它们的发生概率都是 $1-\dfrac 1n$ ，那么它们全部都发生的概率至多是 $\dfrac1e\approx0.3679$
+
+假设可以枚举到的全体解是 $U$ ，$|U|=n$ ，其中正解是 $S$ ，如果每次随机枚举一个解，期望正确率是 $1-\epsilon$ (即错误率是 $\epsilon$ )，那么单次枚举有 $\dfrac{|S|}n$ 概率得到正解，枚举 $n(-\log\dfrac\epsilon{|S|})$ 次可以把全体 $S$ 元素都枚举一次
+
+\textbf{爬山算法 / 模拟退火}：
+
+设枚举次数是 $m$ ，那么 $tC^m\approx t_0$ 即 $m\approx\log(\dfrac{t_0}t,C)$ ，即复杂度为 $O\left(\log(\dfrac{t_0}t,\allowbreak{}C)\right)$
+
+通常降温系数 $C\in [0.985,\allowbreak{}0.999],\allowbreak{}t_0=10^{-15}$ ，$t$ 一般看定义域，例如 $t=10^4$
+
+规定熵值越低解越优。通常可以跑多次。一种卡时方法：
+
+\begin{minted}{cpp}
+while ((double)clock()/CLOCKS_PER_SEC < MAX_TIME) simulateAnneal();
+\end{minted}
+
+\begin{notebox}
+(SCNUOJ1679) 求满足 $x+y=k$ 下 $\sqrt{p-a+x^2}+\sqrt{p-b+y^2}$ 最小的解 $(x,y)$
+\end{notebox}
+
+\inputminted{cpp}{code/ext_072.cpp}
+
+\begin{notebox}
+(SCNUOJ1730) 给定常数 $a,b,c,d,e,l,r$ ，求下列函数在定义域 $[l,r]$ 的最大值：
+
+\begin{adjustbox}{max width=\linewidth,center}
+$f(x)=\sin(\dfrac xa)+\sin(\dfrac xb)+\sin(\dfrac xc)+\sin(\dfrac xd)+\sin(\dfrac xe)$
+\end{adjustbox}
+
+\inputminted{cpp}{code/ext_073.cpp}
+
+洛谷P2503-将 $n$ 个数分成 $m$ 组，组内求和得到 $m$ 个数，求最小方差 $m\le n\le20,2\le m\le6$
+
+对某个序列，每次将当前数贪心放进 $m$ 组里和最小的一组，可以证明是对确定序列得到最小方差的；然后用模拟退火不断打乱序列即可，对每个位置退火 $1$ 次，共退火 $n$ 次
+
+lc1157-有数组 $n(\le 2\times10^4)$ 和 $q(\le10^4)$ 次询问，每次问子区间 $[l,r]$ 的出现频率不低于 $t(t$ 至少区间一半长 $)$ 的元素是什么。
+\end{notebox}
+
+因为出现次数至少一半，随机枚举 $20$ 次，几乎不可能取不到是该数字。每次枚举，通过 lower, upper bound 对该元素的出现下标有序数组搜索得到出现频次。
+
+\begin{notebox}
+解法二：使用 Boyer-Moore 投票算法 $O(n)$ 在已知存在众数的情况下求出众数，利用投票算法套线段树维护信息。
+\end{notebox}
+
+\subsection{莫队}
+
+\subsubsection{普通}
+
+\begin{notebox}
+洛谷P3901-静态 $n$ 长数列 $a(1\le n,a_i\le10^5)$ ，有 $m(1\le m\le10^5)$ 次询问，问区间内是否每个数互不相同
+\end{notebox}
+
+复杂度 $O(n\sqrt m)$ ，三种正确的循环位置： \mintinline{text}|l--,r--,r++,l++|  ， \mintinline{text}|l--,r++,r--,l++| ， \mintinline{text}|l--,r++,l++,r--| (前两步先扩大区间(\mintinline{text}|l--,r++|)，后两步缩小区间(\mintinline{text}|l++,r--|))
+
+\inputminted{cpp}{code/p3901_mo_algo.cpp}
+
+\subsubsection{带修}
+
+\begin{notebox}
+洛谷1903 有 $n$ 长序列 $a(a_i\le10^6)$ ，有 $m(n,m\le 133333)$ 次操作：\mintinline{text}|Q l r| 表示询问区间 $[l,r]$ 内不同数值数； \mintinline{text}|R p c| 表示将 $a_p$ 修改为 $c$ 。
+\end{notebox}
+
+复杂度 $O(n^\frac53)$
+
+\inputminted{cpp}{code/p1903_mo_algo.cpp}
+
+\subsubsection{树上}
+
+子树：
+
+\begin{notebox}
+例题洛谷U41492：$n(n\le 10^5)$ 个节点的树，每个节点有不同的颜色( $10^5$ 种)，问每个节点为根的子树中，所有节点有多少种不同的颜色；$m(m\le 10^5)$ 次询问，每次问一棵子树
+\end{notebox}
+
+\inputminted{cpp}{code/ext_074.cpp}
+
+链：
+
+\begin{notebox}
+SP10707 有 $n\le4\times10^4$ 节点树，每个点一种颜色 $\le2\times10^9$，有 $m\le10^5$ 次询问，问 $u,v$ 路径上不同颜色数
+\end{notebox}
+
+\inputminted{cpp}{code/sp10707_mo_algo.cpp}
+
+\subsubsection{回滚}
+
+\begin{notebox}
+AT1219 给定长为 $n$ 的数组 $a(1\le a_i\le10^9)$ 和 $q(1\le n,q\le10^5)$ 次询问，每次问 $[l,r]$ 内最大重要度。数字 $x$ 重要度等于 $x$ 乘以它的出现次数
+\end{notebox}
+
+复杂度 $O(n\sqrt m)$ ，按顺序处理询问：
+
+\begin{itemize}
+\item 如果询问左端点所属块 b 和上一个询问左端点所属块的不同，那么将莫队区间的左端点初始化为 b 的右端点加 1 , 将莫队区间的右端点初始化为 b 的右端点；
+\item 如果询问的左右端点所属的块相同，那么直接扫描区间回答询问；
+\item 如果询问的左右端点所属的块不同：
+
+\begin{itemize}
+\item 如果询问的右端点大于莫队区间的右端点，那么不断扩展右端点直至莫队区间的右端点等于询问的右端点；
+\item 不断扩展莫队区间的左端点直至莫队区间的左端点等于询问的左端点；
+\item 回答询问；
+\item 撤销莫队区间左端点的改动，使莫队区间的左端点回滚到 b 的右端点加 1。
+\end{itemize}
+\end{itemize}
+
+\inputminted{cpp}{code/at1219_mo_algo.cpp}
+
+\begin{notebox}
+洛谷5906 给定长为 $n$ 的序列 $a(1\le a_i\le2\times10^9)$ 和 $q(1\le n,q\le2\times10^5)$ 个询问，每次问 $[l,r]$ 内相同数的最远间隔距离，特别的如果没有相同数输出 $0$
+\end{notebox}
+
+\inputminted{cpp}{code/p5906_mo_algo.cpp}
+
+\subsection{高精度}
+
+\subsubsection{C++}
+
+以下给出高精度之间的、带负数的加减乘除模运算 (洛谷P1932)：
+
+其中高精度间乘法复杂度是 $O(n^2)$ ，高精度间除法使用二分答案，复杂度大概是 $O(n\log n)$
+
+\inputminted{cpp}{code/ext_075.cpp}
+
+\subsubsection{FFT 乘法}
+
+复杂度 $O(n\log n)$ ，可以通过 $10^6$ 数据量
+
+\inputminted{cpp}{code/p1919_a_mul_b_fft.cpp}
+
+\subsubsection{Java 高精度}
+
+\mintinline{text}|java.math.BigInteger|,\mintinline{text}|java.math.BigDecimal| 高精度运算 JAVA8为例
+
+构造函数只能传字符串。可以直接输出。
+
+\mintinline{text}|BigInteger| 方法：(注意不会改变lhs本身,需要用新变量存结果)
+
+\begin{itemize}
+\item add, subtract, multiply, divide
+\item remainder 取模
+\item divideAndRemainder 返回数组，第一个是商，第二个是余
+\item pow(指数是int不是BigInteger) (应该不是快速幂)
+\item negate 相反数
+\item shiftLeft 左移<<(负数右移) 参数是int
+\item shiftRight 右移>>(负数左移) 参数是int
+\item and or 位运算
+\item compareTo
+\item equals 参数rhs是Ojbect
+\item min,max
+\item isProbablePrime(值) 值越大，得到的结果越准确
+\item toString(进制) 可以返回16进制字符串
+
+\mintinline{text}|BigDecimal| 方法：
+\end{itemize}
+
+\begin{itemize}
+\item add subtract multiply divide
+
+divide的设置方法处理小数位：
+\end{itemize}
+
+\begin{itemize}
+\item ROUND\_UP 商的最后一位大于0时向前进位，正负号均如此
+\item ROUND\_DOWN 商的最后一位忽略
+\item ROUND\_CEILING 正up负down 故近似值$\ge$实际值
+\item ROUND\_FLOOR 负up正down 故近似值$\le$实际值
+\item ROUND\_HALF\_DOWN 商四舍五入$\le5$舍弃否则进位
+\item ROUND\_HALF\_UP $<$5舍弃否则进位
+\item ROUND\_HALF\_EVEN 商倒数第二位奇数halfup否则halfdown
+
+要调用，三个参数，第一个是rhs,第二个是商小数点保留位数，第三个是处理方式，如 \mintinline{text}|BigDecimal.ROUND_UP|
+\end{itemize}
+
+\inputminted{java}{code/ext_076.java}
+
+除法必须规定位数(java9后当前函数会报 warning)，如：
+
+\begin{minted}{java}
+BigDecimal a = new BigDecimal(sc.next());
+BigDecimal b = new BigDecimal(sc.next());
+System.out.println(a.divide(b, 2, BigDecimal.ROUND_HALF_DOWN));
+\end{minted}
+
+求高精度整数平方根：范围约为 $10^{1000}$
+
+\inputminted{cpp}{code/ext_077.cpp}
+
+\subsubsection{Python 高精度}
+
+以例子说明：(正常使用四则运算，输入输出和格式化，设置精度即可)
+
+\begin{minted}{python}
+from decimal import *
+getcontext().prec = 20
+x = Decimal('1')
+y = Decimal('7.0')
+print((x / y * y * y).quantize(Decimal('0.00'), ROUND_HALF_DOWN))
+#第二个参数可以不填
+\end{minted}
+
+\begin{notebox}
+精度：(官方文档)
+
+ROUND\_CEILING (towards Infinity), ROUND\_DOWN (towards zero), ROUND\_FLOOR (towards -Infinity), ROUND\_HALF\_DOWN (to nearest with ties going towards zero), ROUND\_HALF\_EVEN (to nearest with ties going to nearest even integer), ROUND\_HALF\_UP (to nearest with ties going away from zero), or ROUND\_UP (away from zero). ROUND\_05UP (away from zero if last digit after rounding towards zero would have been 0 or 5; otherwise towards zero)
+\end{notebox}
+
+\subsection{悬线法}
+
+可以应用于满足以下条件的题目：
+
+\begin{itemize}
+\item 需要在扫描序列时维护单调的信息；
+\item 可以使用单调栈解决；
+\item 不需要在单调栈上二分。
+\end{itemize}
+
+\begin{notebox}
+P4147-给定只包含 FR 的矩阵，求全为 F 矩阵的最大面积的3倍
+\end{notebox}
+
+举每个 \mintinline{text}|F| 的位置作为矩形的最高点，然后找到以该点向上最上的前提下，向左向右最远能扩展多远。设 $l_{i,j},r_{i,j},a_{i,j}$ 分别表示点 $(i,j)$ 向左右上的最远距离。时间 $O(nm)$，空间 $O(m)$。
+
+\inputminted{cpp}{code/p4147_hoverline.cpp}
+
+单调栈法：对每行执行一次每个 $i$ 对应的最远 $l,r$ 可以用单调栈维护。维护单调递增栈，每个元素被退栈之时得到它的右边界。然后再继续来一遍，得到左边界。之后同理操作即可。
+
+\subsection{程序语法}
+
+\subsubsection{常规运算}
+
+\begin{itemize}
+\item \mintinline{text}|__int128| $[-2^{127},2^{127}-1]$ ， $16$ 字节，其中 $2^{127}\approx8.5\times10^{37}$
+\item \mintinline{text}|double| 有效位数约 $15$ 位， $8$ 字节，范围约为 $[-1.79\times10^{308},\allowbreak{}1.79\times10^{308}]$
+\item \mintinline{text}|long double| 通常有效位数约 $20$ 位，$16$ 字节，范围约为 $[-1.2\times10^{4932},\allowbreak{}1.2\times10^{4932}]$
+
+注意：
+\end{itemize}
+
+\begin{itemize}
+\item 取模只可以是整型之间的；负数运算结果等于取绝对值计算，最后正负号与被除数一致，如 $(-5)\bmod 3=-2,5\bmod (-3)=2$  (C99/C++11开始 / JAVA同)
+
+所有版本 C/C++ 必然满足：\mintinline{text}|(a/b)*b+a%b=a|
+\end{itemize}
+
+\begin{itemize}
+\item 浮点数除，被除数为 $0$ ，被除数和除数存在一个负数，结果为负零
+\end{itemize}
+
+\begin{notebox}
+Python : \mintinline{text}|-17%10=-7,17%-10=7,-17%-10=-7| (除时取取比实际结果稍小的最大整数)
+\end{notebox}
+
+整数上取整公式：
+
+\begin{adjustbox}{max width=\linewidth,center}
+$\lceil\dfrac ab\rceil=\dfrac{a+b-1}b=\dfrac{a-1}b+1$
+\end{adjustbox}
+
+\mintinline{text}|__gcd(a,b)| 若一方为零，返回另一方(无论正负)；二者均负返回负，一正一负比较特殊
+
+\subsubsection{位运算}
+
+异或的性质：
+
+\begin{itemize}
+\item 交换律、结合律、消去律，有单位元$0$，自己与自己运算得单位元
+\end{itemize}
+
+\begin{itemize}
+\item $a\oplus b\le a+b=(a|b)+(a\&b)$
+
+前半句：因异或是不进位的加法；后半句：因 $a\&b$ 是进位部分
+
+注意要点：
+\end{itemize}
+
+\begin{itemize}
+\item 优先级： \mintinline{text}|~; +|,\allowbreak \mintinline{text}| -; <<|,\allowbreak \mintinline{text}| >>; ==|,\allowbreak \mintinline{text}@ !=; &; ^; |; &&; ||; ?:@
+\item 移位结果为 ll 时应该是 \mintinline{text}|1LL << k|
+\item 右移位，等同于round(x/2.0)，负数的移位结果不会大于-1
+
+常见应用：
+\end{itemize}
+
+\begin{itemize}
+\item 取正数 \mintinline{text}|x| 的从左往右(从零数)第 \mintinline{text}|i| 位：\mintinline{text}|(x>>i)&1|
+\end{itemize}
+
+\begin{itemize}
+\item 对某个正数 \mintinline{text}|x| 从左往右(从零数)第 \mintinline{text}|k| 位修改取反： \mintinline{text}|x^=(1<<k)|
+\end{itemize}
+
+\begin{itemize}
+\item \mintinline{text}|c&15|  或 \mintinline{text}|c^'0'| 优化 数字字符转数值
+\end{itemize}
+
+\begin{itemize}
+\item \begin{notebox}
+\mintinline{text}|~| 运算仅对 $-1$ 得 $0$ ，可以用于递减到 0 的循环枚举常数优化
+\end{notebox}
+\end{itemize}
+
+\begin{itemize}
+\item 交换两个数 \mintinline{text}|a^=b^=a^=b|
+\end{itemize}
+
+\begin{itemize}
+\item 删掉最低的 1，其他不变 \mintinline{text}|x&(x-1)|
+
+内建函数：
+\end{itemize}
+
+\begin{itemize}
+\item 注：对 \mintinline{text}|unsigned long long| 每个函数名后面加上 \mintinline{text}|ll| (传入的是什么类型不影响结果, 影响的是函数名)
+
+\textbf{1.\_\_builtin\_popcount(unsigned int n)}
+
+该函数时判断n的二进制中有多少个1
+\end{itemize}
+
+\begin{minted}{c}
+int n = 15; //二进制为1111
+cout<<__builtin_popcount(n)<<endl;//输出4
+\end{minted}
+
+\textbf{2.\_\_builtin\_parity(unsigned int n)} 该函数是判断n的二进制中1的个数的奇偶性
+
+\begin{minted}{c}
+int n = 15;//二进制为1111
+int m = 7;//111
+cout<<__builtin_parity(n)<<endl;//偶数个，输出0
+cout<<__builtin_parity(m)<<endl;//奇数个，输出1
+\end{minted}
+
+\textbf{3.\_\_builtin\_ffs(unsigned int n)} 该函数判断n的二进制末尾最后一个1的位置，从一开始
+
+\begin{minted}{c}
+int n = 1;//1
+int m = 8;//1000
+cout<<__builtin_ffs(n)<<endl;//输出1
+cout<<__builtin_ffs(m)<<endl;//输出4
+\end{minted}
+
+\textbf{4.\_\_builtin\_ctz(unsigned int n)} 该函数判断n的二进制末尾后面0的个数，当n为0时，和n的类型有关
+
+\begin{minted}{c}
+int n = 1;//1
+int m = 8;//1000
+cout<<__builtin_ctzll(n)<<endl;//输出0
+cout<<__builtin_ctz(m)<<endl;//输出3
+\end{minted}
+
+\textbf{5. \_\_builtin\_clz (unsigned int x)} 返回前导的0的个数。
+
+\begin{minted}{cpp}
+int n = 1;  //1
+int m = 8;  //1000
+cout<< 32 - __builtin_clz(n) <<endl;  //输出1
+cout<< 64 - __builtin_clzll(m) <<endl;  //输出4
+\end{minted}
+
+应用：\mintinline{text}|31 - __builtin_clz(n)| 等效于 $\lfloor\log_2n\rfloor$
+
+\subsubsection{指针}
+
+\begin{minted}{cpp}
+指针数组 int *p[3];
+指向二维数组的指针(第二维为3) int (*p)[3];//即列指针
+\end{minted}
+
+\inputminted{cpp}{code/ext_078.cpp}
+
+\begin{minted}{cpp}
+例如：void f(int n, int (*compare)(int a, int b));
+int g(int a, int b);
+使用时：g(3, f);
+\end{minted}
+
+\subsubsection{I/O}
+
+cout 输出小数： \mintinline{text}|cout<<setprecision(n)|
+
+cout 输出不同进制：
+
+\begin{minted}{cpp}
+cout<<hex<<17<<endl;
+cout<<dec<<18<<endl;
+cout<<oct<<9<<endl;
+cout<<bitset<sizeof(unsigned long) * 8>(1UL << 27)<<endl;
+\end{minted}
+
+\subsubsection{其他}
+
+计时：(单位：秒)
+
+\begin{minted}{cpp}
+(double)clock() / CLOCKS_PER_SEC
+\end{minted}
+
+decltype
+
+\begin{minted}{cpp}
+int x;
+decltype((x)) z;//z为int & ,da ck
+decltype(x) y;//y为int
+typedef decltype(f(x)+g(x)) dt;
+dt var1;
+\end{minted}
+
+使用了万能头时，不允许使用这些变量名：\mintinline{text}|y1| , \mintinline{text}|y0| , \mintinline{text}|yn| , \mintinline{text}|prev| , \mintinline{text}|tm| 等
+
+Python日期函数举例：
+
+\inputminted{python}{code/python_datetime.py}
+
+输出版本的语法：(适用于 OMS 等可测试平台)
+
+\begin{minted}{c}
+printf("%lld", __STDC_VERSION__); //c
+\end{minted}
+
+\begin{minted}{cpp}
+std::cout << __cplusplus; //c++
+\end{minted}
+
+\begin{minted}{python}
+print(sys.version) # Python
+\end{minted}
+
+\begin{minted}{java}
+System.out.println(System.getProperty("java.version")); //Java
+\end{minted}
+
+\subsection{STL}
+
+\subsubsection{函数}
+
+\hfive{xx\_bound}
+
+bound函数，参数\mintinline{text}|起始迭代器,终止迭代器,值| ，二分查找\mintinline{text}|[起,止)|
+
+\textbf{upper\_bound} 大于 x 的第一个位置
+
+\textbf{lower\_bound} 大于等于 x 的第一个位置
+
+对升序序列：
+
+\mintinline{text}|lower_bound(begin, end, v)|  在 $[begin,end)$ 找第一个大于等于 $v$ 的值，返回该值的迭代器
+
+\mintinline{text}|upper_bound(begin, end, v)|  在 $[begin,end)$ 找第一个大于 $v$ 的值，返回该值的迭代器
+
+若找不到返回 $end$
+
+对降序序列：
+
+\mintinline{text}|lower_bound(begin|,\allowbreak \mintinline{text}| end|,\allowbreak \mintinline{text}| v|,\allowbreak \mintinline{text}| greater<type>())|  在 $[begin,end)$ 找第一个小于等于 $v$ 的值，返回该值的迭代器
+
+\mintinline{text}|upper_bound(begin|,\allowbreak \mintinline{text}| end|,\allowbreak \mintinline{text}| v|,\allowbreak \mintinline{text}| greater<type>())|  在 $[begin,end)$ 找第一个小于 $v$ 的值，返回该值的迭代器
+
+若找不到返回 $end$
+
+以二分搜索向左第一个数为例：
+
+\begin{minted}{cpp}
+int d = lower_bound(a,a+n,f)-a;
+if(f!=a[d]) printf("-1");
+else printf("%d", d+1);
+\end{minted}
+
+默认对非降序列使用，如果要对下降序列使用，需要加greater如下(指针写法)：
+
+\begin{minted}{cpp}
+*upper_bound(d1+1,d1+1+len1,a[i],greater<int>())=a[i];
+\end{minted}
+
+二分查找值区间 $[a,b]$ 长：\mintinline{text}|u(,,b)-l(,,a)|
+
+\hfive{字符串}
+
+C 风格字符串
+
+常用函数：
+
+\begin{itemize}
+\item \mintinline{text}|cin.getline(char* s, int len)| 读整行
+\item \mintinline{text}|strcat(char* s1, char* s2)| $s1=s1+s2$
+\item \mintinline{text}|strstr(char* s1, char* s2)| 在主串 $s1$ 进行模式匹配 ，返回首个匹配成功地址或 \mintinline{text}|NULL|
+\item \mintinline{text}|strchr(char* s1, char s2)| 模式匹配
+\item \mintinline{text}|strchr(char* s1, char s2)| 模式匹配(从右开始)
+\item \mintinline{text}|strtok(char* s1|,\allowbreak \mintinline{text}| const char* sep)| 子串分割
+\end{itemize}
+
+\begin{minted}{cpp}
+const char *sep = ", ";   //必须const
+char *u = strtok(s, sep); // strtok用法模板
+while (u)
+{
+    t.insert(u); //输出分割结果
+    u = strtok(nullptr, sep);
+}
+\end{minted}
+
+\hfive{正则表达式}
+
+\begin{minted}{cpp}
+char data[] = "he...ll..o, worl..d!";
+std::regex reg("\\.");
+std::cout << std::regex_replace(data, reg, "");
+\end{minted}
+
+\inputminted{cpp}{code/ext_079.cpp}
+
+\hfive{随机数}
+
+\inputminted{cpp}{code/ext_080.cpp}
+
+distribution 范围支持负数和超过 int 的范围(即 long long)。
+
+\mintinline{text}|uniform_real_distribution<T>| 生成实数范围
+
+随机打乱：  \mintinline{text}|shuffle(first, last, myrand)| ，\mintinline{text}|myrand| 通常用 \mintinline{text}|mt19937|
+
+\hfive{杂项}
+
+\textbf{unique} : 排序后使用，返回去重后下界。
+
+\begin{minted}{cpp}
+ll m = unique(a + 1, a + 6) - (a + 1);
+\end{minted}
+
+原地去重：
+
+\begin{minted}{cpp}
+nums.erase(unique(nums.begin(), nums.end()), nums.end());
+\end{minted}
+
+\textbf{nth\textbackslash\{\}\_element} : (a,a+k,a+n,cmp); 使容器a+k所在元素左边都小于它，右边都大于它(a+k通常移位)，不返回值
+
+\begin{minted}{cpp}
+nth_element(a + 1, a + k, a + n + 1); //使得a[k]归位
+\end{minted}
+
+\textbf{partial\textbackslash\{\}\_sort} : 保证\textbackslash\{\}[lf,cf)有序，\textbackslash\{\}[cf,rf\textbackslash\{\}]按本来的相对顺序。排序逆序可以如 \mintinline{text}|greater<ll>()| 做参数
+
+\begin{minted}{cpp}
+partial_sort(lf,cf,rf);
+\end{minted}
+
+\textbf{stable\_sort} : 用法同 \mintinline{text}|std::sort| ，区别在于是稳定排序
+
+\textbf{advance}：使迭代器前进n个元素，适用于所有迭代器，第一个参数是迭代器引用，第二个参数是整数距离，表示前进或后退的单位(正负控制)。
+
+\textbf{max\textbackslash\{\}\_element} : 返回首个最大元素所在位置迭代器
+
+\textbf{inplace\textbackslash\{\}\_merge} : (lf,cf,rf,cmp) 对 $[lf,cf)$ 和 $[cf,rf)$ 就地归并排序
+
+\begin{minted}{cpp}
+inplace_merge(a + lf, a + cf + 1, a + rf + 1);
+\end{minted}
+
+\textbf{merge} : (lf1, rf1, lf2, rf2, res, cmp) 归并排序并放到结果迭代器
+
+\subsubsection{数据结构}
+
+\hfive{string}
+
+构造函数
+
+\begin{minted}{cpp}
+string two(20, '*');
+string five(one, 10);
+string six(one+1,one+10);
+string eight(one, 1, 16);
+\end{minted}
+
+常用方法：(复杂度都是暴力实现的复杂度)
+
+\begin{itemize}
+\item \mintinline{text}|append(string s)| 或 \mintinline{text}|push_back(char c)| 末尾增加，等效于 \mintinline{text}|+=|
+\end{itemize}
+
+\begin{itemize}
+\item \mintinline{text}|find(char/string s, start=0)| 从 start 下标开始找第一个出现的子串，返回出现下标或 $-1$
+
+此外还有 \mintinline{text}|find_first_of| , \mintinline{text}|find_last_of| , \mintinline{text}|find_first_not_of| , \mintinline{text}|find_last_not_of|
+\end{itemize}
+
+\begin{itemize}
+\item \mintinline{text}|substr(int start[, int len])| 从 start 下标开始截长为 len 的子串(缺省则截到尾)
+\end{itemize}
+
+\begin{itemize}
+\item \mintinline{text}|erase(int pos, int n)| 删除 pos 下标开始的 n 个字符
+\end{itemize}
+
+\begin{itemize}
+\item \mintinline{text}|insert(int pos, string s)| 在 pos 位置插入字符串 s
+\end{itemize}
+
+\begin{itemize}
+\item \mintinline{text}|append(string s|,\allowbreak \mintinline{text}| int pos|,\allowbreak \mintinline{text}| int n)| 等于 \mintinline{text}|append(s.substr(pos,n))|
+\end{itemize}
+
+\begin{itemize}
+\item \mintinline{text}|back()| 取最后一个字符
+
+常用函数：
+\end{itemize}
+
+\begin{itemize}
+\item \mintinline{text}|reverse(首迭代器, 尾迭代器)| 反转传入的字符串
+\item \mintinline{text}|getline(cin, string)| 读整行(注意跟 \mintinline{text}|cin.getline| 区分)
+\item \mintinline{text}|to_string(any)| 其它数值类型转 \mintinline{text}|std::string| (注：char 会视为 int，不能传C风格字符串)
+\item \mintinline{text}|stoi| , \mintinline{text}|stol| , \mintinline{text}|stof| , \mintinline{text}|stod| ，字符串转 \mintinline{text}|int, long long, float, double|
+\item \mintinline{text}|reduce(首, 尾, v)| 令每个元素为 $a_i=i+v$
+\item \mintinline{text}|lexicographical_compare(迭代器a首|,\allowbreak \mintinline{text}| 迭代器a尾|,\allowbreak \mintinline{text}| 迭代器b首|,\allowbreak \mintinline{text}| 迭代器b尾)| 字典序比较两容器(不一定是字符串)
+\item \mintinline{text}|replace(首迭代器|,\allowbreak \mintinline{text}| 尾迭代器|,\allowbreak \mintinline{text}| 待替换字符|,\allowbreak \mintinline{text}| 替换成的字符)| 批量替换
+\item \mintinline{text}|count(首迭代器, 尾迭代器, 字符)| 字符出现次数统计
+\item \mintinline{text}|reduce(首, 尾, 起始值)| 返回容器元素之和加上起始值，C++17
+
+stringstream：从里面读出数据类比 cin ，用 \mintinline{text}|ss >> v| ；把数据塞进去用 \mintinline{text}|<<|
+\end{itemize}
+
+\hfive{vector}
+
+\begin{minted}{cpp}
+vector<数据类型>变量名 {元素数};
+vector<数据类型>变量名 (长度);
+vector<数据类型>变量名 (长度, 初始值);
+vector<数据类型>变量名 = 变量名2;
+vector<数据类型>变量名(变量名2);
+\end{minted}
+
+多维：
+
+\begin{minted}{cpp}
+vector<vector<int> > x(10, vector<int>(20));
+vector< vector< vector<int> > > x(5,vector<vector<int>>(8,vector<int>(10)));
+vector< vector< vector<int> > > x(5,vector<vector<int>>(8,vector<int>(10, 1)));
+//1是初始值
+vector< vector< vector<int> > > vector_3D_5(n，vector_2D_4);                                   
+vector< vector< vector<int> > > vector_3D_5(n);
+//仅仅指定一维大小。当然二维也可以这样的。
+vector<vector<vector<vector<int>>>>  x(3,vector<vector<vector<int>>>(5,vector< vector<int>>(7,vector<int>(10,1))));
+\end{minted}
+
+resize(size, value)方法改变大小并初始化，默认value0
+
+copy(a.begin(),a.end(),b.begin())，注意b要有足够的空间，可以初始化时给。
+
+emplace\_back()在容器尾部添加一个元素，这个元素原地构造，不需要触发拷贝构造和转移构造。而且调用形式更加简洁，直接根据参数初始化临时对象的成员。(当然int之类的也能用)
+
+rbegin(),rend()可以进行反向输出。(返回reverse\_iterartor)
+
+\begin{minted}{cpp}
+for(auto p = a.rbegin();p != a.rend();p++) cout<<*p<<endl;
+\end{minted}
+
+front()方法返回首元素的引用，例如：c.front() = 3;
+
+back()方法同理
+
+insert(p, value)插入 O(n)
+
+insert(p, b1, b2);将[b1,b2)内元素插入到p位置前面
+
+erase(p)删除 也可以用诸如x.end()-1;O(n)
+
+erase(p, q)删除区间[p,q)的元素
+
+\begin{notebox}
+如：erase(s.begin(),s.begin()+2)删除头两个元素。
+\end{notebox}
+
+\hfive{set}
+
+想要元素可变尝试设置结构体/类成员属性为 \mintinline{text}|mutable| 。
+
+逆序 set <类型, greater<类型> >
+
+可以set<类型> var\{数组, 数组+len\}来获取数组的set化
+
+insert(元素值) 返回 pair，分别代表迭代器和是否成功插入
+
+insert(sp, se)方法植入闭区间
+
+erase(元素值)方法。可以删除不存在的值，将会忽略操作
+
+erase(迭代器)方法 ，如x.end()
+
+对 multiset 而言，erase 元素值会删掉所有同值，迭代器则删单个
+
+find()有，返回迭代器，无，返回末尾end()
+
+并集set\_union(Ab, Ae, Bp, Be, 输出迭代器)//algorithm
+
+交集set\_intersection
+
+差set\_difference
+
+重载 unset: 模板添加一个类,重载 \textbackslash\{\}=\textbackslash\{\}= 方法与返回 size\textbackslash\{\}\_t 的 () 方法
+
+\inputminted{cpp}{code/unset.cpp}
+
+\hfive{map}
+
+count方法：若有查找key，返回1，否则0
+
+erase(key)
+
+pair<key类型,value类型> target = \textbackslash\{\}*T.find(key)  //注意区分[]
+
+\hfive{bitset}
+
+\begin{minted}{cpp}
+bitset<位数> var;
+bitset<d> s1(12);
+string str="100110";
+bitset<d> s2(str);
+//如果是整型，那么填充时会自动转换为二进制，如果是字符串，但是其中出现了 0/1 以外的字符，就会爆炸
+\end{minted}
+
+可以直接当 bool 数组来用。也有方法：
+
+\begin{enumerate}
+\item 基本的位操作，如：$s|=s<<w[i];$
+\item .count()计算1的个数
+\item .any()是否存在1
+\item .none()是否不存在1
+\item .set()全设为1
+\item .reset()全设为0
+\item .flip()按位取反
+\item .test(i) 第i位是不是1
+
+上述函数可以传一个参数，则只对该位操作
+\end{enumerate}
+
+\hfive{其他}
+
+priority\_queue
+
+默认大根堆。定义小根堆：(或自行写结构体)
+
+\begin{minted}{cpp}
+priority_queue<int, vector<int>,greater<int> > q;
+\end{minted}
+
+tuple
+
+直接用 \mintinline{text}|{}| 构造
+
+取出(如 \mintinline{text}|map| 迭代器里的可能要先 \mintinline{text}|second| 一下)，然后用 \mintinline{text}|tie(a,b,c)=tuple变量| 的方法获得每个元素
+
+list 双向链表
+
+deque
+
+array, valarray
+
+\mintinline{text}|complex<T>| 复数，支持 \mintinline{text}|(,)| 构造，能传入 \mintinline{text}|abs|, \mintinline{text}|arg|($[-\pi,\pi]$ 离 x 正半最近的偏移)，能和 T 运算。\mintinline{text}|conj| 共轭复数，\mintinline{text}|norm| 范数，\mintinline{text}|polar(T rho,T theta)| 构造对应复数
+
+\subsubsection{pb\_ds}
+
+有一种比 unordered\_map 更快的哈希表，具体参见上文 \mintinline{text}|线段树-树上二分|。
+
+\begin{minted}{cpp}
+#include <ext/pb_ds/assoc_container.hpp>
+#include <ext/pb_ds/tree_policy.hpp>
+__gnu_pbds::tree<类型, __gnu_pbds::null_type, less<类型>, __gnu_pbds::rb_tree_tag, __gnu_pbds::tree_order_statistics_node_update> 变量名;
+\end{minted}
+
+\begin{itemize}
+\item \mintinline{text}|order_of_key(x)| 返回值 $x$ 在 \mintinline{text}|set| 的下标
+\item \mintinline{text}|find_by_order(x)| 返回下标为 $x$ 的迭代器
+
+使用示例：(洛谷P6136)
+\end{itemize}
+
+\begin{notebox}
+题意：输入 $n,\allowbreak{}m(1\le n\le10^5,\allowbreak{}1\le m\le10^6)$ ，输入 $a_i(0\le a_i < 2^{30})$ ，接下来有 $6$ 种在线操作 ( $x=x\oplus last$ )：
+
+\begin{enumerate}
+\item 插入整数 $x(0\le x < 2^{30})$
+\item 删除整数 $x$ (若有多个相同，只删一个)
+\item 查询整数 $x$ 的排名(比它小的数个数 $+1$ )
+\item 查询排名为 $x$ 的数(不存在时查小于 $x$ 的最大数，保证 $x$ 不越当前界)
+\item 求 $x$ 前驱(小于 $x$ 的最大的数)
+\item 求 $x$ 后继(大于 $x$ 的最小的数)
+\end{enumerate}
+\end{notebox}
+
+\inputminted{cpp}{code/ext_081.cpp}
+
+\subsection{卡常}
+
+\subsubsection{快读/写}
+
+关闭同步流略。好看版快读：
+
+\begin{minted}{cpp}
+ll read()
+{
+    ll num = 0;
+    char c = getchar(), up = c;
+    while (c < '0' || c > '9')
+        up = c, c = getchar();
+    while (c >= '0' && c <= '9')
+        num = (num << 1) + (num << 3) + (c ^ '0'), c = getchar();
+    return up == '-' ? -num : num;
+}
+\end{minted}
+
+位运算快读：
+
+\begin{minted}{cpp}
+ll read()
+{
+    char p = 0;
+    ll r = 0, o = 0;
+    for (; p < '0' || p > '9'; o |= p == '-', p = getchar())
+        ;
+    for (; p >= '0' && p <= '9'; r = (r << 1) + (r << 3) + (p ^ 48), p = getchar())
+        ;
+    return o ? (~r) + 1 : r;
+}
+\end{minted}
+
+快写：
+
+\inputminted{cpp}{code/ext_082.cpp}
+
+更快的读写：
+
+\begin{itemize}
+\item 短板 (仅快读)
+\end{itemize}
+
+\begin{minted}{cpp}
+#define gc() (is == it ? it = (is = in) + fread(in, 1, Q, stdin), (is == it ? EOF : *is++) : *is++)
+const int Q = (1 << 24) + 1;
+char in[Q], *is = in, *it = in, c;
+void read(long long &n) {
+    for (n = 0; (c = gc()) < '0' || c > '9';);
+    for (; c <= '9' && c >= '0'; c = gc()) n = n * 10 + c - 48;
+}
+\end{minted}
+
+\begin{itemize}
+\item 长版
+\end{itemize}
+
+\inputminted{cpp}{code/fastio.cpp}
+
+Python:
+
+\begin{minted}{python}
+import sys
+input = sys.stdin.readline # 实测约快10倍
+print = sys.stdout.write # 仅字符串输出(注意不会换行)
+\end{minted}
+
+Java
+
+\inputminted{java}{code/ext_083.java}
+
+\subsubsection{其他}
+
+\begin{minted}{cpp}
+#pragma GCC optimize(2)
+\end{minted}
+
+快速乘：($a\times b\bmod p$)
+
+\begin{minted}{cpp}
+return ((ull)a*b-(ull)((ull)a/k*b)*k+k)%k; 
+\end{minted}
+
+防炸 ll 不开 i128 的模乘：
+
+\begin{minted}{cpp}
+LL mul(LL a, LL b, LL P){
+    LL L = a * (b >> 25LL) % P * (1LL << 25) % P;
+    LL R = a * (b & ((1LL << 25) - 1)) % P;
+    return (L + R) % P;
+}
+\end{minted}
+
+l
+\end{document}
